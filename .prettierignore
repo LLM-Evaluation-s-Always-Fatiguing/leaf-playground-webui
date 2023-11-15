@@ -1,0 +1,12 @@
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# Ignore pnpm lock file
+pnpm-lock.yaml
