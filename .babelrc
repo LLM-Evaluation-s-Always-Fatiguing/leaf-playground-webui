@@ -3,6 +3,12 @@
     "next/babel"
   ],
   "plugins": [
-    "antd-style"
+    "antd-style",
+    [
+      "babel-plugin-styled-components",
+      {
+        "ssr": false
+      }
+    ]
   ]
 }

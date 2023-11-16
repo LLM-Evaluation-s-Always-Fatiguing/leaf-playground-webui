@@ -1,11 +1,15 @@
 'use client';
 
+import { PropsWithChildren, useRef, useState } from 'react';
 import { StyleProvider, extractStaticStyle } from 'antd-style';
+import { ServerStyleSheet, StyleSheetManager } from 'styled-components';
 import { useServerInsertedHTML } from 'next/navigation';
-import { PropsWithChildren, useRef } from 'react';
 
 const StyleRegistry = ({ children }: PropsWithChildren) => {
   const isInsert = useRef(false);
+  // Only create stylesheet once with lazy initial state
+  // x-ref: https://reactjs.org/docs/hooks-reference.html#lazy-initial-state
+  const [styledComponentsStyleSheet] = useState(() => new ServerStyleSheet());
 
   useServerInsertedHTML(() => {
     // Avoid repeatedly inserting styles when rendering multiple times.
@@ -14,12 +18,23 @@ const StyleRegistry = ({ children }: PropsWithChildren) => {
 
     isInsert.current = true;
 
-    const styles = extractStaticStyle().map((item) => item.style);
+    const antdStyles = extractStaticStyle().map((item) => item.style);
+    const scStyles = styledComponentsStyleSheet.getStyleElement();
+    styledComponentsStyleSheet.instance.clearTag();
 
-    return <>{styles}</>;
+    return (
+      <>
+        {antdStyles}
+        {scStyles}
+      </>
+    );
   });
 
-  return <StyleProvider cache={extractStaticStyle.cache}>{children}</StyleProvider>;
+  return (
+    <StyleProvider cache={extractStaticStyle.cache}>
+      <StyleSheetManager sheet={styledComponentsStyleSheet.instance}>{children}</StyleSheetManager>
+    </StyleProvider>
+  );
 };
 
 export default StyleRegistry;

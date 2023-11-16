@@ -1,6 +1,14 @@
+'use client';
 import Image from 'next/image';
 import { Button } from 'antd';
 import styles from './page.module.css';
+import styled from 'styled-components';
+
+const Test1 = styled.div`
+  width: 50px;
+  height: 50px;
+  background: ${(p) => p.theme.colorPrimary};
+`;
 
 export default function Home() {
   return (
@@ -24,7 +32,8 @@ export default function Home() {
 
       <div className={styles.center}>
         <Image className={styles.logo} src="/next.svg" alt="Next.js Logo" width={180} height={37} priority />
-        <Button >Antd Button</Button>
+        <Button>Antd Button</Button>
+        <Test1 />
       </div>
 
       <div className={styles.grid}>
