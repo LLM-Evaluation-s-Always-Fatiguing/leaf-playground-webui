@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { Button } from 'antd';
 import styles from './page.module.css';
 
 export default function Home() {
@@ -23,6 +24,7 @@ export default function Home() {
 
       <div className={styles.center}>
         <Image className={styles.logo} src="/next.svg" alt="Next.js Logo" width={180} height={37} priority />
+        <Button >Antd Button</Button>
       </div>
 
       <div className={styles.grid}>

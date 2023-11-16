@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "antd": "^5.11.1",
+    "antd-style": "^3.5.2",
     "next": "14.0.2",
     "react": "^18",
     "react-dom": "^18"
@@ -17,6 +19,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "babel-plugin-antd-style": "^1.0.4",
     "eslint": "^8",
     "eslint-config-next": "14.0.2",
     "eslint-config-prettier": "^9.0.0",
