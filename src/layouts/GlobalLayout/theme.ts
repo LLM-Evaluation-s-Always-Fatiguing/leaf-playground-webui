@@ -11,8 +11,15 @@ export const lightTheme: ThemeConfig = {
   components: {
     Layout: {
       headerBg: '#fff',
+      bodyBg: '#fff',
     },
   },
 };
 
-export const darkTheme: ThemeConfig = {};
+export const darkTheme: ThemeConfig = {
+  components: {
+    Layout: {
+      headerBg: '#000',
+    },
+  },
+};

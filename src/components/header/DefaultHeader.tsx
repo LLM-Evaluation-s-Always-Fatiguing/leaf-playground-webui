@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import LEAFLogo from '@/components/project/LEAFLogo';
 import { ThemeMode, useTheme, useThemeMode } from 'antd-style';
 import { MdOutlineBrightnessAuto, MdOutlineLightMode, MdOutlineDarkMode, MdOutlineSettings } from 'react-icons/md';
-import { TbBrandGithub } from "react-icons/tb";
+import { TbBrandGithub } from 'react-icons/tb';
 
 const { Header } = Layout;
 
@@ -52,6 +52,7 @@ const DefaultHeader = () => {
     <Header
       style={{
         height: theme.headerHeight,
+        borderBottom: `2px solid ${theme.appearance === 'light' ? '#D9E1E8' : '#2E1728'}`,
       }}
     >
       <DefaultHeaderContent>
