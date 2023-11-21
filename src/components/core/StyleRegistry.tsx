@@ -15,24 +15,24 @@ const StyleRegistry = ({ children }: PropsWithChildren) => {
     // Avoid repeatedly inserting styles when rendering multiple times.
     // refs: https://github.com/vercel/next.js/discussions/49354#discussioncomment-6279917
     if (isInsert.current) return;
-
     isInsert.current = true;
+    const styles = extractStaticStyle().map((item) => item.style);
+    return <>{styles}</>;
+  });
 
-    const antdStyles = extractStaticStyle().map((item) => item.style);
-    const scStyles = styledComponentsStyleSheet.getStyleElement();
+  useServerInsertedHTML(() => {
+    const styles = styledComponentsStyleSheet.getStyleElement();
     styledComponentsStyleSheet.instance.clearTag();
-
-    return (
-      <>
-        {antdStyles}
-        {scStyles}
-      </>
-    );
+    return <>{styles}</>;
   });
 
   return (
     <StyleProvider cache={extractStaticStyle.cache}>
-      <StyleSheetManager sheet={styledComponentsStyleSheet.instance}>{children}</StyleSheetManager>
+      {typeof window !== 'undefined' ? (
+        children
+      ) : (
+        <StyleSheetManager sheet={styledComponentsStyleSheet.instance}>{children}</StyleSheetManager>
+      )}
     </StyleProvider>
   );
 };

@@ -37,3 +37,6 @@ next-env.d.ts
 
 # IDE - JetBrains
 .idea
+
+# LEAF File API backup
+.leaf-webui-backup

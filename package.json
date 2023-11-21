@@ -1,5 +1,5 @@
 {
-  "name": "next-14-app-antd-formily-template",
+  "name": "leaf-playground-webui",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -17,6 +17,8 @@
     "antd": "^5.11.1",
     "antd-style": "^3.5.2",
     "dayjs": "^1.11.10",
+    "lodash": "^4.17.21",
+    "mime-types": "^2.1.35",
     "monaco-editor": "^0.44.0",
     "next": "14.0.2",
     "react": "^18",
@@ -25,6 +27,8 @@
     "styled-components": "^6.1.1"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.202",
+    "@types/mime-types": "^2.1.4",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
