@@ -61,7 +61,14 @@ const DefaultHeader = () => {
           <div className="title">Playground</div>
         </HeaderLogoArea>
         <HeaderActionsArea>
-          {/*<Button className="actionButton" type="text" icon={<TbBrandGithub size={'1em'} />} />*/}
+          <Button
+            className="actionButton"
+            type="text"
+            icon={<TbBrandGithub size={'1em'} />}
+            onClick={() => {
+              window.open('https://github.com/LLM-Evaluation-s-Always-Fatiguing/leaf-playground', '_blank');
+            }}
+          />
           <Button
             className="actionButton"
             type="text"
