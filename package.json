@@ -10,13 +10,21 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@emotion/cache": "^11.11.0",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
     "@formily/antd-v5": "^1.1.8",
     "@formily/core": "^2.3.0",
+    "@formily/json-schema": "^2.3.0",
     "@formily/react": "^2.3.0",
     "@formily/reactive": "^2.3.0",
     "@monaco-editor/react": "^4.6.0",
+    "@mui/material": "^5.14.18",
+    "@stoplight/json-ref-resolver": "^3.1.6",
+    "@textea/json-viewer": "^3.2.3",
     "antd": "^5.11.1",
     "antd-style": "^3.5.2",
+    "axios": "^1.6.2",
     "dayjs": "^1.11.10",
     "lodash": "^4.17.21",
     "mime-types": "^2.1.35",
@@ -24,8 +32,7 @@
     "next": "14.0.2",
     "react": "^18",
     "react-dom": "^18",
-    "react-icons": "^4.12.0",
-    "styled-components": "^6.1.1"
+    "react-icons": "^4.12.0"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^14.0.3",
@@ -35,7 +42,6 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "babel-plugin-antd-style": "^1.0.4",
-    "babel-plugin-styled-components": "^2.1.4",
     "eslint": "^8",
     "eslint-config-next": "14.0.2",
     "eslint-config-prettier": "^9.0.0",

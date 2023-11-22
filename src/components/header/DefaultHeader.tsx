@@ -1,5 +1,5 @@
 import { Button, Layout } from 'antd';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import LEAFLogo from '@/components/project/LEAFLogo';
 import { ThemeMode, useTheme, useThemeMode } from 'antd-style';
 import { MdOutlineBrightnessAuto, MdOutlineLightMode, MdOutlineDarkMode, MdOutlineSettings } from 'react-icons/md';

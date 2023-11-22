@@ -10,6 +10,6 @@ declare module 'antd-style' {
   }
 }
 
-declare module 'styled-components' {
-  export interface DefaultTheme extends AntdStyleTheme {}
+declare module '@emotion/react' {
+  export interface Theme extends AntdStyleTheme {}
 }

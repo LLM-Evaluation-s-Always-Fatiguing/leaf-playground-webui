@@ -3,7 +3,7 @@
 import { PropsWithChildren } from 'react';
 import { createStyles, setupStyled, StyleProvider, ThemeProvider } from 'antd-style';
 import { App, ConfigProvider, Layout } from 'antd';
-import { ThemeContext } from 'styled-components';
+import { ThemeContext } from '@emotion/react';
 import { ThemeAppearance } from 'antd-style/lib/types/appearance';
 import { commonTheme, lightTheme, darkTheme } from '@/layouts/GlobalLayout/theme';
 import DefaultHeader from '@/components/header/DefaultHeader';
