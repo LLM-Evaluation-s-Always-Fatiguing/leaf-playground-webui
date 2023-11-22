@@ -2,6 +2,9 @@ import { ThemeConfig } from 'antd';
 import { CustomToken } from 'antd-style';
 
 export const commonTheme: ThemeConfig = {
+  token: {
+    colorPrimary: '#7B916E'
+  },
   components: {
     Layout: {
       headerPadding: '0',
