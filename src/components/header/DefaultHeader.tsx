@@ -52,7 +52,7 @@ const DefaultHeader = () => {
     <Header
       style={{
         height: theme.headerHeight,
-        borderBottom: `2px solid ${theme.appearance === 'light' ? '#D9E1E8' : '#2E1728'}`,
+        borderBottom: `1.5px solid ${theme.dividerColor}`,
       }}
     >
       <DefaultHeaderContent>
@@ -61,7 +61,7 @@ const DefaultHeader = () => {
           <div className="title">Playground</div>
         </HeaderLogoArea>
         <HeaderActionsArea>
-          <Button className="actionButton" type="text" icon={<TbBrandGithub size={'1em'} />} />
+          {/*<Button className="actionButton" type="text" icon={<TbBrandGithub size={'1em'} />} />*/}
           <Button
             className="actionButton"
             type="text"

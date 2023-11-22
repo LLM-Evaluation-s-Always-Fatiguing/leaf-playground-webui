@@ -5,7 +5,14 @@ import { createStyles, setupStyled, StyleProvider, ThemeProvider } from 'antd-st
 import { App, ConfigProvider, Layout } from 'antd';
 import { ThemeContext } from '@emotion/react';
 import { ThemeAppearance } from 'antd-style/lib/types/appearance';
-import { commonTheme, lightTheme, darkTheme } from '@/layouts/GlobalLayout/theme';
+import {
+  commonTheme,
+  lightTheme,
+  darkTheme,
+  commonCustomToken,
+  lightCustomToken,
+  darkCustomToken,
+} from '@/layouts/GlobalLayout/theme';
 import DefaultHeader from '@/components/header/DefaultHeader';
 import merge from 'lodash/merge';
 
@@ -15,8 +22,8 @@ const { Content } = Layout;
 
 const useStyles = createStyles(({ token, css }) => ({
   content: css`
-    min-height: calc(100vh - ${token.headerHeight}px);
-    height: 100px;
+    height: calc(100vh - ${token.headerHeight}px);
+    overflow: hidden auto;
   `,
 }));
 
@@ -30,8 +37,11 @@ interface GlobalLayoutProps extends PropsWithChildren {}
 const GlobalLayout = ({ children }: GlobalLayoutProps) => (
   <StyleProvider speedy={true}>
     <ThemeProvider
-      customToken={{
-        headerHeight: 64,
+      customToken={({ appearance }) => {
+        return {
+          ...commonCustomToken,
+          ...(appearance === 'light' ? lightCustomToken : darkCustomToken),
+        };
       }}
       theme={(appearance: ThemeAppearance) => {
         return merge({}, commonTheme, appearance === 'light' ? lightTheme : darkTheme);

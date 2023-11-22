@@ -39,3 +39,8 @@ export default interface Scene {
   agents_config_schemas: Record<string, any>;
   additional_config_schema: any;
 }
+
+export interface SceneListItem {
+  id: string;
+  metadata: SceneMetaData;
+}

@@ -1,4 +1,5 @@
 import { ThemeConfig } from 'antd';
+import { CustomToken } from 'antd-style';
 
 export const commonTheme: ThemeConfig = {
   components: {
@@ -7,6 +8,7 @@ export const commonTheme: ThemeConfig = {
     },
   },
 };
+
 export const lightTheme: ThemeConfig = {
   components: {
     Layout: {
@@ -22,4 +24,16 @@ export const darkTheme: ThemeConfig = {
       headerBg: '#000',
     },
   },
+};
+
+export const commonCustomToken: Partial<CustomToken> = {
+  headerHeight: 64,
+};
+
+export const lightCustomToken: Partial<CustomToken> = {
+  dividerColor: '#D9E1E8',
+};
+
+export const darkCustomToken: Partial<CustomToken> = {
+  dividerColor: '#2E1728',
 };
