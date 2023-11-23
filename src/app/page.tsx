@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { SceneListItem } from '@/types/server/Scene';
+import Scene, { SceneListItem } from '@/types/server/Scene';
 import styled from '@emotion/styled';
-import { Card, Spin } from 'antd';
+import { Spin, message } from 'antd';
 import SceneListComponent from '@/components/scene/SceneListComponent';
 import ServerAPI from '@/services/server';
+import SceneInfoBoard from '@/components/homepage/SceneInfoBoard';
+import SceneConfigBoard from '@/components/homepage/SceneConfigBoard';
 
 const ScenesArea = styled.div`
   width: 24%;
@@ -35,6 +37,13 @@ const ScenesArea = styled.div`
   }
 `;
 
+const OperationArea = styled.div`
+  flex-grow: 1;
+  width: 76%;
+  min-width: 680px;
+  overflow: hidden auto;
+`;
+
 const PageContainer = styled.div`
   width: 100%;
   height: 100%;
@@ -47,19 +56,38 @@ const PageContainer = styled.div`
 `;
 
 export default function Home() {
-  const [loading, setLoading] = useState(false);
+  const [scenesLoading, setScenesLoading] = useState(false);
   const [scenes, setScenes] = useState<SceneListItem[]>([]);
   const [selectedSceneIndex, setSelectedSceneIndex] = useState<number>(0);
 
+  const [sceneDetailLoading, setSceneDetailLoading] = useState(false);
+  const [selectedSceneDetail, setSelectedSceneDetail] = useState<Scene>();
+  const [started, setStarted] = useState(false);
+
+  const loadSelectedSceneDetail = async () => {
+    if (!scenes[selectedSceneIndex]) return;
+    try {
+      setSceneDetailLoading(true);
+      const scene = await ServerAPI.scene.get(scenes[selectedSceneIndex].id);
+      setSelectedSceneDetail(scene);
+    } catch (e) {
+      console.error(e);
+      message.error('Failed to load scene detail');
+    } finally {
+      setSceneDetailLoading(false);
+    }
+  };
+
   const loadScenes = async () => {
     try {
-      setLoading(true);
+      setScenesLoading(true);
       const scenesResp = await ServerAPI.scene.getScenes();
       setScenes(scenesResp.scenes);
     } catch (e) {
       console.error(e);
+      message.error('Failed to load scenes');
     } finally {
-      setLoading(false);
+      setScenesLoading(false);
     }
   };
 
@@ -79,18 +107,31 @@ export default function Home() {
                 selected={selectedSceneIndex === index}
                 onClick={() => {
                   setSelectedSceneIndex(index);
+                  setSelectedSceneDetail(undefined);
                 }}
               />
             );
           })}
         </div>
-        {loading && (
+        {scenesLoading && (
           <div className="loadingOverlay">
             <Spin spinning />
           </div>
         )}
       </ScenesArea>
-
+      <OperationArea>
+        {started && selectedSceneDetail ? (
+          <SceneConfigBoard key={scenes[selectedSceneIndex].id} scene={selectedSceneDetail} />
+        ) : (
+          <SceneInfoBoard
+            scene={scenes[selectedSceneIndex]}
+            onStartClick={async () => {
+              await loadSelectedSceneDetail();
+              setStarted(true);
+            }}
+          />
+        )}
+      </OperationArea>
     </PageContainer>
   );
 }

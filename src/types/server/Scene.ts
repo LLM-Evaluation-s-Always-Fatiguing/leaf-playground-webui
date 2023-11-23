@@ -1,3 +1,6 @@
+import { ISchema as FormilyJSONSchema } from '@formily/json-schema';
+import SampleJSONSchemaDef from '@/types/SampleJSONSchemaDef';
+
 export interface SceneRoleDefinitionType {
   obj: string;
   module: string;
@@ -30,14 +33,20 @@ export interface SceneAgentMetaData {
   actions: Record<string, string>;
 }
 
-export default interface Scene {
+export interface ServerScene {
   id: string;
   scene_metadata: SceneMetaData;
   agents_metadata: Record<string, SceneAgentMetaData>;
   role_agents_num: Record<string, number>;
-  scene_info_config_schema: any;
-  agents_config_schemas: Record<string, any>;
-  additional_config_schema: any;
+  scene_info_config_schema: SampleJSONSchemaDef;
+  agents_config_schemas: Record<string, SampleJSONSchemaDef>;
+  additional_config_schema: SampleJSONSchemaDef;
+}
+
+export default interface Scene extends ServerScene {
+  sceneInfoConfigFormilySchema: FormilyJSONSchema;
+  agentsConfigFormilySchemas: Record<string, FormilyJSONSchema>;
+  additionalConfigFormilySchema: FormilyJSONSchema;
 }
 
 export interface SceneListItem {

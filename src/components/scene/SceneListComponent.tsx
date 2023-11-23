@@ -1,3 +1,5 @@
+'use client';
+
 import styled from '@emotion/styled';
 import { SceneListItem } from '@/types/server/Scene';
 import { Card } from 'antd';

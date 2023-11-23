@@ -1,9 +1,9 @@
-import { ThemeConfig } from 'antd';
+import { ThemeConfig, theme } from 'antd';
 import { CustomToken } from 'antd-style';
 
 export const commonTheme: ThemeConfig = {
   token: {
-    colorPrimary: '#7B916E'
+    colorPrimary: '#7B916E',
   },
   components: {
     Layout: {
@@ -13,6 +13,7 @@ export const commonTheme: ThemeConfig = {
 };
 
 export const lightTheme: ThemeConfig = {
+  algorithm: theme.defaultAlgorithm,
   components: {
     Layout: {
       headerBg: '#fff',
@@ -22,6 +23,7 @@ export const lightTheme: ThemeConfig = {
 };
 
 export const darkTheme: ThemeConfig = {
+  algorithm: theme.darkAlgorithm,
   components: {
     Layout: {
       headerBg: '#000',

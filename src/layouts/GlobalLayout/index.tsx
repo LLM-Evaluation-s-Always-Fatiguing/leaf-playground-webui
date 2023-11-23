@@ -15,6 +15,7 @@ import {
 } from '@/layouts/GlobalLayout/theme';
 import DefaultHeader from '@/components/header/DefaultHeader';
 import merge from 'lodash/merge';
+import en_US from 'antd/locale/en_US';
 
 setupStyled({ ThemeContext });
 
@@ -47,7 +48,7 @@ const GlobalLayout = ({ children }: GlobalLayoutProps) => (
         return merge({}, commonTheme, appearance === 'light' ? lightTheme : darkTheme);
       }}
     >
-      <ConfigProvider>
+      <ConfigProvider locale={en_US}>
         <App>
           <Layout>
             <DefaultHeader />

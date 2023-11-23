@@ -6,13 +6,13 @@ import { useServerInsertedHTML } from 'next/navigation';
 import NextAppDirEmotionCacheProvider from '@/components/core/EmotionCache';
 
 const StyleRegistry = ({ children }: PropsWithChildren) => {
-  const isInsert = useRef(false);
+  const isServerInserted = useRef<boolean>(false);
 
   useServerInsertedHTML(() => {
     // Avoid repeatedly inserting styles when rendering multiple times.
     // refs: https://github.com/vercel/next.js/discussions/49354#discussioncomment-6279917
-    if (isInsert.current) return;
-    isInsert.current = true;
+    if (isServerInserted.current) return;
+    isServerInserted.current = true;
     const styles = extractStaticStyle().map((item) => item.style);
     return <>{styles}</>;
   });
