@@ -2,6 +2,7 @@
 
 import { PropsWithChildren } from 'react';
 import { createStyles, setupStyled, StyleProvider, ThemeProvider } from 'antd-style';
+import { HappyProvider } from '@ant-design/happy-work-theme';
 import { App, ConfigProvider, Layout } from 'antd';
 import { ThemeContext } from '@emotion/react';
 import { ThemeAppearance } from 'antd-style/lib/types/appearance';
@@ -49,12 +50,14 @@ const GlobalLayout = ({ children }: GlobalLayoutProps) => (
       }}
     >
       <ConfigProvider locale={en_US}>
-        <App>
-          <Layout>
-            <DefaultHeader />
-            <GlobalLayoutContent>{children}</GlobalLayoutContent>
-          </Layout>
-        </App>
+        <HappyProvider>
+          <App>
+            <Layout>
+              <DefaultHeader />
+              <GlobalLayoutContent>{children}</GlobalLayoutContent>
+            </Layout>
+          </App>
+        </HappyProvider>
       </ConfigProvider>
     </ThemeProvider>
   </StyleProvider>

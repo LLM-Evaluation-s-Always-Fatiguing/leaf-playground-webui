@@ -11,7 +11,7 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['react-icons'],
   },
-  transpilePackages: ['antd-style', '@formily/antd-v5'],
+  transpilePackages: ['antd-style', '@formily/antd-v5', '@ant-design/happy-work-theme'],
   async rewrites() {
     return [
       {
