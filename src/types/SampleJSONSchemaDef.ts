@@ -7,6 +7,7 @@ export default interface SampleJSONSchemaDef {
   description?: string;
   type?: JSONSchemaType | JSONSchemaType[];
   properties?: Record<string, SampleJSONSchemaDef>;
+  items?: SampleJSONSchemaDef | SampleJSONSchemaDef[];
   required?: string[];
   enum?: any[];
   default?: any;
