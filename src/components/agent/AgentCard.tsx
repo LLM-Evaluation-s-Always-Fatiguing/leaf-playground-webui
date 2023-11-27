@@ -6,9 +6,9 @@ import styled from '@emotion/styled';
 import { FiPlus } from 'react-icons/fi';
 import { FaCheck } from 'react-icons/fa6';
 import { RiRobot2Fill } from 'react-icons/ri';
-import { ISchema as FormilyJSONSchema } from '@formily/json-schema/esm/types';
 import { useMemo } from 'react';
 import { useTheme } from 'antd-style';
+import FormilyJSONSchema from '@/types/FormilyJSONSchema';
 
 const AddContent = styled.div`
   width: 100%;
@@ -87,7 +87,8 @@ const AgentCard = (props: AgentCardProps) => {
 
   const requiredBackendConfigs = useMemo(() => {
     if (!props.sceneAgentConfigData) return [];
-    return props.agentsConfigFormilySchemas[props.sceneAgentConfigData.agent_id].properties?.ai_backend_config.required;
+    return props.agentsConfigFormilySchemas[props.sceneAgentConfigData.agent_id].properties?.ai_backend_config
+      .required as string[];
   }, [props.sceneAgentConfigData, props.agentsConfigFormilySchemas]);
 
   const displayKV = Object.entries(props.sceneAgentConfigData?.agent_config_data.ai_backend_config || {}).filter(

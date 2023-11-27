@@ -1,4 +1,4 @@
-import { ISchema as FormilyJSONSchema } from '@formily/json-schema/esm/types';
+import FormilyJSONSchema from "@/types/FormilyJSONSchema";
 
 export interface AgentProfile {
   name: string;
