@@ -52,7 +52,7 @@ interface SceneConfigBoardProps {
   scene: Scene;
 }
 
-const SceneConfigBoard = (props: SceneConfigBoardProps) => {
+const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
   const router = useRouter();
 
   const sceneForm = useMemo(() => {
@@ -81,29 +81,7 @@ const SceneConfigBoard = (props: SceneConfigBoardProps) => {
   const [operatingAgentConfigIndex, setOperatingAgentConfigIndex] = useState(-1);
   const [createOrUpdateAgentModalOpen, setCreateOrUpdateAgentModalOpen] = useState(false);
 
-  const minAgentsCount = useMemo(() => {
-    const noStaticRolesCount = props.scene.scene_metadata.role_definitions
-      .filter((d) => !d.is_static)
-      .map((d) => props.scene.role_agents_num[d.name]);
-    return noStaticRolesCount.reduce((total, current) => {
-      return total + (current === -1 ? 1 : current);
-    }, 0);
-  }, [props.scene]);
-
-  const maxAgentsCount = useMemo(() => {
-    const noStaticRolesCount = props.scene.scene_metadata.role_definitions
-      .filter((d) => !d.is_static)
-      .map((d) => props.scene.role_agents_num[d.name]);
-    let maxAgentsCount = noStaticRolesCount.some((c) => c === -1) ? -1 : 0;
-    if (maxAgentsCount >= 0) {
-      maxAgentsCount = noStaticRolesCount.reduce((total, current) => {
-        return total + current;
-      }, 0);
-    }
-    return maxAgentsCount;
-  }, [props.scene]);
-
-  console.log(props.scene);
+  console.log(scene);
   return (
     <>
       <Container>
@@ -134,7 +112,7 @@ const SceneConfigBoard = (props: SceneConfigBoardProps) => {
                         onAutoSubmit={console.log}
                         onAutoSubmitFailed={console.log}
                       >
-                        <FormilyDefaultSchemaField schema={props.scene.sceneInfoConfigFormilySchema} />
+                        <FormilyDefaultSchemaField schema={scene.sceneInfoConfigFormilySchema} />
                       </Form>
                     ),
                     style: {
@@ -154,7 +132,7 @@ const SceneConfigBoard = (props: SceneConfigBoardProps) => {
                         onAutoSubmit={console.log}
                         onAutoSubmitFailed={console.log}
                       >
-                        <FormilyDefaultSchemaField schema={props.scene.additionalConfigFormilySchema} />
+                        <FormilyDefaultSchemaField schema={scene.additionalConfigFormilySchema} />
                       </Form>
                     ),
                     style: {
@@ -165,12 +143,12 @@ const SceneConfigBoard = (props: SceneConfigBoardProps) => {
                 ]}
               />
             </Card>
-            <Card title={`Agent List (At least ${minAgentsCount} agent${minAgentsCount > 1 ? 's' : ''})`}>
+            <Card title={`Agent List (At least ${scene.min_agents_num} agent${scene.min_agents_num > 1 ? 's' : ''})`}>
               <Space>
-                {(maxAgentsCount <= 0 || sceneAgentConfigs.length <= maxAgentsCount) && (
+                {(scene.max_agents_num <= 0 || sceneAgentConfigs.length <= scene.max_agents_num) && (
                   <AgentCard
                     role={'add'}
-                    agentsConfigFormilySchemas={props.scene.agentsConfigFormilySchemas}
+                    agentsConfigFormilySchemas={scene.agentsConfigFormilySchemas}
                     onAddNewClick={() => {
                       setSelectAgentModalOpen(true);
                     }}
@@ -181,7 +159,7 @@ const SceneConfigBoard = (props: SceneConfigBoardProps) => {
                     <AgentCard
                       key={index}
                       role={'agent'}
-                      agentsConfigFormilySchemas={props.scene.agentsConfigFormilySchemas}
+                      agentsConfigFormilySchemas={scene.agentsConfigFormilySchemas}
                       sceneAgentConfigData={agentConfig}
                     />
                   );
@@ -203,17 +181,19 @@ const SceneConfigBoard = (props: SceneConfigBoardProps) => {
               try {
                 // sceneForm.validate();
                 await sceneAdditionalForm.validate();
-                if (sceneAgentConfigs.length < minAgentsCount) {
-                  message.error(`At least ${minAgentsCount} agent${minAgentsCount > 1 ? 's' : ''} are required.`);
+                if (sceneAgentConfigs.length < scene.min_agents_num) {
+                  message.error(
+                    `At least ${scene.min_agents_num} agent${scene.min_agents_num > 1 ? 's' : ''} are required.`
+                  );
                   return;
                 }
                 const sceneConfig = {
                   environments: {},
-                  ...sceneForm.values
+                  ...sceneForm.values,
                 };
                 const additionalConfig = sceneAdditionalForm.values;
                 const finalConfig = {
-                  id: props.scene.id,
+                  id: scene.id,
                   scene_info_config_data: sceneConfig,
                   scene_agents_config_data: sceneAgentConfigs,
                   additional_config_data: additionalConfig,
@@ -232,7 +212,7 @@ const SceneConfigBoard = (props: SceneConfigBoardProps) => {
       </Container>
       <SelectAgentModal
         open={selectAgentModalOpen}
-        agentsConfigFormilySchemas={props.scene.agentsConfigFormilySchemas}
+        agentsConfigFormilySchemas={scene.agentsConfigFormilySchemas}
         onSubmit={(agentDefinition) => {
           setOperatingAgentDefinition(agentDefinition);
           setSelectAgentModalOpen(false);

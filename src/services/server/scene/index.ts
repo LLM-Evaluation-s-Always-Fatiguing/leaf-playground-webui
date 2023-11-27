@@ -22,13 +22,7 @@ const sceneAPI = {
       serverScene.additional_config_schema
     );
     return {
-      id: serverScene.id,
-      scene_metadata: serverScene.scene_metadata,
-      agents_metadata: serverScene.agents_metadata,
-      role_agents_num: serverScene.role_agents_num,
-      scene_info_config_schema: serverScene.scene_info_config_schema,
-      agents_config_schemas: serverScene.agents_config_schemas,
-      additional_config_schema: serverScene.additional_config_schema,
+      ...serverScene,
       sceneInfoConfigFormilySchema,
       agentsConfigFormilySchemas,
       additionalConfigFormilySchema,

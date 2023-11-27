@@ -38,6 +38,8 @@ export interface ServerScene {
   scene_metadata: SceneMetaData;
   agents_metadata: Record<string, SceneAgentMetaData>;
   role_agents_num: Record<string, number>;
+  min_agents_num: number;
+  max_agents_num: number;
   scene_info_config_schema: SampleJSONSchemaDef;
   agents_config_schemas: Record<string, SampleJSONSchemaDef>;
   additional_config_schema: SampleJSONSchemaDef;
