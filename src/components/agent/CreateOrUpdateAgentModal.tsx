@@ -76,7 +76,7 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
       }}
     >
       <Spin spinning={modalLoading}>
-        <Form form={form}>
+        <Form form={form} labelCol={6}>
           <FormilyDefaultSchemaField schema={sceneAgentDefinition?.schema} />
         </Form>
       </Spin>
