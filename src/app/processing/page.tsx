@@ -160,9 +160,11 @@ const ProcessingPage = () => {
     ws.onmessage = (event) => {
       const eventData = JSON.parse(JSON.parse(event.data));
       console.log('WebSocket Received Message:', eventData);
-      setLogs((prev) => {
-        return [...prev, eventData.data];
-      });
+      if (eventData.type === 'log') {
+        setLogs((prev) => {
+          return [...prev, eventData.data];
+        });
+      }
     };
 
     ws.onerror = (error) => {
