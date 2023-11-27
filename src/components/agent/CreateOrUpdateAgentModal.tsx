@@ -33,11 +33,9 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
     setModalLoading(false);
     const newForm = createForm({
       validateFirst: true,
+      initialValues: sceneAgentConfigData?.agent_config_data || {},
     });
     setForm(newForm);
-    if (sceneAgentConfigData) {
-      newForm.setInitialValues(sceneAgentConfigData);
-    }
   };
 
   useEffect(() => {

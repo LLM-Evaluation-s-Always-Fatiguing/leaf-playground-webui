@@ -13,6 +13,7 @@ import SceneAgentConfigData, { SceneAgentDefinition } from '@/types/server/Agent
 import AgentCard from '@/components/agent/AgentCard';
 import totalSceneConfig from '@/utils/temp/scene-config';
 import { useRouter } from 'next/navigation';
+import FormilyJSONSchema from '@/types/FormilyJSONSchema';
 
 const Container = styled.div`
   width: 100%;
@@ -161,6 +162,15 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
                       role={'agent'}
                       agentsConfigFormilySchemas={scene.agentsConfigFormilySchemas}
                       sceneAgentConfigData={agentConfig}
+                      onEditButtonClick={() => {
+                        setOperatingAgentConfigIndex(index);
+                        setOperatingAgentDefinition({
+                          agent_id: agentConfig.agent_id,
+                          name: scene.agentsConfigFormilySchemas[agentConfig.agent_id].title,
+                          schema: scene.agentsConfigFormilySchemas[agentConfig.agent_id],
+                        });
+                        setCreateOrUpdateAgentModalOpen(true);
+                      }}
                     />
                   );
                 })}

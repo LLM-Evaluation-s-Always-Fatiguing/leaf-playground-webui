@@ -1,5 +1,5 @@
-import { ISchema as FormilyJSONSchema } from '@formily/json-schema';
 import SampleJSONSchemaDef from '@/types/SampleJSONSchemaDef';
+import FormilyJSONSchema from '@/types/FormilyJSONSchema';
 
 export interface SceneRoleDefinitionType {
   obj: string;
