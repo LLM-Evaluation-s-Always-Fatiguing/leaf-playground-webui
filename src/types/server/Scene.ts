@@ -1,25 +1,14 @@
 import SampleJSONSchemaDef from '@/types/SampleJSONSchemaDef';
 import FormilyJSONSchema from '@/types/FormilyJSONSchema';
-
-export interface SceneRoleDefinitionType {
-  obj: string;
-  module: string;
-  source_file?: string;
-}
-
-export interface SceneRoleDefinitionAgentType {
-  obj: string;
-  module: string;
-  source_file?: string;
-}
+import DynamicObject from '@/types/server/DynamicObject';
 
 export interface SceneRoleDefinition {
   name: string;
   description: string;
   num_agents: number;
   is_static: boolean;
-  type: SceneRoleDefinitionType;
-  agent_type: SceneRoleDefinitionAgentType;
+  type: DynamicObject;
+  agent_type: DynamicObject;
 }
 
 export interface SceneMetaData {

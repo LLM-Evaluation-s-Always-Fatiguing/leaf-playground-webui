@@ -13,7 +13,8 @@ import SceneAgentConfigData, { SceneAgentDefinition } from '@/types/server/Agent
 import AgentCard from '@/components/agent/AgentCard';
 import totalSceneConfig from '@/utils/temp/scene-config';
 import { useRouter } from 'next/navigation';
-import FormilyJSONSchema from '@/types/FormilyJSONSchema';
+import merge from 'lodash/merge';
+import { DefaultSceneInfoConfig } from '@/models/scene';
 
 const Container = styled.div`
   width: 100%;
@@ -197,10 +198,7 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
                   );
                   return;
                 }
-                const sceneConfig = {
-                  environments: {},
-                  ...sceneForm.values,
-                };
+                const sceneConfig = merge({}, DefaultSceneInfoConfig, sceneForm.values);
                 const additionalConfig = sceneAdditionalForm.values;
                 const finalConfig = {
                   id: scene.id,

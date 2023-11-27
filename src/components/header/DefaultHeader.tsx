@@ -4,17 +4,12 @@ import { Button, Layout, Tooltip, ColorPicker } from 'antd';
 import styled from '@emotion/styled';
 import LEAFLogo from '@/components/project/LEAFLogo';
 import { ThemeMode, useTheme } from 'antd-style';
-import {
-  MdOutlineBrightnessAuto,
-  MdOutlineLightMode,
-  MdOutlineDarkMode,
-  MdOutlineInfo,
-  MdOutlineColorLens,
-} from 'react-icons/md';
+import { MdOutlineBrightnessAuto, MdOutlineLightMode, MdOutlineDarkMode, MdOutlineInfo } from 'react-icons/md';
 import { TbBrandGithub } from 'react-icons/tb';
 import { FaRegAngry, FaRegLaughSquint } from 'react-icons/fa';
 import useDisplayConfig from '@/managers/DisplayConfigManager/useDisplayConfig';
 import HeaderPrimaryColorPicker from '@/components/header/PrimaryColorPicker';
+import { useRouter } from 'next/navigation';
 
 const { Header } = Layout;
 
@@ -23,6 +18,7 @@ const HeaderLogoArea = styled.div`
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
+  cursor: pointer;
 
   .title {
     margin-left: 12px;
@@ -61,6 +57,7 @@ const DefaultHeaderContent = styled.div`
 const DefaultHeader = () => {
   const theme = useTheme();
   const displayConfig = useDisplayConfig();
+  const router = useRouter();
 
   return (
     <Header
@@ -70,7 +67,11 @@ const DefaultHeader = () => {
       }}
     >
       <DefaultHeaderContent>
-        <HeaderLogoArea>
+        <HeaderLogoArea
+          onClick={() => {
+            router.push('/');
+          }}
+        >
           <LEAFLogo />
           <div className="title">Playground</div>
         </HeaderLogoArea>
@@ -90,7 +91,9 @@ const DefaultHeader = () => {
             <Button
               className="actionButton"
               type="text"
-              icon={displayConfig.happyWorkEffect ? <FaRegAngry size={'0.95em'} /> : <FaRegLaughSquint size={'0.95em'} />}
+              icon={
+                displayConfig.happyWorkEffect ? <FaRegAngry size={'0.95em'} /> : <FaRegLaughSquint size={'0.95em'} />
+              }
               onClick={() => {
                 displayConfig.toggleHappyWorkEffect();
               }}
