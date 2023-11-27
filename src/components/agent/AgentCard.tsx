@@ -6,6 +6,7 @@ import styled from '@emotion/styled';
 import { FiPlus } from 'react-icons/fi';
 import { FaCheck } from 'react-icons/fa6';
 import { RiRobot2Fill } from 'react-icons/ri';
+import { MdOutlineSettings } from 'react-icons/md';
 import { useMemo } from 'react';
 import { useTheme } from 'antd-style';
 import FormilyJSONSchema from '@/types/FormilyJSONSchema';
@@ -29,6 +30,7 @@ const AgentContent = styled.div`
   align-items: center;
   padding: 16px 12px 0 12px;
   overflow: hidden;
+  position: relative;
 
   .avatar {
     width: 60px;
@@ -71,6 +73,21 @@ const AgentContent = styled.div`
     justify-content: center;
     align-items: center;
   }
+
+  .editButton {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    font-size: 21px;
+    color: ${(props) => props.theme.colorPrimary};
+    cursor: pointer;
+  }
 `;
 
 interface AgentCardProps {
@@ -78,6 +95,7 @@ interface AgentCardProps {
   sceneAgentConfigData?: SceneAgentConfigData;
   agentsConfigFormilySchemas: Record<string, FormilyJSONSchema>;
   onAddNewClick?: () => void;
+  onEditButtonClick?: () => void;
 }
 
 const AgentCard = (props: AgentCardProps) => {
@@ -87,8 +105,8 @@ const AgentCard = (props: AgentCardProps) => {
 
   const requiredBackendConfigs = useMemo(() => {
     if (!props.sceneAgentConfigData) return [];
-    return props.agentsConfigFormilySchemas[props.sceneAgentConfigData.agent_id].properties?.ai_backend_config
-      .required as string[];
+    return (props.agentsConfigFormilySchemas[props.sceneAgentConfigData.agent_id].properties?.ai_backend_config
+      .required || []) as string[];
   }, [props.sceneAgentConfigData, props.agentsConfigFormilySchemas]);
 
   const displayKV = Object.entries(props.sceneAgentConfigData?.agent_config_data.ai_backend_config || {}).filter(
@@ -166,6 +184,14 @@ const AgentCard = (props: AgentCardProps) => {
             >
               Connected
             </div>
+          </div>
+          <div
+            className="editButton"
+            onClick={() => {
+              props.onEditButtonClick?.();
+            }}
+          >
+            <MdOutlineSettings size={'1em'} />
           </div>
         </AgentContent>
       )}
