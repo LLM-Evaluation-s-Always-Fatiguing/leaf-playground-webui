@@ -209,6 +209,7 @@ const SceneConfigBoard = (props: SceneConfigBoardProps) => {
                 }
                 const sceneConfig = {
                   environments: {},
+                  ...sceneForm.values
                 };
                 const additionalConfig = sceneAdditionalForm.values;
                 const finalConfig = {
