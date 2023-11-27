@@ -1,6 +1,6 @@
 'use client';
 
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, useState } from 'react';
 import { createStyles, setupStyled, StyleProvider, ThemeProvider } from 'antd-style';
 import { HappyProvider } from '@ant-design/happy-work-theme';
 import { App, ConfigProvider, Layout } from 'antd';
@@ -17,6 +17,7 @@ import {
 import DefaultHeader from '@/components/header/DefaultHeader';
 import merge from 'lodash/merge';
 import en_US from 'antd/locale/en_US';
+import useDisplayConfig from '@/managers/DisplayConfigManager/useDisplayConfig';
 
 setupStyled({ ThemeContext });
 
@@ -36,31 +37,40 @@ const GlobalLayoutContent = ({ children }: PropsWithChildren) => {
 
 interface GlobalLayoutProps extends PropsWithChildren {}
 
-const GlobalLayout = ({ children }: GlobalLayoutProps) => (
-  <StyleProvider speedy={true}>
-    <ThemeProvider
-      customToken={({ appearance }) => {
-        return {
-          ...commonCustomToken,
-          ...(appearance === 'light' ? lightCustomToken : darkCustomToken),
-        };
-      }}
-      theme={(appearance: ThemeAppearance) => {
-        return merge({}, commonTheme, appearance === 'light' ? lightTheme : darkTheme);
-      }}
-    >
-      <ConfigProvider locale={en_US}>
-        <HappyProvider>
-          <App>
-            <Layout>
-              <DefaultHeader />
-              <GlobalLayoutContent>{children}</GlobalLayoutContent>
-            </Layout>
-          </App>
-        </HappyProvider>
-      </ConfigProvider>
-    </ThemeProvider>
-  </StyleProvider>
-);
+const GlobalLayout = ({ children }: GlobalLayoutProps) => {
+  const displayConfig = useDisplayConfig();
+  return (
+    <StyleProvider speedy={true}>
+      <ThemeProvider
+        defaultAppearance={displayConfig.themeMode === 'auto' ? undefined : displayConfig.themeMode}
+        themeMode={displayConfig.themeMode}
+        customToken={({ appearance }) => {
+          return {
+            ...commonCustomToken,
+            ...(appearance === 'light' ? lightCustomToken : darkCustomToken),
+          };
+        }}
+        theme={(appearance: ThemeAppearance) => {
+          return merge({}, commonTheme, appearance === 'light' ? lightTheme : darkTheme, {
+            token: {
+              colorPrimary: displayConfig.primaryColor,
+            },
+          });
+        }}
+      >
+        <ConfigProvider locale={en_US}>
+          <HappyProvider disabled={!displayConfig.happyWorkEffect}>
+            <App>
+              <Layout>
+                <DefaultHeader />
+                <GlobalLayoutContent>{children}</GlobalLayoutContent>
+              </Layout>
+            </App>
+          </HappyProvider>
+        </ConfigProvider>
+      </ThemeProvider>
+    </StyleProvider>
+  );
+};
 
 export default GlobalLayout;

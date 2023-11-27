@@ -59,13 +59,14 @@ const SceneListComponent = (props: SceneListComponentProps) => {
 
   return (
     <Card
-      style={
-        props.selected
+      style={{
+        marginBottom: 8,
+        ...(props.selected
           ? {
               border: `1px solid ${theme.colorPrimary}`,
             }
-          : {}
-      }
+          : {}),
+      }}
       bodyStyle={{
         padding: 0,
         cursor: 'pointer',

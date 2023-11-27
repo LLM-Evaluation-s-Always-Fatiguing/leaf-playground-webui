@@ -1,8 +1,10 @@
+'use client';
+
 import { Card } from 'antd';
 import SceneAgentConfigData from '@/types/server/Agent';
 import styled from '@emotion/styled';
 import { FiPlus } from 'react-icons/fi';
-import { FaCheck } from "react-icons/fa6";
+import { FaCheck } from 'react-icons/fa6';
 import { RiRobot2Fill } from 'react-icons/ri';
 import { ISchema as FormilyJSONSchema } from '@formily/json-schema/esm/types';
 import { useMemo } from 'react';

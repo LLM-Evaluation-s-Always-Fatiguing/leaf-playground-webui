@@ -26,6 +26,7 @@
     "antd": "^5.11.1",
     "antd-style": "^3.5.2",
     "axios": "^1.6.2",
+    "cookies-next": "^4.1.0",
     "dayjs": "^1.11.10",
     "lodash": "^4.17.21",
     "mime-types": "^2.1.35",

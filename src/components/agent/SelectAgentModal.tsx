@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Modal, Spin, Form, FormInstance } from 'antd';
 import { SceneAgentDefinition } from '@/types/server/Agent';

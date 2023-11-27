@@ -1,4 +1,6 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import { Modal, Spin } from 'antd';
 import SceneAgentConfigData, { SceneAgentDefinition } from '@/types/server/Agent';
 import { Form } from '@formily/antd-v5';
