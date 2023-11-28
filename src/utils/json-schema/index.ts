@@ -1,7 +1,9 @@
+// @ts-nocheck
+
 import { Resolver } from '@stoplight/json-ref-resolver';
-import { ISchema as FormilyJSONSchema } from '@formily/json-schema';
 import cloneDeep from 'lodash/cloneDeep';
 import SampleJSONSchemaDef from '@/types/SampleJSONSchemaDef';
+import FormilyJSONSchema from '@/types/FormilyJSONSchema';
 
 const resolver = new Resolver();
 
@@ -18,7 +20,8 @@ function addFormilySchemaSpecial(schema: SampleJSONSchemaDef) {
     const noNullAnyOf = schema.anyOf.filter((item: any) => item.type !== 'null');
     switch (noNullAnyOf.length) {
       case 1: // handle xxx | null
-        if (noNullAnyOf[0].type !== "object") { // TODO: temp should remove
+        if (noNullAnyOf[0].type !== 'object') {
+          // TODO: temp should remove
           Object.assign(schema, noNullAnyOf[0]);
           delete schema.anyOf;
         }

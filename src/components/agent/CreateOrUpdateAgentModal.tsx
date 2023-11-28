@@ -2,22 +2,22 @@
 
 import React, { useEffect, useState } from 'react';
 import { Modal, Spin } from 'antd';
-import SceneAgentConfigData, { SceneAgentDefinition } from '@/types/server/Agent';
+import SceneAgentConfig, { SceneAgentDefinition } from '@/types/server/Agent';
 import { Form } from '@formily/antd-v5';
 import { createForm } from '@formily/core';
 import FormilyDefaultSchemaField from '@/components/formily/FormilyDefaultSchemaField';
 
 interface CreateOrUpdateAgentModalProps {
   open: boolean;
-  sceneAgentConfigData?: SceneAgentConfigData;
+  sceneAgentConfig?: SceneAgentConfig;
   sceneAgentDefinition?: SceneAgentDefinition;
-  onSubmit: (sceneAgent: SceneAgentConfigData) => void;
+  onSubmit: (sceneAgent: SceneAgentConfig) => void;
   onNeedClose: () => void;
 }
 
 const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
   open,
-  sceneAgentConfigData,
+  sceneAgentConfig,
   sceneAgentDefinition,
   onSubmit,
   onNeedClose,
@@ -33,7 +33,7 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
     setModalLoading(false);
     const newForm = createForm({
       validateFirst: true,
-      initialValues: sceneAgentConfigData?.agent_config_data || {},
+      initialValues: sceneAgentConfig?.agent_config_data || {},
     });
     setForm(newForm);
   };
@@ -61,11 +61,11 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
 
   return (
     <Modal
-      title={`${sceneAgentConfigData ? 'Edit' : 'Create'} Agent`}
+      title={`${sceneAgentConfig ? 'Edit' : 'Create'} Agent`}
       open={open}
       width={640}
       destroyOnClose
-      okText={sceneAgentConfigData ? 'Save' : 'Create'}
+      okText={sceneAgentConfig ? 'Save' : 'Create'}
       onOk={() => {
         onConfirm();
       }}

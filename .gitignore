@@ -40,3 +40,6 @@ next-env.d.ts
 
 # LEAF File API backup
 .leaf-webui-backup
+
+# Bundle
+/bundle

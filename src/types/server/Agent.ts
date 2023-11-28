@@ -15,7 +15,7 @@ export interface AgentConfigData {
   ai_backend_config: AgentBackendConfig;
 }
 
-export default interface SceneAgentConfigData {
+export default interface SceneAgentConfig {
   agent_id: string;
   agent_config_data: AgentConfigData;
 }

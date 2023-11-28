@@ -1,7 +1,7 @@
 'use client';
 
 import { Card } from 'antd';
-import SceneAgentConfigData from '@/types/server/Agent';
+import SceneAgentConfig from '@/types/server/Agent';
 import styled from '@emotion/styled';
 import { FiPlus } from 'react-icons/fi';
 import { FaCheck } from 'react-icons/fa6';
@@ -92,7 +92,7 @@ const AgentContent = styled.div`
 
 interface AgentCardProps {
   role: 'agent' | 'add';
-  sceneAgentConfigData?: SceneAgentConfigData;
+  sceneAgentConfig?: SceneAgentConfig;
   agentsConfigFormilySchemas: Record<string, FormilyJSONSchema>;
   onAddNewClick?: () => void;
   onEditButtonClick?: () => void;
@@ -104,13 +104,13 @@ const AgentCard = (props: AgentCardProps) => {
   const isAddCard = props.role === 'add';
 
   const requiredBackendConfigs = useMemo(() => {
-    if (!props.sceneAgentConfigData) return [];
-    return (props.agentsConfigFormilySchemas[props.sceneAgentConfigData.agent_id].properties?.ai_backend_config
-      .required || []) as string[];
-  }, [props.sceneAgentConfigData, props.agentsConfigFormilySchemas]);
+    if (!props.sceneAgentConfig) return [];
+    return (props.agentsConfigFormilySchemas[props.sceneAgentConfig.agent_id].properties?.ai_backend_config.required ||
+      []) as string[];
+  }, [props.sceneAgentConfig, props.agentsConfigFormilySchemas]);
 
-  const displayKV = Object.entries(props.sceneAgentConfigData?.agent_config_data.ai_backend_config || {}).filter(
-    ([key]) => requiredBackendConfigs.includes(key)
+  const displayKV = Object.entries(props.sceneAgentConfig?.agent_config_data.ai_backend_config || {}).filter(([key]) =>
+    requiredBackendConfigs.includes(key)
   );
 
   return (
@@ -144,7 +144,7 @@ const AgentCard = (props: AgentCardProps) => {
           <div className="avatar">
             <RiRobot2Fill size={'1em'} />
           </div>
-          <div className="name">{props.sceneAgentConfigData?.agent_config_data.profile.name}</div>
+          <div className="name">{props.sceneAgentConfig?.agent_config_data.profile.name}</div>
           <div className="infoArea">
             {displayKV.map((kv, index) => {
               return (

@@ -44,3 +44,13 @@ export interface SceneListItem {
   id: string;
   metadata: SceneMetaData;
 }
+
+export interface SceneInfoConfig {
+  environments: Record<string, any>;
+
+  [key: string]: any;
+}
+
+export interface SceneAdditionalConfig {
+  [key: string]: any;
+}

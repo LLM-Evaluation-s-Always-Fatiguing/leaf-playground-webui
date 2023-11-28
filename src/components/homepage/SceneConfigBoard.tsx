@@ -9,12 +9,13 @@ import { useMemo, useState } from 'react';
 import SelectAgentModal from '@/components/agent/SelectAgentModal';
 import FormilyDefaultSchemaField from '@/components/formily/FormilyDefaultSchemaField';
 import CreateOrUpdateAgentModal from '@/components/agent/CreateOrUpdateAgentModal';
-import SceneAgentConfigData, { SceneAgentDefinition } from '@/types/server/Agent';
+import SceneAgentConfig, { SceneAgentDefinition } from '@/types/server/Agent';
 import AgentCard from '@/components/agent/AgentCard';
-import totalSceneConfig from '@/utils/temp/scene-config';
 import { useRouter } from 'next/navigation';
 import merge from 'lodash/merge';
 import { DefaultSceneInfoConfig } from '@/models/scene';
+import { RunSceneConfig } from '@/types/server/web-socket';
+import useGlobalStore from '@/stores/global';
 
 const Container = styled.div`
   width: 100%;
@@ -56,6 +57,7 @@ interface SceneConfigBoardProps {
 
 const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
   const router = useRouter();
+  const globalStore = useGlobalStore();
 
   const sceneForm = useMemo(() => {
     return createForm({
@@ -78,12 +80,11 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
   }, []);
 
   const [selectAgentModalOpen, setSelectAgentModalOpen] = useState(false);
-  const [sceneAgentConfigs, setSceneAgentConfigs] = useState<SceneAgentConfigData[]>([]);
+  const [sceneAgentConfigs, setSceneAgentConfigs] = useState<SceneAgentConfig[]>([]);
   const [operatingAgentDefinition, setOperatingAgentDefinition] = useState<SceneAgentDefinition>();
   const [operatingAgentConfigIndex, setOperatingAgentConfigIndex] = useState(-1);
   const [createOrUpdateAgentModalOpen, setCreateOrUpdateAgentModalOpen] = useState(false);
 
-  console.log(scene);
   return (
     <>
       <Container>
@@ -162,7 +163,7 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
                       key={index}
                       role={'agent'}
                       agentsConfigFormilySchemas={scene.agentsConfigFormilySchemas}
-                      sceneAgentConfigData={agentConfig}
+                      sceneAgentConfig={agentConfig}
                       onEditButtonClick={() => {
                         setOperatingAgentConfigIndex(index);
                         setOperatingAgentDefinition({
@@ -200,14 +201,13 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
                 }
                 const sceneConfig = merge({}, DefaultSceneInfoConfig, sceneForm.values);
                 const additionalConfig = sceneAdditionalForm.values;
-                const finalConfig = {
+                const finalConfig: RunSceneConfig = {
                   id: scene.id,
                   scene_info_config_data: sceneConfig,
                   scene_agents_config_data: sceneAgentConfigs,
                   additional_config_data: additionalConfig,
                 };
-                console.log(finalConfig);
-                totalSceneConfig.config = finalConfig;
+                globalStore.updateRunSceneConfig(finalConfig);
                 router.push('/processing');
               } catch (e) {
                 console.error(e);
@@ -232,7 +232,7 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
       />
       <CreateOrUpdateAgentModal
         open={createOrUpdateAgentModalOpen}
-        sceneAgentConfigData={operatingAgentConfigIndex >= 0 ? sceneAgentConfigs[operatingAgentConfigIndex] : undefined}
+        sceneAgentConfig={operatingAgentConfigIndex >= 0 ? sceneAgentConfigs[operatingAgentConfigIndex] : undefined}
         sceneAgentDefinition={operatingAgentDefinition}
         onSubmit={(agentConfig) => {
           if (operatingAgentConfigIndex >= 0) {

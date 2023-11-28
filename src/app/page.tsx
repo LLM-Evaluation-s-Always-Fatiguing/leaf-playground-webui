@@ -8,6 +8,7 @@ import SceneListComponent from '@/components/scene/SceneListComponent';
 import ServerAPI from '@/services/server';
 import SceneInfoBoard from '@/components/homepage/SceneInfoBoard';
 import SceneConfigBoard from '@/components/homepage/SceneConfigBoard';
+import useGlobalStore from "@/stores/global";
 
 const ScenesArea = styled.div`
   width: 24%;
@@ -56,6 +57,8 @@ const PageContainer = styled.div`
 `;
 
 export default function Home() {
+  const globalStore = useGlobalStore();
+
   const [scenesLoading, setScenesLoading] = useState(false);
   const [scenes, setScenes] = useState<SceneListItem[]>([]);
   const [selectedSceneIndex, setSelectedSceneIndex] = useState<number>(0);
@@ -69,6 +72,7 @@ export default function Home() {
     try {
       setSceneDetailLoading(true);
       const scene = await ServerAPI.scene.get(scenes[selectedSceneIndex].id);
+      globalStore.updateCurrentScene(scene);
       setSelectedSceneDetail(scene);
     } catch (e) {
       console.error(e);

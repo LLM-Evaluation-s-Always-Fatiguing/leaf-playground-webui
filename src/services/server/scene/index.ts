@@ -1,7 +1,7 @@
 import request from '@/services/server/request';
 import Scene, { SceneListItem, ServerScene } from '@/types/server/Scene';
 import { transferStandardJSONSchemaToFormilyJSONSchema } from '@/utils/json-schema';
-import { ISchema as FormilyJSONSchema } from '@formily/json-schema';
+import FormilyJSONSchema from '@/types/FormilyJSONSchema';
 
 const sceneAPI = {
   async getScenes(): Promise<{

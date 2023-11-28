@@ -1,7 +1,6 @@
 'use client';
 
 import styled from '@emotion/styled';
-import totalSceneConfig from '@/utils/temp/scene-config';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ServerWebSocketLogMessage,
@@ -12,6 +11,10 @@ import SceneLog from '@/types/server/Log';
 import GeneralMCQExamineVisualization from '@/components/processing/specialized/general-mcq-examine/GeneralMCQExamineVisualization';
 import { DefaultProcessingVisualizationComponentProps } from '@/components/processing/def';
 import VisualizationComponentWithExtraProps from '@/components/processing/common/VisualizationComponentWithExtraProps';
+import useGlobalStore from '@/stores/global';
+import { useRouter } from 'next/navigation';
+import { message } from 'antd';
+import BuddhaVisualization from '@/components/processing/specialized/buddha/BuddhaVisualization';
 
 const PageContainer = styled.div`
   width: 100%;
@@ -30,22 +33,30 @@ const VisualizationArea = styled.div`
 `;
 
 const ProcessingPage = () => {
-  const config = totalSceneConfig.config;
+  const router = useRouter();
+  const globalStore = useGlobalStore();
 
   const wsRef = useRef<WebSocket>();
+  const wsOpenRef = useRef(false);
 
   const [logs, setLogs] = useState<SceneLog[]>([]);
 
   useEffect(() => {
-    if (!wsRef.current) {
-      const ws = new WebSocket('ws://127.0.0.1:8000/run_scene');
+    if (!globalStore.runSceneConfig) {
+      message.error('No run scene config!');
+      router.replace('/');
+    }
 
-      ws.onopen = () => {
+    if (!wsRef.current) {
+      wsRef.current = new WebSocket('ws://127.0.0.1:8000/run_scene');
+
+      wsRef.current.onopen = function() {
+        wsOpenRef.current = true;
         console.log('WebSocket opened');
-        ws.send(JSON.stringify(config));
+        this.send(JSON.stringify(globalStore.runSceneConfig));
       };
 
-      ws.onmessage = (event) => {
+      wsRef.current.onmessage = (event) => {
         const message: ServerWebSocketMessage = JSON.parse(JSON.parse(event.data));
         console.log('WebSocket Received Message:', message);
         if (message.type === ServerWebSocketMessageType.LOG) {
@@ -56,15 +67,14 @@ const ProcessingPage = () => {
         }
       };
 
-      ws.onerror = (error) => {
+      wsRef.current.onerror = (error) => {
         console.error('WebSocket Error:', error);
       };
 
-      ws.onclose = () => {
+      wsRef.current.onclose = () => {
+        wsOpenRef.current = false;
         console.log('WebSocket closed.');
       };
-
-      wsRef.current = ws;
     }
 
     return () => {
@@ -76,16 +86,19 @@ const ProcessingPage = () => {
   }, []);
 
   function getProcessingVisualizationComponent(): React.FC<DefaultProcessingVisualizationComponentProps> {
-    switch (config.scene_info_config_data) {
-      default:
+    switch (globalStore.currentScene?.scene_metadata.name) {
+      case 'GeneralMCQExamine':
         return VisualizationComponentWithExtraProps(GeneralMCQExamineVisualization, {});
-      // return () => false;
+      case 'Buddha':
+        return VisualizationComponentWithExtraProps(BuddhaVisualization, {});
+      default:
+        return () => false;
     }
   }
 
   const VisualizationComponent = useMemo(() => {
     return getProcessingVisualizationComponent();
-  }, [config]);
+  }, [globalStore.currentScene, globalStore.runSceneConfig]);
 
   return (
     <PageContainer>

@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "bundle": "node scripts/build-webui-bundle.js",
     "analyze": "ANALYZE=true next build",
     "start": "next start",
     "lint": "next lint"
@@ -34,9 +35,12 @@
     "next": "14.0.2",
     "react": "^18",
     "react-dom": "^18",
-    "react-icons": "^4.12.0"
+    "react-icons": "^4.12.0",
+    "sharp": "^0.32.6",
+    "zustand": "^4.4.7"
   },
   "devDependencies": {
+    "@emotion/babel-plugin": "^11.11.0",
     "@next/bundle-analyzer": "^14.0.3",
     "@types/lodash": "^4.14.202",
     "@types/mime-types": "^2.1.4",
@@ -47,7 +51,21 @@
     "eslint": "^8",
     "eslint-config-next": "14.0.2",
     "eslint-config-prettier": "^9.0.0",
+    "fs-extra": "^11.2.0",
     "prettier": "3.1.0",
     "typescript": "^5"
+  },
+  "pnpm": {
+    "supportedArchitectures": {
+      "os": [
+        "darwin",
+        "win32",
+        "linux"
+      ],
+      "cpu": [
+        "x64",
+        "arm64"
+      ]
+    }
   }
 }

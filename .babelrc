@@ -3,6 +3,7 @@
     "next/babel"
   ],
   "plugins": [
-    "antd-style"
+    "antd-style",
+    "@emotion"
   ]
 }
