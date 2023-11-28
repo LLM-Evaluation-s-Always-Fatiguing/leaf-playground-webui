@@ -1,5 +1,8 @@
 name: Build and Release WebUI
 
+permissions:
+  contents: write
+
 on:
   workflow_dispatch:
 
@@ -44,6 +47,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./bundle/webui.zip
+          asset_path: ./bundle/webui-v${{ steps.package_version.outputs.version }}.zip
           asset_name: webui-v${{ steps.package_version.outputs.version }}.zip
           asset_content_type: application/zip
