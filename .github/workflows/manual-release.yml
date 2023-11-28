@@ -2,11 +2,6 @@ name: Build and Release WebUI
 
 on:
   workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Branch to build from'
-        required: true
-        default: 'main'
 
 jobs:
   build-and-release:
@@ -15,7 +10,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.inputs.branch }}
+          ref: main  # 指定默认分支
 
       - name: Set up Node.js 18
         uses: actions/setup-node@v2
@@ -32,12 +27,23 @@ jobs:
         id: package_version
         run: echo "::set-output name=version::$(node -p "require('./package.json').version")"
 
+      - name: Create Release Draft
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.package_version.outputs.version }}
+          release_name: Release v${{ steps.package_version.outputs.version }}
+          draft: true
+          prerelease: false
+
       - name: Upload WebUI as Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ github.event.release.upload_url }}
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./bundle/webui.zip
-          asset_name: webui-${{ steps.package_version.outputs.version }}.zip
+          asset_name: webui-v${{ steps.package_version.outputs.version }}.zip
           asset_content_type: application/zip
