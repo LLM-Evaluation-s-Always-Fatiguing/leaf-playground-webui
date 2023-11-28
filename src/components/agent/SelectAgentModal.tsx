@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Modal, Spin, Form, FormInstance } from 'antd';
 import { SceneAgentDefinition } from '@/types/server/Agent';
 import { Select } from '@formily/antd-v5';
-import FormilyJSONSchema from "@/types/FormilyJSONSchema";
+import FormilyJSONSchema from '@/types/FormilyJSONSchema';
 
 interface SelectAgentModalProps {
   open: boolean;

@@ -1,7 +1,6 @@
-import {test} from "@jest/globals";
-import {deReferenceJSONSchema} from "@/utils/json-schema";
-import {FormilySchemaTransformer} from "@/utils/formily-json-schema/formily-schema";
-
+import { test } from '@jest/globals';
+import { deReferenceJSONSchema } from '@/utils/json-schema';
+import { FormilySchemaTransformer } from '@/utils/formily-json-schema/formily-schema';
 
 const SIMPLE_SCHEMA = `{
         "$defs": {
@@ -24,14 +23,12 @@ const SIMPLE_SCHEMA = `{
     }`;
 
 test('simple transform', async () => {
+  const transformer = new FormilySchemaTransformer();
 
-    const transformer = new FormilySchemaTransformer();
+  const result = await transformer.transform(JSON.parse(SIMPLE_SCHEMA));
 
-    const result = await transformer.transform(JSON.parse(SIMPLE_SCHEMA));
-
-    console.log(JSON.stringify(result, null, 2));
+  console.log(JSON.stringify(result, null, 2));
 });
-
 
 const COMPLEX_SCHEMA = `{
     "$defs": {
@@ -451,13 +448,12 @@ const COMPLEX_SCHEMA = `{
     ],
     "title": "LogBody",
     "type": "object"
-}`
+}`;
 
 test('complex transform', async () => {
+  const transformer = new FormilySchemaTransformer();
 
-    const transformer = new FormilySchemaTransformer();
+  const result = await transformer.transform(JSON.parse(COMPLEX_SCHEMA));
 
-    const result = await transformer.transform(JSON.parse(COMPLEX_SCHEMA));
-
-    console.log(JSON.stringify(result, null, 2));
+  console.log(JSON.stringify(result, null, 2));
 });

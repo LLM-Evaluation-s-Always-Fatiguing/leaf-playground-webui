@@ -19,7 +19,7 @@ export class NullableBasicAnyOf extends AbstractComponentDef {
 
   transformCore(schema: FormilyJSONSchema, level: number, rootTransform?: TransformCore | undefined): void {
     const noNullAnyOf = schema.anyOf.filter((item: any) => item.type !== 'null');
-    Object.assign(schema, noNullAnyOf[0])
+    Object.assign(schema, noNullAnyOf[0]);
     delete schema.anyOf;
     rootTransform?.(schema, level, rootTransform);
   }

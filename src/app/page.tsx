@@ -8,7 +8,7 @@ import SceneListComponent from '@/components/scene/SceneListComponent';
 import ServerAPI from '@/services/server';
 import SceneInfoBoard from '@/components/homepage/SceneInfoBoard';
 import SceneConfigBoard from '@/components/homepage/SceneConfigBoard';
-import useGlobalStore from "@/stores/global";
+import useGlobalStore from '@/stores/global';
 
 const ScenesArea = styled.div`
   width: 24%;

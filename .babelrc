@@ -1,9 +1,4 @@
 {
-  "presets": [
-    "next/babel"
-  ],
-  "plugins": [
-    "antd-style",
-    "@emotion"
-  ]
+  "presets": ["next/babel"],
+  "plugins": ["antd-style", "@emotion"]
 }

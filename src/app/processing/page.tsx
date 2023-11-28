@@ -50,7 +50,7 @@ const ProcessingPage = () => {
     if (!wsRef.current) {
       wsRef.current = new WebSocket('ws://127.0.0.1:8000/run_scene');
 
-      wsRef.current.onopen = function() {
+      wsRef.current.onopen = function () {
         wsOpenRef.current = true;
         console.log('WebSocket opened');
         this.send(JSON.stringify(globalStore.runSceneConfig));
