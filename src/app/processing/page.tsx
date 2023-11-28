@@ -3,6 +3,7 @@
 import styled from '@emotion/styled';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  ServerWebSocketEndMessage,
   ServerWebSocketLogMessage,
   ServerWebSocketMessage,
   ServerWebSocketMessageType,
@@ -12,9 +13,10 @@ import GeneralMCQExamineVisualization from '@/components/processing/specialized/
 import { DefaultProcessingVisualizationComponentProps } from '@/components/processing/def';
 import VisualizationComponentWithExtraProps from '@/components/processing/common/VisualizationComponentWithExtraProps';
 import useGlobalStore from '@/stores/global';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { message } from 'antd';
 import BuddhaVisualization from '@/components/processing/specialized/buddha/BuddhaVisualization';
+import LocalAPI from '@/services/local';
 
 const PageContainer = styled.div`
   width: 100%;
@@ -34,36 +36,52 @@ const VisualizationArea = styled.div`
 
 const ProcessingPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const globalStore = useGlobalStore();
+
+  const taskId = searchParams.get('taskId');
 
   const wsRef = useRef<WebSocket>();
   const wsOpenRef = useRef(false);
 
+  const [wsConnected, setWSConnected] = useState(false);
   const [logs, setLogs] = useState<SceneLog[]>([]);
 
   useEffect(() => {
-    if (!globalStore.runSceneConfig) {
-      message.error('No run scene config!');
+    if (!globalStore.runSceneConfig || !taskId) {
+      message.error('Wrong state!');
       router.replace('/');
     }
 
     if (!wsRef.current) {
-      wsRef.current = new WebSocket('ws://127.0.0.1:8000/run_scene');
+      wsRef.current = new WebSocket(`ws://127.0.0.1:8000/task/ws/${taskId}`);
 
       wsRef.current.onopen = function () {
         wsOpenRef.current = true;
+        setWSConnected(true);
         console.log('WebSocket opened');
         this.send(JSON.stringify(globalStore.runSceneConfig));
       };
 
-      wsRef.current.onmessage = (event) => {
-        const message: ServerWebSocketMessage = JSON.parse(JSON.parse(event.data));
-        console.log('WebSocket Received Message:', message);
-        if (message.type === ServerWebSocketMessageType.LOG) {
-          const logMessage = message as ServerWebSocketLogMessage;
-          setLogs((prev) => {
-            return [...prev, message.data];
-          });
+      wsRef.current.onmessage = async (event) => {
+        const wsMessage: ServerWebSocketMessage = JSON.parse(JSON.parse(event.data));
+        console.log('WebSocket Received Message:', wsMessage);
+        switch (wsMessage.type) {
+          case ServerWebSocketMessageType.LOG:
+            const logMessage = wsMessage as ServerWebSocketLogMessage;
+            setLogs((prev) => {
+              return [...prev, logMessage.data];
+            });
+            break;
+          case ServerWebSocketMessageType.End:
+            const endMessage = wsMessage as ServerWebSocketEndMessage;
+            message.success('Task Finished!');
+            wsRef.current?.close();
+            await LocalAPI.file.openDict(endMessage.data.save_dir);
+            router.replace(`/result/${taskId}`);
+            break;
+          default:
+            break;
         }
       };
 
@@ -73,6 +91,7 @@ const ProcessingPage = () => {
 
       wsRef.current.onclose = () => {
         wsOpenRef.current = false;
+        setWSConnected(false);
         console.log('WebSocket closed.');
       };
     }

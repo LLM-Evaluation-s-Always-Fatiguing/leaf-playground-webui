@@ -6,6 +6,7 @@ import { RiRobot2Fill } from 'react-icons/ri';
 import { GiTeacher } from 'react-icons/gi';
 import { useEffect, useRef } from 'react';
 import { SceneLogTextContent } from '@/types/server/Log';
+import debounce from 'lodash/debounce';
 
 const Container = styled.div`
   width: 100%;
@@ -115,8 +116,8 @@ const Container = styled.div`
         flex-direction: column;
         align-items: flex-end;
         white-space: pre-line;
+        word-break: break-all;
         padding: 16px 12px;
-        text-align: right;
       }
     }
   }
@@ -142,13 +143,16 @@ const GeneralMCQExamineVisualization = (props: GeneralMCQExamineVisualizationPro
   const enableAutoScrollToBottomRef = useRef(true);
   const reEnableAutoScrollToBottomTimerRef = useRef<any>();
 
-  useEffect(() => {
-    if (!enableAutoScrollToBottomRef.current) return;
-    scrollAreaRef.current?.scrollTo({
-      top: scrollAreaRef.current?.scrollHeight || 0,
-      behavior: 'smooth',
-    });
-  }, [props.logs]);
+  useEffect(
+    debounce(() => {
+      if (!enableAutoScrollToBottomRef.current || !scrollAreaRef.current) return;
+      scrollAreaRef.current.scrollTo({
+        top: scrollAreaRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }, 600),
+    [props.logs]
+  );
 
   return (
     <Container

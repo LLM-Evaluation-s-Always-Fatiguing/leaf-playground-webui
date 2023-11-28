@@ -2,8 +2,7 @@
 
 import { DefaultProcessingVisualizationComponentProps } from '@/components/processing/def';
 import styled from '@emotion/styled';
-import { RiRobot2Fill } from 'react-icons/ri';
-import { GiTeacher } from 'react-icons/gi';
+import { MdPerson3 } from "react-icons/md";
 import { useEffect, useRef } from 'react';
 import { SceneLogTextContent } from '@/types/server/Log';
 
@@ -116,7 +115,7 @@ const Container = styled.div`
         align-items: flex-end;
         white-space: pre-line;
         padding: 16px 12px;
-        text-align: right;
+        word-break: break-all;
       }
     }
   }
@@ -167,7 +166,20 @@ const BuddhaVisualization = (props: BuddhaVisualizationProps) => {
       {props.logs.map((log, index) => {
         return (
           <div key={index} className={log.references ? 'examinee' : 'examiner'}>
-            <div className="avatar">{log.references ? <RiRobot2Fill size={'1em'} /> : <GiTeacher size={'1em'} />}</div>
+            <div className="avatar">
+              {log.references ? (
+                <img
+                  style={{
+                    width: '1em',
+                    height: '1em',
+                  }}
+                  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAACXBIWXMAAAsTAAALEwEAmpwYAAADqUlEQVR4nM2aWaiNURTHf8Zr5oab6XpQrojMQ5mVMpSpKOQFJV48KSSueCEeJXO8mCnCCyEkXmRIuIZrCMl8zde9n5bWrdNu73PO/r597jn/WnX6zt7/tdY+a6+99voOhMcUYB/wFPgKVAMVwAFgIgWMMuA6EGWQizq2oDAW+JyF8XXyARhFgaAn8NHD+FQnelAAuGAx7iwwEigCmgAjgJOOcMorxluMks3awDF+k2X8BPKInYYx34CSNOMbAzeMOTvII+4YxhzPYs48Y8598ogqw5hzwFaN7Sf6i0S6yd8Al9TJ1Dlf8ulAnOxjyo98GT8X+BnAgQg4X5+HW7GmySiwVAEzcm18N+BRGiMeaaqcBvRXZ9G02hkYB6wGbjrm1wDzc2V8sWYMU+lfYDvQz5NPHDxn4fsDjMmFA4csyh4AAxLybrHwPgNaExBTHeHSJRD/dgt/OQFxyxI2QwLytwJeGDo+6fPEGGpZnW2ExyKLnjkhiM0CrBZYAVzRVXoHXAOWa/WZCc10rMx5p4ehcC0AvlsKw8S4ZAmfWkcavK2p1oVS4K5jbq2eyiZfYrz1PJDEwPYWng7APU+uLyEciFMuPASmAy1Upmc4ACOH/A7hQI2D/KDW/rKyp2MYdwxoqxyHHWMkXBPjl4O8Y8qYpp5OnNI5dSjJ5S/w3EFuQjLQZu0DuQyv1qxmy1aRRd6HcOBqlg7UoRewUQu21ypyjdyg37kQWUQO0MTY5elAXEQWOZGUdFaaLBQakUVk/82MS9hJ87ArnkMjcoj0V7vGISzPkElCI0oja+MQXjFIVgLNPUvwV8BLYLLHvObAKkP35Rj2/88eqSRSlfrgZcpcKZV9MNzQLQvhjd8GieyJ+nKgs6FbEok3zAOpnef8yeqEGD8pxv07SnoimzWQT/wnRQvLCe4NMxM0ov7QyHJX8IZ5aZHOcn2hiaFboiHxHmijz1tqG1BeEc0GGiZc6dnKVabcaJlt9oq8YZYQpboPzNAalsCBERY+0dE9RAO4wiBZAvS1KJSXHHGxx8LXV3WlPpPbnDf2ZjjeU1PcwBj8gzU0stGxmxwreOxZcHXTFyBRFiI2DCImlmW4YZn9zNFZvlOuzJKzGlhKQgzVBlOlbia55h0B1lsU1ujdeI6ucpFKqT474+gplQNHlfuH6tofo/7yxrosVzKdrCHPWByzdyQrvZACQS8NHVfLMVVqta0if1EoOPTRvSEXEGlJSooVkc/yTGK9d0iN/wCp8MgWvwcy9gAAAABJRU5ErkJggg=="
+                  alt={'avatar'}
+                />
+              ) : (
+                <MdPerson3 size={'1em'} />
+              )}
+            </div>
             <div className="card">
               <div className="header">{log.narrator}</div>
               <div className="body">{(log.response.content as SceneLogTextContent).text}</div>

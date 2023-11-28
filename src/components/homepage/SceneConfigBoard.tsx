@@ -14,8 +14,9 @@ import AgentCard from '@/components/agent/AgentCard';
 import { useRouter } from 'next/navigation';
 import merge from 'lodash/merge';
 import { DefaultSceneInfoConfig } from '@/models/scene';
-import { RunSceneConfig } from '@/types/server/web-socket';
+import RunSceneConfig from '@/types/server/RunSceneConfig';
 import useGlobalStore from '@/stores/global';
+import ServerAPI from '@/services/server';
 
 const Container = styled.div`
   width: 100%;
@@ -206,11 +207,15 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
                   scene_info_config_data: sceneConfig,
                   scene_agents_config_data: sceneAgentConfigs,
                   additional_config_data: additionalConfig,
+                  scene_evaluators_config_data: null,
                 };
+                const { task_id } = await ServerAPI.sceneTask.createSceneTask(finalConfig);
                 globalStore.updateRunSceneConfig(finalConfig);
-                router.push('/processing');
+                globalStore.updateTaskId(task_id);
+                router.push(`/processing?taskId=${task_id}`);
               } catch (e) {
                 console.error(e);
+                message.error('Create scene task failed.');
               }
             }}
           >

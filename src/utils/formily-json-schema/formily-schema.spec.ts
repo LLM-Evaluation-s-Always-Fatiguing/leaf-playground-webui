@@ -1,5 +1,4 @@
 import { test } from '@jest/globals';
-import { deReferenceJSONSchema } from '@/utils/json-schema';
 import { FormilySchemaTransformer } from '@/utils/formily-json-schema/formily-schema';
 
 const SIMPLE_SCHEMA = `{

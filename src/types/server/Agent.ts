@@ -10,14 +10,14 @@ export interface AgentBackendConfig {
   [key: string]: any;
 }
 
-export interface AgentConfigData {
+export interface SceneAgentConfigData {
   profile: AgentProfile;
   ai_backend_config: AgentBackendConfig;
 }
 
 export default interface SceneAgentConfig {
   agent_id: string;
-  agent_config_data: AgentConfigData;
+  agent_config_data: SceneAgentConfigData;
 }
 
 export interface SceneAgentDefinition {

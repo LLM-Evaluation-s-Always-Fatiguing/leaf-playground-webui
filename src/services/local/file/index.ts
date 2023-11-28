@@ -28,6 +28,11 @@ const fileLocalAPI = {
         return JSON.parse(json);
       });
   },
+  async openDict(dictPath: string): Promise<void> {
+    await request.post(`${prefix}/open-dict`, {
+      directoryPath: dictPath,
+    });
+  },
 };
 
 export default fileLocalAPI;

@@ -1,14 +1,16 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { devtools } from 'zustand/middleware';
-import { RunSceneConfig } from '@/types/server/web-socket';
+import RunSceneConfig from '@/types/server/RunSceneConfig';
 import Scene from '@/types/server/Scene';
 
 interface GlobalState {
   currentScene?: Scene;
   runSceneConfig?: RunSceneConfig;
+  taskId?: string;
   updateCurrentScene: (scene: Scene) => void;
   updateRunSceneConfig: (runSceneConfig: RunSceneConfig) => void;
+  updateTaskId: (taskId: string) => void;
 }
 
 const useGlobalStore = create<GlobalState>()(
@@ -23,6 +25,10 @@ const useGlobalStore = create<GlobalState>()(
       updateRunSceneConfig: (runSceneConfig) =>
         set((state) => {
           state.runSceneConfig = runSceneConfig;
+        }),
+      updateTaskId: (taskId) =>
+        set((state) => {
+          state.taskId = taskId;
         }),
     }))
   )
