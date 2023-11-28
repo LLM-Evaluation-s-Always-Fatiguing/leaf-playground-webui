@@ -1,5 +1,7 @@
 const { execSync } = require('child_process');
 const fs = require('fs-extra');
+const packageJson = require('../package.json');
+const archiver = require('archiver');
 
 /**
  * Bundle WebUI.
@@ -18,16 +20,6 @@ function bundleWebUI() {
     console.log('WebUI bundled successfully');
   } catch (error) {
     console.error('Error while bundling Web UI:', error);
-  }
-}
-
-function rebuildSharp(platform, arch) {
-  const command = `pnpm rebuild --config.platform=${platform} --config.arch=${arch} sharp`;
-  console.log(`Executing: ${command}`);
-  try {
-    execSync(command, { stdio: 'inherit' });
-  } catch (error) {
-    console.error(`Error rebuilding sharp for ${platform}-${arch}:`, error);
     throw error;
   }
 }
@@ -37,11 +29,6 @@ function installDependenciesAndBuild() {
     console.log('Installing dependencies...');
     execSync('pnpm install', { stdio: 'inherit' });
 
-    rebuildSharp('linux', 'x64');
-    rebuildSharp('win32', 'x64');
-    rebuildSharp('darwin', 'x64');
-    rebuildSharp('darwin', 'arm64');
-
     console.log('Building project...');
     execSync('pnpm build', { stdio: 'inherit' });
 
@@ -49,10 +36,25 @@ function installDependenciesAndBuild() {
     console.log('Project build and bundling completed successfully.');
   } catch (error) {
     console.error('Error during installation or build:', error);
+    throw error;
   }
 }
 
-function main() {
+function zipBundle() {
+  return new Promise((resolve, reject) => {
+    const archive = archiver('zip', { zlib: { level: 9 } });
+    const stream = fs.createWriteStream(`./bundle/webui-v${packageJson.version}.zip`);
+    archive
+      .directory('./bundle/webui', false)
+      .on('error', (err) => reject(err))
+      .pipe(stream);
+
+    stream.on('close', () => resolve());
+    archive.finalize();
+  });
+}
+
+async function main() {
   fs.removeSync('./bundle'); // Delete old bundle directory
 
   try {
@@ -64,10 +66,21 @@ function main() {
     try {
       execSync('corepack enable', { stdio: 'inherit' });
       console.log('Corepack enabled successfully. Installing pnpm...');
+
       installDependenciesAndBuild();
     } catch (enableError) {
       console.error('Error enabling corepack:', enableError);
+      throw error;
     }
+  }
+
+  try {
+    console.log('Starting Zip Bundle...');
+    await zipBundle();
+    console.log('Zip Bundle completed successfully.');
+  } catch (e) {
+    console.error('Zip Bundle failed:', e);
+    throw error;
   }
 }
 
