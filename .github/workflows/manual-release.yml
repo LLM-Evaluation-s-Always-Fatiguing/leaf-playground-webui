@@ -1,0 +1,43 @@
+name: Build and Release WebUI
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build from'
+        required: true
+        default: 'main'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.branch }}
+
+      - name: Set up Node.js 18
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: Install dependencies with pnpm
+        run: npm install -g pnpm && pnpm install
+
+      - name: Bundle the project
+        run: pnpm bundle
+
+      - name: Get package version
+        id: package_version
+        run: echo "::set-output name=version::$(node -p "require('./package.json').version")"
+
+      - name: Upload WebUI as Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./bundle/webui.zip
+          asset_name: webui-${{ steps.package_version.outputs.version }}.zip
+          asset_content_type: application/zip
