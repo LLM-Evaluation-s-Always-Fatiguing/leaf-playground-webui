@@ -9,6 +9,7 @@ import JSONViewer from '@/components/common/JSONViewer';
 import SceneLog from '@/types/server/Log';
 import dayjs from 'dayjs';
 import JSONViewerModal from '@/components/common/JSONViewer/Modal';
+import ReactECharts from 'echarts-for-react';
 
 const Container = styled.div`
   width: 100%;
@@ -55,17 +56,18 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
     const agents = await LocalAPI.file.readJSON(agentsFilePath);
     const metricsFilePath = taskResultSavedDir + '/metrics.jsonl';
     const metrics = await LocalAPI.file.readJSONL(metricsFilePath);
+    const chartsDictPath = taskResultSavedDir + '/charts';
+    const chartJSONFiles = (await LocalAPI.file.listDict(chartsDictPath)).filter((f) => f.fullPath.endsWith('.json'));
+    const chartOptions = [];
+    for (let chartJson of chartJSONFiles) {
+      chartOptions.push(await LocalAPI.file.readJSON(chartJson.fullPath));
+    }
     setResultData({
       scene,
       logs,
       agents,
       metrics,
-    });
-    console.log({
-      scene,
-      logs,
-      agents,
-      metrics,
+      chartOptions,
     });
     setLoading(false);
   };
@@ -131,6 +133,26 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
               },
             ]}
           />
+        </Card>
+        <Card
+          title={'Charts'}
+          bodyStyle={{
+            display: 'flex',
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+          }}
+        >
+          {(resultData?.chartOptions || []).map((option, index) => {
+            return (
+              <ReactECharts
+                key={index}
+                option={option}
+                style={{
+                  width: '50%',
+                }}
+              />
+            );
+          })}
         </Card>
         <Card
           title={'Logs'}
@@ -207,7 +229,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
         </Card>
       </Container>
       <JSONViewerModal
-        title={"Log Detail"}
+        title={'Log Detail'}
         open={jsonViewerModalOpen}
         jsonObject={operatingLog}
         onNeedClose={() => {
