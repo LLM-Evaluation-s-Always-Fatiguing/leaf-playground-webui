@@ -8,6 +8,7 @@ import { Button, Card, Descriptions, Space, Table } from 'antd';
 import JSONViewer from '@/components/common/JSONViewer';
 import SceneLog from '@/types/server/Log';
 import dayjs from 'dayjs';
+import JSONViewerModal from '@/components/common/JSONViewer/Modal';
 
 const Container = styled.div`
   width: 100%;
@@ -40,6 +41,8 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
 
   const [loading, setLoading] = useState(false);
   const [resultData, setResultData] = useState<Record<string, any>>();
+  const [operatingLog, setOperatingLog] = useState<SceneLog>();
+  const [jsonViewerModalOpen, setJSONViewerModalOpen] = useState<boolean>(false);
 
   const loadDataFromLocal = async () => {
     if (!taskResultSavedDir || resultData) return;
@@ -72,7 +75,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
   }, []);
 
   return (
-    <div>
+    <>
       <Container>
         <div className="header">
           <div></div>
@@ -176,10 +179,18 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
               },
               {
                 title: 'Operation',
-                render: () => {
+                render: (_, record) => {
                   return (
                     <Space>
-                      <Button type={'link'}>Detail</Button>
+                      <Button
+                        type={'link'}
+                        onClick={() => {
+                          setOperatingLog(record);
+                          setJSONViewerModalOpen(true);
+                        }}
+                      >
+                        Detail
+                      </Button>
                     </Space>
                   );
                 },
@@ -195,7 +206,15 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
           />
         </Card>
       </Container>
-    </div>
+      <JSONViewerModal
+        title={"Log Detail"}
+        open={jsonViewerModalOpen}
+        jsonObject={operatingLog}
+        onNeedClose={() => {
+          setJSONViewerModalOpen(false);
+        }}
+      />
+    </>
   );
 };
 

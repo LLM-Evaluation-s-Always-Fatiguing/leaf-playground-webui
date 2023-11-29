@@ -17,7 +17,6 @@ import { DefaultSceneInfoConfig } from '@/models/scene';
 import RunSceneConfig from '@/types/server/RunSceneConfig';
 import useGlobalStore from '@/stores/global';
 import ServerAPI from '@/services/server';
-import { FormItem } from '@formily/antd-v5';
 import EvaluatorConfig, { EvaluatorConfigData } from '@/types/server/Evaluator';
 
 const Container = styled.div`
@@ -75,7 +74,7 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
       validateFirst: true,
     });
   }, []);
-  const [assessmentMethod, setAssessmentMethod] = useState('human');
+  const [assessmentMethod, setAssessmentMethod] = useState('evaluators');
   const evaluatorForm = useMemo(() => {
     return createForm({
       validateFirst: true,
@@ -152,7 +151,7 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
                                   name={'assessment_method'}
                                   x-decorator="FormItem"
                                   x-component="Radio.Group"
-                                  default={'human'}
+                                  default={'evaluators'}
                                   enum={[
                                     { label: 'Only Human', value: 'human' },
                                     { label: 'With LLM', value: 'evaluators' },
