@@ -5,7 +5,7 @@ import styled from '@emotion/styled';
 import { Button, Card, Collapse, message, Space } from 'antd';
 import { Form } from '@formily/antd-v5';
 import { createForm, onFormValuesChange } from '@formily/core';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import SelectAgentModal from '@/components/agent/SelectAgentModal';
 import FormilyDefaultSchemaField from '@/components/formily/FormilyDefaultSchemaField';
 import CreateOrUpdateAgentModal from '@/components/agent/CreateOrUpdateAgentModal';
@@ -61,6 +61,9 @@ interface SceneConfigBoardProps {
 const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
   const router = useRouter();
   const globalStore = useGlobalStore();
+
+  const creatingSceneRef = useRef(false);
+  const [creatingScene, setCreatingScene] = useState(false);
 
   const sceneForm = useMemo(() => {
     return createForm({
@@ -155,11 +158,12 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
                                     { label: 'With LLM', value: 'evaluators' },
                                   ]}
                                 />
-                                {assessmentMethod === 'evaluators' &&
-                                  Object.entries(scene.evaluatorsConfigFormilySchemas).map(([key, schema]) => {
-                                    return (
+                              </FormilyDefaultSchemaField>
+                              {assessmentMethod === 'evaluators' &&
+                                Object.entries(scene.evaluatorsConfigFormilySchemas).map(([key, schema]) => {
+                                  return (
+                                    <FormilyDefaultSchemaField key={key}>
                                       <FormilyDefaultSchemaField.Void
-                                        key={key}
                                         x-decorator="Card"
                                         x-decorator-props={{
                                           title: schema.title,
@@ -170,9 +174,9 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
                                           <FormilyDefaultSchemaField schema={schema} />
                                         </FormilyDefaultSchemaField.Object>
                                       </FormilyDefaultSchemaField.Void>
-                                    );
-                                  })}
-                              </FormilyDefaultSchemaField>
+                                    </FormilyDefaultSchemaField>
+                                  );
+                                })}
                             </Form>
                           ),
                           style: {
@@ -221,6 +225,7 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
         </Content>
         <Footer>
           <Button
+            loading={creatingScene}
             size={'large'}
             type={'primary'}
             style={{
@@ -229,14 +234,19 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
               lineHeight: '1.2',
             }}
             onClick={async () => {
+              if (creatingSceneRef.current) return;
+              creatingSceneRef.current = true;
+              setCreatingScene(true);
               try {
-                // sceneForm.validate();
+                await sceneForm.validate();
                 await sceneAdditionalForm.validate();
                 await evaluatorForm.validate();
                 if (sceneAgentConfigs.length < scene.min_agents_num) {
                   message.error(
                     `At least ${scene.min_agents_num} agent${scene.min_agents_num > 1 ? 's' : ''} are required.`
                   );
+                  creatingSceneRef.current = false;
+                  setCreatingScene(false);
                   return;
                 }
                 const sceneConfig = merge({}, DefaultSceneInfoConfig, sceneForm.values);
@@ -267,6 +277,8 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
               } catch (e) {
                 console.error(e);
                 message.error('Create scene task failed.');
+                setCreatingScene(false);
+                creatingSceneRef.current = false;
               }
             }}
           >
