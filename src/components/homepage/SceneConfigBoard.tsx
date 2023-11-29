@@ -159,24 +159,9 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
                                   ]}
                                 />
                               </FormilyDefaultSchemaField>
-                              {assessmentMethod === 'evaluators' &&
-                                Object.entries(scene.evaluatorsConfigFormilySchemas).map(([key, schema]) => {
-                                  return (
-                                    <FormilyDefaultSchemaField key={key}>
-                                      <FormilyDefaultSchemaField.Void
-                                        x-decorator="Card"
-                                        x-decorator-props={{
-                                          title: schema.title,
-                                          size: 'small',
-                                        }}
-                                      >
-                                        <FormilyDefaultSchemaField.Object name={key} x-decorator="FormItem">
-                                          <FormilyDefaultSchemaField schema={schema} />
-                                        </FormilyDefaultSchemaField.Object>
-                                      </FormilyDefaultSchemaField.Void>
-                                    </FormilyDefaultSchemaField>
-                                  );
-                                })}
+                              {assessmentMethod === 'evaluators' && (
+                                <FormilyDefaultSchemaField schema={scene.evaluatorsConfigFormilySchemas} />
+                              )}
                             </Form>
                           ),
                           style: {

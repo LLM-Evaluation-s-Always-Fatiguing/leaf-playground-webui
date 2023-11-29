@@ -39,7 +39,7 @@ export default interface Scene extends ServerScene {
   sceneInfoConfigFormilySchema: FormilyJSONSchema;
   agentsConfigFormilySchemas: Record<string, FormilyJSONSchema>;
   additionalConfigFormilySchema: FormilyJSONSchema;
-  evaluatorsConfigFormilySchemas?: Record<string, FormilyJSONSchema>;
+  evaluatorsConfigFormilySchemas?: FormilyJSONSchema;
 }
 
 export interface SceneListItem {
