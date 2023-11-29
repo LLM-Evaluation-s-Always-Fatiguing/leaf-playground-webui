@@ -21,11 +21,20 @@ const sceneAPI = {
     const additionalConfigFormilySchema = await transferStandardJSONSchemaToFormilyJSONSchema(
       serverScene.additional_config_schema
     );
+    let evaluatorsConfigFormilySchemas: Record<string, FormilyJSONSchema> | undefined;
+    if (serverScene.evaluators_config_schemas) {
+      evaluatorsConfigFormilySchemas = {};
+      for (const [evaluator_id, evaluator_config_schema] of Object.entries(serverScene.evaluators_config_schemas)) {
+        evaluatorsConfigFormilySchemas[evaluator_id] =
+          await transferStandardJSONSchemaToFormilyJSONSchema(evaluator_config_schema);
+      }
+    }
     return {
       ...serverScene,
       sceneInfoConfigFormilySchema,
       agentsConfigFormilySchemas,
       additionalConfigFormilySchema,
+      evaluatorsConfigFormilySchemas,
     };
   },
 };

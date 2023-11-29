@@ -4,7 +4,7 @@ import Scene from '@/types/server/Scene';
 import styled from '@emotion/styled';
 import { Button, Card, Collapse, message, Space } from 'antd';
 import { Form } from '@formily/antd-v5';
-import { createForm } from '@formily/core';
+import { createForm, onFormValuesChange } from '@formily/core';
 import { useMemo, useState } from 'react';
 import SelectAgentModal from '@/components/agent/SelectAgentModal';
 import FormilyDefaultSchemaField from '@/components/formily/FormilyDefaultSchemaField';
@@ -17,6 +17,8 @@ import { DefaultSceneInfoConfig } from '@/models/scene';
 import RunSceneConfig from '@/types/server/RunSceneConfig';
 import useGlobalStore from '@/stores/global';
 import ServerAPI from '@/services/server';
+import { FormItem } from '@formily/antd-v5';
+import EvaluatorConfig, { EvaluatorConfigData } from '@/types/server/Evaluator';
 
 const Container = styled.div`
   width: 100%;
@@ -68,14 +70,16 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
   const sceneAdditionalForm = useMemo(() => {
     return createForm({
       validateFirst: true,
-      initialValues: {
-        dataset_config: {
-          path: 'AsakusaRinne/gaokao_bench',
-          name: '2010-2022_History_MCQs',
-          split: 'dev',
-          question_column: 'question',
-          golden_answer_column: 'answer',
-        },
+    });
+  }, []);
+  const [assessmentMethod, setAssessmentMethod] = useState('human');
+  const evaluatorForm = useMemo(() => {
+    return createForm({
+      validateFirst: true,
+      effects() {
+        onFormValuesChange((form) => {
+          setAssessmentMethod(form.values.assessment_method);
+        });
       },
     });
   }, []);
@@ -99,7 +103,7 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
               }}
             >
               <Collapse
-                defaultActiveKey={['basic', 'additional']}
+                defaultActiveKey={['basic', 'additional', 'assessment']}
                 style={{
                   borderRadius: 0,
                   border: 'none',
@@ -109,13 +113,7 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
                     key: 'basic',
                     label: 'Basic',
                     children: (
-                      <Form
-                        form={sceneForm}
-                        labelCol={5}
-                        wrapperCol={16}
-                        onAutoSubmit={console.log}
-                        onAutoSubmitFailed={console.log}
-                      >
+                      <Form form={sceneForm} labelCol={5} wrapperCol={16}>
                         <FormilyDefaultSchemaField schema={scene.sceneInfoConfigFormilySchema} />
                       </Form>
                     ),
@@ -129,13 +127,7 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
                     key: 'additional',
                     label: 'Additional',
                     children: (
-                      <Form
-                        form={sceneAdditionalForm}
-                        labelCol={5}
-                        wrapperCol={16}
-                        onAutoSubmit={console.log}
-                        onAutoSubmitFailed={console.log}
-                      >
+                      <Form form={sceneAdditionalForm} labelCol={5} wrapperCol={16}>
                         <FormilyDefaultSchemaField schema={scene.additionalConfigFormilySchema} />
                       </Form>
                     ),
@@ -144,6 +136,52 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
                       border: 'none',
                     },
                   },
+                  ...(scene.evaluatorsConfigFormilySchemas
+                    ? [
+                        {
+                          key: 'assessment',
+                          label: 'Assessment',
+                          children: (
+                            <Form form={evaluatorForm} labelCol={5} wrapperCol={16}>
+                              <FormilyDefaultSchemaField>
+                                <FormilyDefaultSchemaField.Markup
+                                  title={'Assessment method'}
+                                  name={'assessment_method'}
+                                  x-decorator="FormItem"
+                                  x-component="Radio.Group"
+                                  default={'human'}
+                                  enum={[
+                                    { label: 'Only Human', value: 'human' },
+                                    { label: 'With LLM', value: 'evaluators' },
+                                  ]}
+                                />
+                                {assessmentMethod === 'evaluators' &&
+                                  Object.entries(scene.evaluatorsConfigFormilySchemas).map(([key, schema]) => {
+                                    return (
+                                      <FormilyDefaultSchemaField.Void
+                                        key={key}
+                                        x-decorator="Card"
+                                        x-decorator-props={{
+                                          title: schema.title,
+                                          size: 'small',
+                                        }}
+                                      >
+                                        <FormilyDefaultSchemaField.Object name={key} x-decorator="FormItem">
+                                          <FormilyDefaultSchemaField schema={schema} />
+                                        </FormilyDefaultSchemaField.Object>
+                                      </FormilyDefaultSchemaField.Void>
+                                    );
+                                  })}
+                              </FormilyDefaultSchemaField>
+                            </Form>
+                          ),
+                          style: {
+                            borderRadius: 0,
+                            border: 'none',
+                          },
+                        },
+                      ]
+                    : []),
                 ]}
               />
             </Card>
@@ -194,6 +232,7 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
               try {
                 // sceneForm.validate();
                 await sceneAdditionalForm.validate();
+                await evaluatorForm.validate();
                 if (sceneAgentConfigs.length < scene.min_agents_num) {
                   message.error(
                     `At least ${scene.min_agents_num} agent${scene.min_agents_num > 1 ? 's' : ''} are required.`
@@ -202,12 +241,24 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
                 }
                 const sceneConfig = merge({}, DefaultSceneInfoConfig, sceneForm.values);
                 const additionalConfig = sceneAdditionalForm.values;
+                let evaluatorConfig: EvaluatorConfig[] | null = null;
+                if (assessmentMethod === 'human') {
+                  evaluatorConfig = [];
+                  Object.entries(evaluatorForm.values)
+                    .filter((entry) => entry[0] !== 'assessment_method')
+                    .forEach(([name, config]) => {
+                      evaluatorConfig?.push({
+                        evaluator_name: name,
+                        evaluator_config_data: config as EvaluatorConfigData,
+                      });
+                    });
+                }
                 const finalConfig: RunSceneConfig = {
                   id: scene.id,
                   scene_info_config_data: sceneConfig,
                   scene_agents_config_data: sceneAgentConfigs,
                   additional_config_data: additionalConfig,
-                  scene_evaluators_config_data: null,
+                  scene_evaluators_config_data: evaluatorConfig,
                 };
                 const { task_id } = await ServerAPI.sceneTask.createSceneTask(finalConfig);
                 globalStore.updateRunSceneConfig(finalConfig);

@@ -12,6 +12,7 @@ import {
   Input,
   NumberPicker,
   Select,
+  Radio,
   Space,
   Switch,
 } from '@formily/antd-v5';
@@ -19,19 +20,20 @@ import { Card, Flex } from 'antd';
 
 const FormilyDefaultSchemaField = createSchemaField({
   components: {
-    FormLayout,
-    FormGrid,
-    FormItem,
     ArrayItems,
     ArrayTabs,
+    DatePicker,
+    Editable,
+    FormGrid,
+    FormItem,
+    FormLayout,
     Input,
     NumberPicker,
-    Switch,
-    DatePicker,
     Select,
-    Editable,
-    Card,
+    Radio,
     Space,
+    Switch,
+    Card,
     Flex,
   },
 });

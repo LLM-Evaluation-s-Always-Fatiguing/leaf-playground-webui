@@ -32,12 +32,14 @@ export interface ServerScene {
   scene_info_config_schema: SampleJSONSchemaDef;
   agents_config_schemas: Record<string, SampleJSONSchemaDef>;
   additional_config_schema: SampleJSONSchemaDef;
+  evaluators_config_schemas?: Record<string, SampleJSONSchemaDef>;
 }
 
 export default interface Scene extends ServerScene {
   sceneInfoConfigFormilySchema: FormilyJSONSchema;
   agentsConfigFormilySchemas: Record<string, FormilyJSONSchema>;
   additionalConfigFormilySchema: FormilyJSONSchema;
+  evaluatorsConfigFormilySchemas?: Record<string, FormilyJSONSchema>;
 }
 
 export interface SceneListItem {

@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { useTheme } from "antd-style";
 
 const Container = styled.div`
   width: 100%;
@@ -44,6 +45,7 @@ interface ProcessingConsoleProps {
 }
 
 const ProcessingConsole = (props: ProcessingConsoleProps) => {
+  const theme = useTheme();
   return (
     <Container>
       <div className="header">
@@ -51,7 +53,7 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
           <div
             className="indicator"
             style={{
-              background: props.wsConnected ? 'green' : 'red',
+              background: props.wsConnected ? theme.colorSuccess : theme.colorError,
             }}
           />
           {props.wsConnected ? <span>Connected</span> : <span>Disconnected</span>}

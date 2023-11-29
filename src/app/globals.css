@@ -5,8 +5,8 @@
   -webkit-font-smoothing: subpixel-antialiased;
   text-rendering: optimizeLegibility;
   font-family: -apple-system, BlinkMacSystemFont, Georgia, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans',
-  'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-  'Noto Color Emoji';
+    'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
 }
 
 * {
@@ -21,7 +21,7 @@ body {
   overflow-x: hidden;
 }
 
-html[data-theme="light"] {
+html[data-theme='light'] {
   ::-webkit-scrollbar {
     width: var(--scroll-bar-width);
     height: var(--scroll-bar-width);
@@ -41,7 +41,7 @@ html[data-theme="light"] {
   }
 }
 
-html[data-theme="dark"] {
+html[data-theme='dark'] {
   ::-webkit-scrollbar {
     width: var(--scroll-bar-width);
     height: var(--scroll-bar-width);

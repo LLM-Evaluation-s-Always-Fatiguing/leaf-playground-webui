@@ -68,7 +68,6 @@ const ProcessingPage = () => {
         wsOpenRef.current = true;
         setWSConnected(true);
         console.log('WebSocket opened');
-        this.send(JSON.stringify(globalStore.runSceneConfig));
       };
 
       wsRef.current.onmessage = async (event) => {
