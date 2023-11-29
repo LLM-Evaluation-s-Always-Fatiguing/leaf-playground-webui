@@ -13,6 +13,15 @@ const fileLocalAPI = {
       })
     ).data;
   },
+  async readJSON(filePath: string): Promise<any> {
+    return (
+      await request.get(`${prefix}/read`, {
+        params: {
+          filePath,
+        },
+      })
+    ).data;
+  },
   async readJSONL(filePath: string): Promise<any[]> {
     const jsonLStr: string = (
       await request.get(`${prefix}/read`, {
@@ -24,6 +33,7 @@ const fileLocalAPI = {
     return jsonLStr
       .replace(/\n*$/, '')
       .split(/\n/)
+      .filter(line => line.trim())
       .map((json) => {
         return JSON.parse(json);
       });
