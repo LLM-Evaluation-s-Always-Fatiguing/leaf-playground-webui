@@ -73,9 +73,11 @@ export class FormilySchemaTransformer {
   }
 
   async transform(schema: FormilyJSONSchema): Promise<FormilyJSONSchema> {
-    const derefedSchema = cloneDeep(await this.deref(schema));
+    const finalSchema = cloneDeep(await this.deref(schema));
+    delete finalSchema.$def;
     const transformCore = this.transformCore.bind(this);
-    this.transformCore(derefedSchema, 0, transformCore);
-    return derefedSchema;
+    this.transformCore(finalSchema, 0, transformCore);
+    delete finalSchema.transformedBy;
+    return finalSchema;
   }
 }

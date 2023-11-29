@@ -7,7 +7,7 @@ export class DefaultNumberComponentDef extends AbstractComponentDef {
     return schema.type == 'integer' || schema.type == 'number';
   }
 
-  transformCore(schema: FormilyJSONSchema, level: number, rootTransform?: TransformCore | undefined): void {
+  transformCore(schema: FormilyJSONSchema, level: number, rootTransform: TransformCore | undefined): void {
     schema['x-decorator'] = 'FormItem';
     schema['x-component'] = 'NumberPicker';
   }

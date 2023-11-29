@@ -46,5 +46,7 @@ export default interface FormilyJSONSchema<
     Message
   >;
 
+  transformedBy?: string[];
+
   [key: string]: any;
 }

@@ -7,7 +7,7 @@ export class DefaultInputComponentDef extends AbstractComponentDef {
     return schema.type == 'string';
   }
 
-  transformCore(schema: FormilyJSONSchema, level: number, rootTransform?: TransformCore | undefined): void {
+  transformCore(schema: FormilyJSONSchema, level: number, rootTransform: TransformCore | undefined): void {
     schema['x-decorator'] = 'FormItem';
     if (schema.enum) {
       schema['x-component'] = 'Select';

@@ -4,13 +4,17 @@ import { DefaultInputComponentDef } from '@/utils/formily-json-schema/componentD
 import { DefaultArrayComponentDef } from '@/utils/formily-json-schema/componentDefs/DefaultArray';
 import { DefaultObjectComponentDef } from '@/utils/formily-json-schema/componentDefs/DefaultObject';
 import { TopObjectComponentDef } from '@/utils/formily-json-schema/componentDefs/TopObject';
-import { NullableBasicAnyOf } from '@/utils/formily-json-schema/componentDefs/NullableBasicAnyOf';
+import { NullableBasicAnyOfDef } from '@/utils/formily-json-schema/componentDefs/NullableBasicAnyOf';
+import { RemoveTitleTempSuffixDef } from '@/utils/formily-json-schema/componentDefs/RemoveTitleTempSuffix';
 
 export const SystemComponentDefs = [
+  // Preprocessor Component
+  new RemoveTitleTempSuffixDef(),
+
   // High Level Component
   new TopObjectComponentDef(),
 
-  new NullableBasicAnyOf(),
+  new NullableBasicAnyOfDef(),
 
   // Basic Component
   new DefaultNumberComponentDef(),

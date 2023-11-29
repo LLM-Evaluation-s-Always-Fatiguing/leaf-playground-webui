@@ -17,6 +17,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { message } from 'antd';
 import BuddhaVisualization from '@/components/processing/specialized/buddha/BuddhaVisualization';
 import LocalAPI from '@/services/local';
+import ProcessingConsole from '@/components/processing/common/Console';
 
 const PageContainer = styled.div`
   width: 100%;
@@ -31,6 +32,12 @@ const PageContainer = styled.div`
 const VisualizationArea = styled.div`
   width: 45%;
   min-width: 480px;
+  height: 100%;
+`;
+
+const ConsoleArea = styled.div`
+  width: calc(100% - 45% - 1px);
+  min-width: 680px;
   height: 100%;
 `;
 
@@ -51,6 +58,7 @@ const ProcessingPage = () => {
     if (!globalStore.runSceneConfig || !taskId) {
       message.error('Wrong state!');
       router.replace('/');
+      return;
     }
 
     if (!wsRef.current) {
@@ -78,7 +86,9 @@ const ProcessingPage = () => {
             message.success('Task Finished!');
             wsRef.current?.close();
             await LocalAPI.file.openDict(endMessage.data.save_dir);
-            router.replace(`/result/${taskId}`);
+            message.success('Result dict opened.');
+            globalStore.updateTaskResultSavedDir(endMessage.data.save_dir);
+            router.replace(`/result/${taskId}?taskResultSavedDir=${encodeURIComponent(endMessage.data.save_dir)}`);
             break;
           default:
             break;
@@ -124,6 +134,9 @@ const ProcessingPage = () => {
       <VisualizationArea>
         <VisualizationComponent logs={logs} />
       </VisualizationArea>
+      <ConsoleArea>
+        <ProcessingConsole wsConnected={wsConnected} />
+      </ConsoleArea>
     </PageContainer>
   );
 };

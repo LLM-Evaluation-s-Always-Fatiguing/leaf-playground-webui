@@ -2,7 +2,7 @@ import FormilyJSONSchema from '@/types/FormilyJSONSchema';
 import type { TransformCore } from '../formily-schema';
 import { AbstractComponentDef } from '@/utils/formily-json-schema/abstract-component-def';
 
-export class NullableBasicAnyOf extends AbstractComponentDef {
+export class NullableBasicAnyOfDef extends AbstractComponentDef {
   shouldTransform(schema: FormilyJSONSchema, level: number): boolean {
     if (schema.anyOf && schema.anyOf.length) {
       const noNullAnyOf = schema.anyOf.filter((item: any) => item.type !== 'null');
@@ -17,10 +17,10 @@ export class NullableBasicAnyOf extends AbstractComponentDef {
     return false;
   }
 
-  transformCore(schema: FormilyJSONSchema, level: number, rootTransform?: TransformCore | undefined): void {
+  transformCore(schema: FormilyJSONSchema, level: number, rootTransform: TransformCore): void {
     const noNullAnyOf = schema.anyOf.filter((item: any) => item.type !== 'null');
     Object.assign(schema, noNullAnyOf[0]);
     delete schema.anyOf;
-    rootTransform?.(schema, level, rootTransform);
+    rootTransform(schema, level, rootTransform);
   }
 }

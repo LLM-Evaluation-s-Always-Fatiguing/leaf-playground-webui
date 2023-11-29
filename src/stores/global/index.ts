@@ -8,9 +8,11 @@ interface GlobalState {
   currentScene?: Scene;
   runSceneConfig?: RunSceneConfig;
   taskId?: string;
+  taskResultSavedDir?: string;
   updateCurrentScene: (scene: Scene) => void;
   updateRunSceneConfig: (runSceneConfig: RunSceneConfig) => void;
   updateTaskId: (taskId: string) => void;
+  updateTaskResultSavedDir: (taskResultSavedDir: string) => void;
 }
 
 const useGlobalStore = create<GlobalState>()(
@@ -29,6 +31,10 @@ const useGlobalStore = create<GlobalState>()(
       updateTaskId: (taskId) =>
         set((state) => {
           state.taskId = taskId;
+        }),
+      updateTaskResultSavedDir: (taskResultSavedDir) =>
+        set((state) => {
+          state.taskResultSavedDir = taskResultSavedDir;
         }),
     }))
   )

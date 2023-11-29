@@ -1,7 +1,7 @@
 'use client';
 
-import { PropsWithChildren, useState } from 'react';
-import { createStyles, setupStyled, StyleProvider, ThemeProvider } from 'antd-style';
+import { PropsWithChildren, useEffect } from 'react';
+import { createStyles, setupStyled, StyleProvider, ThemeProvider, useTheme } from 'antd-style';
 import { HappyProvider } from '@ant-design/happy-work-theme';
 import { App, ConfigProvider, Layout } from 'antd';
 import { ThemeContext } from '@emotion/react';
@@ -32,6 +32,12 @@ const useStyles = createStyles(({ token, css }) => ({
 
 const GlobalLayoutContent = ({ children }: PropsWithChildren) => {
   const { styles } = useStyles();
+  const theme = useTheme();
+
+  useEffect(() => {
+    window.document.getElementsByTagName('html')[0].setAttribute('data-theme', theme.appearance);
+  }, [theme]);
+
   return <Content className={styles.content}>{children}</Content>;
 };
 
