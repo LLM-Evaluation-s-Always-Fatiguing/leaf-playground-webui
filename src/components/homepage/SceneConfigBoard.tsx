@@ -236,7 +236,7 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
                 const sceneConfig = merge({}, DefaultSceneInfoConfig, sceneForm.values);
                 const additionalConfig = sceneAdditionalForm.values;
                 let evaluatorConfig: EvaluatorConfig[] | null = null;
-                if (assessmentMethod === 'human') {
+                if (assessmentMethod === 'evaluators') {
                   evaluatorConfig = [];
                   Object.entries(evaluatorForm.values)
                     .filter((entry) => entry[0] !== 'assessment_method')
