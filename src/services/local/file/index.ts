@@ -28,12 +28,13 @@ const fileLocalAPI = {
         params: {
           filePath,
         },
+        responseType: 'text',
       })
     ).data;
     return jsonLStr
       .replace(/\n*$/, '')
       .split(/\n/)
-      .filter(line => line.trim())
+      .filter((line) => line.trim())
       .map((json) => {
         return JSON.parse(json);
       });
