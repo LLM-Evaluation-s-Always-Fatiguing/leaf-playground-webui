@@ -4,18 +4,9 @@ import DirectoryItem from '@/types/api-router/DirectoryItem';
 const prefix = '/file';
 
 const fileLocalAPI = {
-  async listDict(dictPath: string): Promise<DirectoryItem[]> {
-    return (
-      await request.get(`${prefix}/list-dict`, {
-        params: {
-          dictPath,
-        },
-      })
-    ).data;
-  },
   async readJSON(filePath: string): Promise<any> {
     return (
-      await request.get(`${prefix}/read`, {
+      await request.get(`${prefix}`, {
         params: {
           filePath,
         },
@@ -24,7 +15,7 @@ const fileLocalAPI = {
   },
   async readJSONL(filePath: string): Promise<any[]> {
     const jsonLStr: string = (
-      await request.get(`${prefix}/read`, {
+      await request.get(`${prefix}`, {
         params: {
           filePath,
         },
@@ -38,11 +29,6 @@ const fileLocalAPI = {
       .map((json) => {
         return JSON.parse(json);
       });
-  },
-  async openDict(dictPath: string): Promise<void> {
-    await request.post(`${prefix}/open-dict`, {
-      directoryPath: dictPath,
-    });
   },
 };
 

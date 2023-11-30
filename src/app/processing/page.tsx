@@ -84,7 +84,7 @@ const ProcessingPage = () => {
             const endMessage = wsMessage as ServerWebSocketEndMessage;
             message.success('Task Finished!');
             wsRef.current?.close();
-            await LocalAPI.file.openDict(endMessage.data.save_dir);
+            await LocalAPI.dict.open(endMessage.data.save_dir);
             message.success('Result dict opened.');
             globalStore.updateTaskResultSavedDir(endMessage.data.save_dir);
             router.replace(`/result/${taskId}?taskResultSavedDir=${encodeURIComponent(endMessage.data.save_dir)}`);

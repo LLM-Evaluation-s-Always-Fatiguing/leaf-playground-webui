@@ -25,8 +25,7 @@ const Container = styled.div`
     justify-content: space-between;
     align-items: center;
     padding: 16px;
-    background-color: #f5f5f5;
-    border-bottom: 1px solid #e5e5e5;
+    background-color: ${props => props.theme.colorBorderSecondary};
 
     .title {
       font-size: 21px;
@@ -57,7 +56,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
     const metricsFilePath = taskResultSavedDir + '/metrics.jsonl';
     const metrics = await LocalAPI.file.readJSONL(metricsFilePath);
     const chartsDictPath = taskResultSavedDir + '/charts';
-    const chartJSONFiles = (await LocalAPI.file.listDict(chartsDictPath)).filter((f) => f.fullPath.endsWith('.json'));
+    const chartJSONFiles = (await LocalAPI.dict.read(chartsDictPath)).filter((f) => f.fullPath.endsWith('.json'));
     const chartOptions = [];
     for (let chartJson of chartJSONFiles) {
       chartOptions.push(await LocalAPI.file.readJSON(chartJson.fullPath));
@@ -84,13 +83,17 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
           <div className="title">{`${resultData?.scene.metadata.name}`}</div>
           <Button
             onClick={async () => {
-              await LocalAPI.file.openDict(taskResultSavedDir!);
+              await LocalAPI.dict.open(taskResultSavedDir!);
             }}
           >
             Open Source Dict
           </Button>
         </div>
-        <Card>
+        <Card
+          style={{
+            borderRadius: 0
+          }}
+        >
           <Descriptions
             title="Scene Info"
             items={[
@@ -136,6 +139,9 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
         </Card>
         <Card
           title={'Charts'}
+          style={{
+            borderRadius: 0
+          }}
           bodyStyle={{
             display: 'flex',
             flexDirection: 'row',
@@ -156,7 +162,9 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
         </Card>
         <Card
           title={'Logs'}
-          bordered={false}
+          style={{
+            borderRadius: 0
+          }}
           bodyStyle={{
             padding: 0,
           }}

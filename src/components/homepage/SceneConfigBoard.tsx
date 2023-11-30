@@ -19,6 +19,7 @@ import useGlobalStore from '@/stores/global';
 import ServerAPI from '@/services/server';
 import EvaluatorConfig, { EvaluatorConfigData } from '@/types/server/Evaluator';
 import { getRandomAgentColor } from '@/utils/color';
+import { saveWebUITaskOriginalDataToLocal } from '@/utils/task-result-bundle';
 
 const Container = styled.div`
   width: 100%;
@@ -261,6 +262,7 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
                   scene_evaluators_config_data: evaluatorConfig,
                 };
                 const { task_id } = await ServerAPI.sceneTask.createSceneTask(finalConfig);
+                await saveWebUITaskOriginalDataToLocal(task_id, scene, finalConfig);
                 globalStore.updateRunSceneConfig(finalConfig);
                 globalStore.updateTaskId(task_id);
                 router.push(`/processing?taskId=${task_id}`);
