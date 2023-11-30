@@ -141,7 +141,16 @@ const AgentCard = (props: AgentCardProps) => {
         </AddContent>
       ) : (
         <AgentContent>
-          <div className="avatar">
+          <div
+            className="avatar"
+            style={
+              props.sceneAgentConfig?.primary_color
+                ? {
+                    color: props.sceneAgentConfig.primary_color,
+                  }
+                : {}
+            }
+          >
             <RiRobot2Fill size={'1em'} />
           </div>
           <div className="name">{props.sceneAgentConfig?.agent_config_data.profile.name}</div>

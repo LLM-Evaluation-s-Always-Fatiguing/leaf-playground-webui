@@ -17,6 +17,7 @@ export interface SceneAgentConfigData {
 
 export default interface SceneAgentConfig {
   agent_id: string;
+  primary_color?: string;
   agent_config_data: SceneAgentConfigData;
 }
 

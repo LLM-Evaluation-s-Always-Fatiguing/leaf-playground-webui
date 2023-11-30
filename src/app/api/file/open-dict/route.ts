@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 
     if (platform === 'win32') {
       // Windows
-      command = `explorer "${directoryPath}"`;
+      command = `start explorer "${directoryPath}"`;
     } else if (platform === 'darwin') {
       // macOS
       command = `open "${directoryPath}"`;

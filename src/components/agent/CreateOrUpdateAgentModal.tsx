@@ -6,6 +6,7 @@ import SceneAgentConfig, { SceneAgentDefinition } from '@/types/server/Agent';
 import { Form } from '@formily/antd-v5';
 import { createForm } from '@formily/core';
 import FormilyDefaultSchemaField from '@/components/formily/FormilyDefaultSchemaField';
+import { getRandomAgentColor } from '@/utils/color';
 
 interface CreateOrUpdateAgentModalProps {
   open: boolean;

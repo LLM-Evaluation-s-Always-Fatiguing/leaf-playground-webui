@@ -18,6 +18,7 @@ import RunSceneConfig from '@/types/server/RunSceneConfig';
 import useGlobalStore from '@/stores/global';
 import ServerAPI from '@/services/server';
 import EvaluatorConfig, { EvaluatorConfigData } from '@/types/server/Evaluator';
+import { getRandomAgentColor } from '@/utils/color';
 
 const Container = styled.div`
   width: 100%;
@@ -174,7 +175,7 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
               />
             </Card>
             <Card title={`Agent List (At least ${scene.min_agents_num} agent${scene.min_agents_num > 1 ? 's' : ''})`}>
-              <Space>
+              <Space wrap={true}>
                 {(scene.max_agents_num <= 0 || sceneAgentConfigs.length <= scene.max_agents_num) && (
                   <AgentCard
                     role={'add'}
@@ -287,6 +288,11 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
         sceneAgentConfig={operatingAgentConfigIndex >= 0 ? sceneAgentConfigs[operatingAgentConfigIndex] : undefined}
         sceneAgentDefinition={operatingAgentDefinition}
         onSubmit={(agentConfig) => {
+          if (!agentConfig.primary_color) {
+            agentConfig.primary_color = getRandomAgentColor(
+              sceneAgentConfigs.map((ac) => ac.primary_color).filter((c) => !!c) as string[]
+            );
+          }
           if (operatingAgentConfigIndex >= 0) {
             const newSceneAgentConfigs = [...sceneAgentConfigs];
             newSceneAgentConfigs[operatingAgentConfigIndex] = agentConfig;
