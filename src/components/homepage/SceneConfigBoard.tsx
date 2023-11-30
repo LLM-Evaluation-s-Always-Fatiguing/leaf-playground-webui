@@ -201,6 +201,11 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
                         });
                         setCreateOrUpdateAgentModalOpen(true);
                       }}
+                      onDeleteButtonClick={() => {
+                        const newSceneAgentConfigs = [...sceneAgentConfigs];
+                        newSceneAgentConfigs.splice(index, 1);
+                        setSceneAgentConfigs(newSceneAgentConfigs);
+                      }}
                     />
                   );
                 })}

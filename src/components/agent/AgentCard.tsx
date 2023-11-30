@@ -6,7 +6,7 @@ import styled from '@emotion/styled';
 import { FiPlus } from 'react-icons/fi';
 import { FaCheck } from 'react-icons/fa6';
 import { RiRobot2Fill } from 'react-icons/ri';
-import { MdOutlineSettings } from 'react-icons/md';
+import { MdClose, MdOutlineSettings } from 'react-icons/md';
 import { useMemo } from 'react';
 import { useTheme } from 'antd-style';
 import FormilyJSONSchema from '@/types/FormilyJSONSchema';
@@ -88,6 +88,28 @@ const AgentContent = styled.div`
     color: ${(props) => props.theme.colorPrimary};
     cursor: pointer;
   }
+
+  .deleteButton {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    font-size: 21px;
+    color: ${(props) => props.theme.colorError};
+    cursor: pointer;
+    visibility: hidden;
+  }
+
+  :hover {
+    .deleteButton {
+      visibility: visible;
+    }
+  }
 `;
 
 interface AgentCardProps {
@@ -96,6 +118,7 @@ interface AgentCardProps {
   agentsConfigFormilySchemas: Record<string, FormilyJSONSchema>;
   onAddNewClick?: () => void;
   onEditButtonClick?: () => void;
+  onDeleteButtonClick?: () => void;
 }
 
 const AgentCard = (props: AgentCardProps) => {
@@ -201,6 +224,14 @@ const AgentCard = (props: AgentCardProps) => {
             }}
           >
             <MdOutlineSettings size={'1em'} />
+          </div>
+          <div
+            className="deleteButton"
+            onClick={() => {
+              props.onDeleteButtonClick?.();
+            }}
+          >
+            <MdClose size={'1em'} />
           </div>
         </AgentContent>
       )}
