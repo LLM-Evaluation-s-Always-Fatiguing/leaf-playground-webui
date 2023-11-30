@@ -142,7 +142,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
             flexWrap: 'wrap',
           }}
         >
-          {(resultData?.chartOptions || []).map((option, index) => {
+          {(resultData?.chartOptions || []).map((option: object, index: number) => {
             return (
               <ReactECharts
                 key={index}
