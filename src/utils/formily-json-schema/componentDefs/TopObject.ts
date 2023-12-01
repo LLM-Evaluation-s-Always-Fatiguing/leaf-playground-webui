@@ -20,6 +20,7 @@ export class TopObjectComponentDef extends AbstractComponentDef {
       bordered: false,
       style: {
         boxShadow: 'none',
+        marginBottom: '16px',
       },
       headStyle: {
         border: 'none',

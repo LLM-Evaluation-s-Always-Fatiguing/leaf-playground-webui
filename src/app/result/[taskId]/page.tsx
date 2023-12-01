@@ -111,10 +111,15 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                 key: '5',
                 label: 'Agents',
                 children: (
-                  <Space>
+                  <Space wrap>
                     {Object.entries(resultData?.agents || {}).map(([key, agent]: [string, any]) => {
                       return (
-                        <Space key={key}>
+                        <Space
+                          key={key}
+                          style={{
+                            flexShrink: 0,
+                          }}
+                        >
                           <div
                             style={{
                               width: '10px',
