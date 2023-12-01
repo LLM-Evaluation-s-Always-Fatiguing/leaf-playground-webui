@@ -25,7 +25,7 @@ const Container = styled.div`
     justify-content: space-between;
     align-items: center;
     padding: 16px;
-    background-color: ${props => props.theme.colorBorderSecondary};
+    background-color: ${(props) => props.theme.colorBorderSecondary};
 
     .title {
       font-size: 21px;
@@ -59,7 +59,12 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
     const chartJSONFiles = (await LocalAPI.dict.read(chartsDictPath)).filter((f) => f.fullPath.endsWith('.json'));
     const chartOptions = [];
     for (let chartJson of chartJSONFiles) {
-      chartOptions.push(await LocalAPI.file.readJSON(chartJson.fullPath));
+      let content = await LocalAPI.file.readJSON(chartJson.fullPath);
+      if (typeof content === 'string') {
+        const cmd = `(() => (${content}))()`;
+        content = eval(cmd);
+      }
+      chartOptions.push(content);
     }
     setResultData({
       scene,
@@ -91,27 +96,12 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
         </div>
         <Card
           style={{
-            borderRadius: 0
+            borderRadius: 0,
           }}
         >
           <Descriptions
             title="Scene Info"
             items={[
-              {
-                key: '1',
-                label: 'Name',
-                children: <p>{resultData?.scene.metadata.name}</p>,
-              },
-              {
-                key: '2',
-                label: 'Description',
-                children: <p>{resultData?.scene.metadata.description}</p>,
-              },
-              {
-                key: '3',
-                label: 'Total Record',
-                children: <p>{resultData?.logs.length}</p>,
-              },
               {
                 key: '4',
                 label: 'Config',
@@ -119,6 +109,29 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
               },
               {
                 key: '5',
+                label: 'Agents',
+                children: (
+                  <Space>
+                    {Object.entries(resultData?.agents || {}).map(([key, agent]: [string, any]) => {
+                      return (
+                        <Space key={key}>
+                          <div
+                            style={{
+                              width: '10px',
+                              height: '10px',
+                              borderRadius: '10px',
+                              background: agent.config.chart_major_color,
+                            }}
+                          />
+                          Agent: {agent.config.profile.name}({agent.type.obj})
+                        </Space>
+                      );
+                    })}
+                  </Space>
+                ),
+              },
+              {
+                key: '6',
                 label: 'Agents Config',
                 children: (
                   <JSONViewer
@@ -128,7 +141,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                 ),
               },
               {
-                key: '6',
+                key: '7',
                 label: 'Evaluators Config',
                 children: (
                   <JSONViewer defaultCollapsed={true} jsonObject={resultData?.scene.config.scene_evaluators || {}} />
@@ -140,7 +153,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
         <Card
           title={'Charts'}
           style={{
-            borderRadius: 0
+            borderRadius: 0,
           }}
           bodyStyle={{
             display: 'flex',
@@ -163,7 +176,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
         <Card
           title={'Logs'}
           style={{
-            borderRadius: 0
+            borderRadius: 0,
           }}
           bodyStyle={{
             padding: 0,

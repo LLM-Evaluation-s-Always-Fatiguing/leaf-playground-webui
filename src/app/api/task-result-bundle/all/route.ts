@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import groupBy from 'lodash/groupBy';
 import dayjs from 'dayjs';
+import TaskInfo from '@/types/api-router/TaskInfo';
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -21,7 +22,7 @@ export async function GET(req: NextRequest) {
       .filter((dirent) => dirent.isDirectory())
       .map((dirent) => dirent.name);
 
-    let tasks = [];
+    const tasks: TaskInfo[] = [];
 
     for (const dir of directories) {
       const webuiPath = path.join(bundlesPath, dir, '.webui');

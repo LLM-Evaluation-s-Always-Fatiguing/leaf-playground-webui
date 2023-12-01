@@ -167,9 +167,9 @@ const AgentCard = (props: AgentCardProps) => {
           <div
             className="avatar"
             style={
-              props.sceneAgentConfig?.primary_color
+              props.sceneAgentConfig?.agent_config_data.chart_major_color
                 ? {
-                    color: props.sceneAgentConfig.primary_color,
+                    color: props.sceneAgentConfig.agent_config_data.chart_major_color,
                   }
                 : {}
             }

@@ -16,7 +16,16 @@ const sceneAPI = {
     );
     const agentsConfigFormilySchemas: Record<string, FormilyJSONSchema> = {};
     for (const [agent_id, agent_config_schema] of Object.entries(serverScene.agents_config_schemas)) {
-      agentsConfigFormilySchemas[agent_id] = await transferStandardJSONSchemaToFormilyJSONSchema(agent_config_schema);
+      const agentFormilySchema = await transferStandardJSONSchemaToFormilyJSONSchema(agent_config_schema);
+
+      if (agentFormilySchema.properties?.chart_major_color) {
+        agentFormilySchema.properties.chart_major_color['x-component'] = 'ColorPicker';
+        agentFormilySchema.properties.chart_major_color['x-component-props'] = {
+          format: 'hex',
+        };
+      }
+
+      agentsConfigFormilySchemas[agent_id] = agentFormilySchema;
     }
     const additionalConfigFormilySchema = await transferStandardJSONSchemaToFormilyJSONSchema(
       serverScene.additional_config_schema
@@ -33,7 +42,6 @@ const sceneAPI = {
           await transferStandardJSONSchemaToFormilyJSONSchema(evaluator_config_schema);
       }
     }
-    console.log(evaluatorsConfigFormilySchemas);
     return {
       ...serverScene,
       sceneInfoConfigFormilySchema,

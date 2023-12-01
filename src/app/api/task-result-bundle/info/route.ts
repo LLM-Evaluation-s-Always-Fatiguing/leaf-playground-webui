@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
       JSON.stringify({
         taskInfo: JSON.parse(taskInfoData),
         scene: JSON.parse(sceneData),
-        config: JSON.parse(configData),
+        runConfig: JSON.parse(configData),
       }),
       {
         status: 200,

@@ -12,6 +12,7 @@ interface CreateOrUpdateAgentModalProps {
   open: boolean;
   sceneAgentConfig?: SceneAgentConfig;
   sceneAgentDefinition?: SceneAgentDefinition;
+  otherAgentConfigs: SceneAgentConfig[];
   onSubmit: (sceneAgent: SceneAgentConfig) => void;
   onNeedClose: () => void;
 }
@@ -20,6 +21,7 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
   open,
   sceneAgentConfig,
   sceneAgentDefinition,
+  otherAgentConfigs,
   onSubmit,
   onNeedClose,
 }) => {
@@ -34,7 +36,11 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
     setModalLoading(false);
     const newForm = createForm({
       validateFirst: true,
-      initialValues: sceneAgentConfig?.agent_config_data || {},
+      initialValues: sceneAgentConfig?.agent_config_data || {
+        chart_major_color: getRandomAgentColor(
+          otherAgentConfigs.map((c) => c.agent_config_data.profile.chart_major_color!)
+        ),
+      },
     });
     setForm(newForm);
   };
@@ -48,6 +54,7 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
   const onConfirm = async () => {
     if (!sceneAgentDefinition) return;
     try {
+      console.log(form.values);
       await form.validate();
       const formValues = form.values;
       onSubmit({
@@ -59,6 +66,8 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
       console.error(e);
     }
   };
+
+  console.log(sceneAgentDefinition);
 
   return (
     <Modal

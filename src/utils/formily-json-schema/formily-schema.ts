@@ -77,7 +77,6 @@ export class FormilySchemaTransformer {
     delete finalSchema.$defs;
     const transformCore = this.transformCore.bind(this);
     this.transformCore(finalSchema, 0, transformCore);
-    delete finalSchema.transformedBy;
     return finalSchema;
   }
 }

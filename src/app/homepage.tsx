@@ -9,6 +9,9 @@ import ServerAPI from '@/services/server';
 import SceneInfoBoard from '@/components/homepage/SceneInfoBoard';
 import SceneConfigBoard from '@/components/homepage/SceneConfigBoard';
 import useGlobalStore from '@/stores/global';
+import ServerInfo from '@/types/server/ServerInfo';
+import TaskInfo from '@/types/api-router/TaskInfo';
+import LocalAPI from '@/services/local';
 
 const ScenesArea = styled.div`
   width: 24%;
@@ -57,11 +60,15 @@ const PageContainer = styled.div`
 `;
 
 interface HomePageProps {
+  serverInfo: ServerInfo;
   scenes: SceneListItem[];
+  taskHistories: Record<string, TaskInfo[]>;
 }
 
 export default function HomePage(props: HomePageProps) {
   const globalStore = useGlobalStore();
+
+  const [taskHistories, setTaskHistories] = useState<Record<string, TaskInfo[]>>(props.taskHistories);
 
   const [scenesLoading, setScenesLoading] = useState(false);
   const [scenes, setScenes] = useState<SceneListItem[]>(props.scenes);
@@ -99,8 +106,19 @@ export default function HomePage(props: HomePageProps) {
     }
   };
 
+  const loadTaskHistories = async () => {
+    try {
+      const taskHistories = await LocalAPI.taskResultBundle.getAll(props.serverInfo.paths.save_root);
+      setTaskHistories(taskHistories);
+    } catch (e) {
+      console.error(e);
+      message.error('Failed to load task histories');
+    }
+  };
+
   useEffect(() => {
     loadScenes();
+    loadTaskHistories();
   }, []);
 
   return (
@@ -129,7 +147,11 @@ export default function HomePage(props: HomePageProps) {
       </ScenesArea>
       <OperationArea>
         {started && selectedSceneDetail ? (
-          <SceneConfigBoard key={scenes[selectedSceneIndex].id} scene={selectedSceneDetail} />
+          <SceneConfigBoard
+            key={scenes[selectedSceneIndex].id}
+            scene={selectedSceneDetail}
+            taskHistories={taskHistories[scenes[selectedSceneIndex].id] || []}
+          />
         ) : (
           <SceneInfoBoard
             scene={scenes[selectedSceneIndex]}

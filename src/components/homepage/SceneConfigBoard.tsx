@@ -20,6 +20,9 @@ import ServerAPI from '@/services/server';
 import EvaluatorConfig, { EvaluatorConfigData } from '@/types/server/Evaluator';
 import { getRandomAgentColor } from '@/utils/color';
 import { saveWebUITaskOriginalDataToLocal } from '@/utils/task-result-bundle';
+import TaskInfo from '@/types/api-router/TaskInfo';
+import { MdOutlineHistory } from 'react-icons/md';
+import TaskHistoriesModal from '@/components/task/TaskHistoriesModal';
 
 const Container = styled.div`
   width: 100%;
@@ -29,6 +32,33 @@ const Container = styled.div`
   flex-direction: column;
   justify-content: flex-start;
   align-items: stretch;
+  position: relative;
+
+  .historyButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    border-radius: ${(props) => props.theme.borderRadius}px;
+    background: ${(props) => props.theme.colorBgBase};
+    ${(props) =>
+      props.theme.isDarkMode
+        ? `border: 1px solid ${props.theme.colorPrimary};`
+        : 'box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);'}
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    color: ${(props) => props.theme.colorPrimary};
+    font-size: 26px;
+  }
+
+  .title {
+    font-size: 24px;
+    font-weight: 500;
+    z-index: 10;
+  }
 `;
 
 const Content = styled.div`
@@ -57,11 +87,14 @@ const Footer = styled.div`
 
 interface SceneConfigBoardProps {
   scene: Scene;
+  taskHistories: TaskInfo[];
 }
 
-const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
+const SceneConfigBoard = ({ scene, taskHistories }: SceneConfigBoardProps) => {
   const router = useRouter();
   const globalStore = useGlobalStore();
+
+  const hasHistories = taskHistories.length > 0;
 
   const creatingSceneRef = useRef(false);
   const [creatingScene, setCreatingScene] = useState(false);
@@ -93,6 +126,7 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
   const [operatingAgentDefinition, setOperatingAgentDefinition] = useState<SceneAgentDefinition>();
   const [operatingAgentConfigIndex, setOperatingAgentConfigIndex] = useState(-1);
   const [createOrUpdateAgentModalOpen, setCreateOrUpdateAgentModalOpen] = useState(false);
+  const [taskHistoriesModalOpen, setTaskHistoriesModalOpen] = useState(false);
 
   return (
     <>
@@ -215,68 +249,97 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
           </Space>
         </Content>
         <Footer>
-          <Button
-            loading={creatingScene}
-            size={'large'}
-            type={'primary'}
-            style={{
-              minWidth: '120px',
-              fontSize: '18px',
-              lineHeight: '1.2',
-            }}
-            onClick={async () => {
-              if (creatingSceneRef.current) return;
-              creatingSceneRef.current = true;
-              setCreatingScene(true);
-              try {
-                await sceneForm.validate();
-                await sceneAdditionalForm.validate();
-                await evaluatorForm.validate();
-                if (sceneAgentConfigs.length < scene.min_agents_num) {
-                  message.error(
-                    `At least ${scene.min_agents_num} agent${scene.min_agents_num > 1 ? 's' : ''} are required.`
-                  );
-                  creatingSceneRef.current = false;
-                  setCreatingScene(false);
-                  return;
-                }
-                const sceneConfig = merge({}, DefaultSceneInfoConfig, sceneForm.values);
-                const additionalConfig = sceneAdditionalForm.values;
-                let evaluatorConfig: EvaluatorConfig[] | null = null;
-                if (assessmentMethod === 'evaluators') {
-                  evaluatorConfig = [];
-                  Object.entries(evaluatorForm.values)
-                    .filter((entry) => entry[0] !== 'assessment_method')
-                    .forEach(([name, config]) => {
-                      evaluatorConfig?.push({
-                        evaluator_name: name,
-                        evaluator_config_data: config as EvaluatorConfigData,
+          <Space>
+            <Button
+              size={'large'}
+              disabled={creatingScene}
+              style={{
+                minWidth: '120px',
+                fontSize: '18px',
+                lineHeight: '1.2',
+              }}
+              onClick={async () => {
+                await sceneForm.reset();
+                await sceneAdditionalForm.reset();
+                await evaluatorForm.reset();
+                setSceneAgentConfigs([]);
+              }}
+            >
+              Reset
+            </Button>
+            <Button
+              loading={creatingScene}
+              size={'large'}
+              type={'primary'}
+              style={{
+                minWidth: '120px',
+                fontSize: '18px',
+                lineHeight: '1.2',
+              }}
+              onClick={async () => {
+                if (creatingSceneRef.current) return;
+                creatingSceneRef.current = true;
+                setCreatingScene(true);
+                try {
+                  await sceneForm.validate();
+                  await sceneAdditionalForm.validate();
+                  await evaluatorForm.validate();
+                  if (sceneAgentConfigs.length < scene.min_agents_num) {
+                    message.error(
+                      `At least ${scene.min_agents_num} agent${scene.min_agents_num > 1 ? 's' : ''} are required.`
+                    );
+                    creatingSceneRef.current = false;
+                    setCreatingScene(false);
+                    return;
+                  }
+                  const sceneConfig = merge({}, DefaultSceneInfoConfig, sceneForm.values);
+                  const additionalConfig = sceneAdditionalForm.values;
+                  let evaluatorConfig: EvaluatorConfig[] | null = null;
+                  if (assessmentMethod === 'evaluators') {
+                    evaluatorConfig = [];
+                    Object.entries(evaluatorForm.values)
+                      .filter((entry) => entry[0] !== 'assessment_method')
+                      .forEach(([name, config]) => {
+                        evaluatorConfig?.push({
+                          evaluator_name: name,
+                          evaluator_config_data: config as EvaluatorConfigData,
+                        });
                       });
-                    });
+                  }
+                  const finalConfig: RunSceneConfig = {
+                    id: scene.id,
+                    scene_info_config_data: sceneConfig,
+                    scene_agents_config_data: sceneAgentConfigs,
+                    additional_config_data: additionalConfig,
+                    scene_evaluators_config_data: evaluatorConfig,
+                  };
+                  const { task_id, save_dir } = await ServerAPI.sceneTask.createSceneTask(finalConfig);
+                  await saveWebUITaskOriginalDataToLocal(save_dir, task_id, scene, finalConfig);
+                  globalStore.updateRunSceneConfig(finalConfig);
+                  globalStore.updateTaskId(task_id);
+                  router.push(`/processing?taskId=${task_id}`);
+                } catch (e) {
+                  console.error(e);
+                  message.error('Create scene task failed.');
+                  setCreatingScene(false);
+                  creatingSceneRef.current = false;
                 }
-                const finalConfig: RunSceneConfig = {
-                  id: scene.id,
-                  scene_info_config_data: sceneConfig,
-                  scene_agents_config_data: sceneAgentConfigs,
-                  additional_config_data: additionalConfig,
-                  scene_evaluators_config_data: evaluatorConfig,
-                };
-                const { task_id } = await ServerAPI.sceneTask.createSceneTask(finalConfig);
-                await saveWebUITaskOriginalDataToLocal(task_id, scene, finalConfig);
-                globalStore.updateRunSceneConfig(finalConfig);
-                globalStore.updateTaskId(task_id);
-                router.push(`/processing?taskId=${task_id}`);
-              } catch (e) {
-                console.error(e);
-                message.error('Create scene task failed.');
-                setCreatingScene(false);
-                creatingSceneRef.current = false;
-              }
+              }}
+            >
+              Start
+            </Button>
+          </Space>
+        </Footer>
+        {hasHistories && (
+          <div
+            className="historyButton"
+            onClick={() => {
+              setTaskHistoriesModalOpen(true);
             }}
           >
-            Start
-          </Button>
-        </Footer>
+            <MdOutlineHistory size={'1em'} />
+          </div>
+        )}
       </Container>
       <SelectAgentModal
         open={selectAgentModalOpen}
@@ -294,12 +357,8 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
         open={createOrUpdateAgentModalOpen}
         sceneAgentConfig={operatingAgentConfigIndex >= 0 ? sceneAgentConfigs[operatingAgentConfigIndex] : undefined}
         sceneAgentDefinition={operatingAgentDefinition}
+        otherAgentConfigs={sceneAgentConfigs}
         onSubmit={(agentConfig) => {
-          if (!agentConfig.primary_color) {
-            agentConfig.primary_color = getRandomAgentColor(
-              sceneAgentConfigs.map((ac) => ac.primary_color).filter((c) => !!c) as string[]
-            );
-          }
           if (operatingAgentConfigIndex >= 0) {
             const newSceneAgentConfigs = [...sceneAgentConfigs];
             newSceneAgentConfigs[operatingAgentConfigIndex] = agentConfig;
@@ -315,6 +374,32 @@ const SceneConfigBoard = ({ scene }: SceneConfigBoardProps) => {
           setOperatingAgentConfigIndex(-1);
           setOperatingAgentDefinition(undefined);
           setCreateOrUpdateAgentModalOpen(false);
+        }}
+      />
+      <TaskHistoriesModal
+        open={taskHistoriesModalOpen}
+        scene={scene}
+        tasks={taskHistories}
+        onApplyHistoryTaskConfig={(runConfig) => {
+          console.log(runConfig);
+          sceneForm.setValues(runConfig.scene_info_config_data);
+          sceneAdditionalForm.setValues(runConfig.additional_config_data);
+          if (runConfig.scene_evaluators_config_data) {
+            evaluatorForm.setValues(
+              runConfig.scene_evaluators_config_data.reduce(
+                (acc, evaluator) => {
+                  acc[evaluator.evaluator_name] = evaluator.evaluator_config_data;
+                  return acc;
+                },
+                {} as Record<string, EvaluatorConfigData>
+              )
+            );
+          }
+          setSceneAgentConfigs(runConfig.scene_agents_config_data);
+          setTaskHistoriesModalOpen(false);
+        }}
+        onNeedClose={() => {
+          setTaskHistoriesModalOpen(false);
         }}
       />
     </>

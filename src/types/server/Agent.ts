@@ -12,12 +12,12 @@ export interface AgentBackendConfig {
 
 export interface SceneAgentConfigData {
   profile: AgentProfile;
+  chart_major_color?: string;
   ai_backend_config: AgentBackendConfig;
 }
 
 export default interface SceneAgentConfig {
   agent_id: string;
-  primary_color?: string;
   agent_config_data: SceneAgentConfigData;
 }
 

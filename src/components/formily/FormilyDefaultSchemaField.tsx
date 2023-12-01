@@ -17,6 +17,7 @@ import {
   Switch,
 } from '@formily/antd-v5';
 import { Card, Flex, Input as AntdInput } from 'antd';
+import ColorPicker from "@/components/formily/ColorPicker";
 
 const NoConfigRequired = () => {
   return (
@@ -55,6 +56,8 @@ const FormilyDefaultSchemaField = createSchemaField({
     Flex,
 
     NoConfigRequired,
+
+    ColorPicker,
   },
 });
 
