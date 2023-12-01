@@ -10,6 +10,8 @@ import { FaRegAngry, FaRegLaughSquint } from 'react-icons/fa';
 import useDisplayConfig from '@/managers/DisplayConfigManager/useDisplayConfig';
 import HeaderPrimaryColorPicker from '@/components/header/PrimaryColorPicker';
 import { useRouter } from 'next/navigation';
+import AboutModal from '@/components/AboutModal';
+import { useState } from 'react';
 
 const { Header } = Layout;
 
@@ -58,85 +60,103 @@ const DefaultHeader = () => {
   const theme = useTheme();
   const displayConfig = useDisplayConfig();
   const router = useRouter();
+  const [aboutModalOpen, setAboutModalOpen] = useState<boolean>(false);
 
   return (
-    <Header
-      style={{
-        height: theme.headerHeight,
-        borderBottom: `1.5px solid ${theme.dividerColor}`,
-      }}
-    >
-      <DefaultHeaderContent>
-        <HeaderLogoArea
-          onClick={() => {
-            router.push('/');
-          }}
-        >
-          <LEAFLogo />
-          <div className="title">Playground</div>
-        </HeaderLogoArea>
-        <HeaderActionsArea>
-          <Tooltip title={'Github'}>
-            <Button
-              className="actionButton"
-              type="text"
-              icon={<TbBrandGithub size={'1em'} />}
-              onClick={() => {
-                window.open('https://github.com/LLM-Evaluation-s-Always-Fatiguing/leaf-playground', '_blank');
-              }}
-            />
-          </Tooltip>
-          <HeaderPrimaryColorPicker />
-          <Tooltip title={displayConfig.happyWorkEffect ? 'Disable Happy Work Effect' : 'Enable Happy Work Effect'}>
-            <Button
-              className="actionButton"
-              type="text"
-              icon={
-                displayConfig.happyWorkEffect ? <FaRegAngry size={'0.95em'} /> : <FaRegLaughSquint size={'0.95em'} />
-              }
-              onClick={() => {
-                displayConfig.toggleHappyWorkEffect();
-              }}
-            />
-          </Tooltip>
-          <Tooltip title={'Auto Theme'}>
-            <Button
-              className="actionButton"
-              type="text"
-              style={
-                theme.themeMode !== 'auto'
-                  ? {
-                      color: theme.colorTextDisabled,
-                    }
-                  : {}
-              }
-              icon={<MdOutlineBrightnessAuto size={'1em'} />}
-              onClick={() => {
-                displayConfig.toggleThemeMode(theme.themeMode === 'auto' ? (theme.appearance as ThemeMode) : 'auto');
-              }}
-            />
-          </Tooltip>
-          <Tooltip
-            title={theme.themeMode === 'auto' ? undefined : theme.appearance === 'dark' ? 'Light Theme' : 'Dark Theme'}
+    <>
+      <Header
+        style={{
+          height: theme.headerHeight,
+          borderBottom: `1.5px solid ${theme.dividerColor}`,
+        }}
+      >
+        <DefaultHeaderContent>
+          <HeaderLogoArea
+            onClick={() => {
+              router.push('/');
+            }}
           >
-            <Button
-              className="actionButton"
-              type="text"
-              disabled={theme.themeMode === 'auto'}
-              icon={
-                theme.appearance === 'dark' ? <MdOutlineLightMode size={'1em'} /> : <MdOutlineDarkMode size={'1em'} />
+            <LEAFLogo />
+            <div className="title">Playground</div>
+          </HeaderLogoArea>
+          <HeaderActionsArea>
+            <Tooltip title={'Github'}>
+              <Button
+                className="actionButton"
+                type="text"
+                icon={<TbBrandGithub size={'1em'} />}
+                onClick={() => {
+                  window.open('https://github.com/LLM-Evaluation-s-Always-Fatiguing/leaf-playground', '_blank');
+                }}
+              />
+            </Tooltip>
+            <HeaderPrimaryColorPicker />
+            <Tooltip title={displayConfig.happyWorkEffect ? 'Disable Happy Work Effect' : 'Enable Happy Work Effect'}>
+              <Button
+                className="actionButton"
+                type="text"
+                icon={
+                  displayConfig.happyWorkEffect ? <FaRegAngry size={'0.95em'} /> : <FaRegLaughSquint size={'0.95em'} />
+                }
+                onClick={() => {
+                  displayConfig.toggleHappyWorkEffect();
+                }}
+              />
+            </Tooltip>
+            <Tooltip title={'Auto Theme'}>
+              <Button
+                className="actionButton"
+                type="text"
+                style={
+                  theme.themeMode !== 'auto'
+                    ? {
+                        color: theme.colorTextDisabled,
+                      }
+                    : {}
+                }
+                icon={<MdOutlineBrightnessAuto size={'1em'} />}
+                onClick={() => {
+                  displayConfig.toggleThemeMode(theme.themeMode === 'auto' ? (theme.appearance as ThemeMode) : 'auto');
+                }}
+              />
+            </Tooltip>
+            <Tooltip
+              title={
+                theme.themeMode === 'auto' ? undefined : theme.appearance === 'dark' ? 'Light Theme' : 'Dark Theme'
               }
-              onClick={() => {
-                displayConfig.toggleThemeMode(theme.appearance === 'dark' ? 'light' : 'dark');
-              }}
-            />
-          </Tooltip>
-          <Tooltip title={'About'}>
-            <Button className="actionButton" type="text" icon={<MdOutlineInfo size={'1.1em'} />} />
-          </Tooltip>
-        </HeaderActionsArea>
-      </DefaultHeaderContent>
-    </Header>
+            >
+              <Button
+                className="actionButton"
+                type="text"
+                disabled={theme.themeMode === 'auto'}
+                icon={
+                  theme.appearance === 'dark' ? <MdOutlineLightMode size={'1em'} /> : <MdOutlineDarkMode size={'1em'} />
+                }
+                onClick={() => {
+                  displayConfig.toggleThemeMode(theme.appearance === 'dark' ? 'light' : 'dark');
+                }}
+              />
+            </Tooltip>
+            <Tooltip title={'About'}>
+              <Button
+                className="actionButton"
+                type="text"
+                icon={<MdOutlineInfo size={'1.1em'} />}
+                onClick={() => {
+                  setAboutModalOpen(true);
+                }}
+              />
+            </Tooltip>
+          </HeaderActionsArea>
+        </DefaultHeaderContent>
+      </Header>
+      <AboutModal
+        open={aboutModalOpen}
+        onNeedClose={() => {
+          setAboutModalOpen(false);
+        }}
+      />
+    </>
   );
 };
 

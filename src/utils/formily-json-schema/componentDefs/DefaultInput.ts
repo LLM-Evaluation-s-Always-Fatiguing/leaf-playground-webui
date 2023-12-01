@@ -11,6 +11,9 @@ export class DefaultInputComponentDef extends AbstractComponentDef {
     schema['x-decorator'] = 'FormItem';
     if (schema.enum) {
       schema['x-component'] = 'Select';
+      schema['x-component-props'] = {
+        allowClear: schema.required !== true,
+      };
     } else {
       schema['x-component'] = 'Input';
     }

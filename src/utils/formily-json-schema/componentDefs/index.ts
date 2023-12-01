@@ -7,6 +7,7 @@ import { TopObjectComponentDef } from '@/utils/formily-json-schema/componentDefs
 import { NullableBasicAnyOfDef } from '@/utils/formily-json-schema/componentDefs/NullableBasicAnyOf';
 import { RemoveTitleTempSuffixDef } from '@/utils/formily-json-schema/componentDefs/RemoveTitleTempSuffix';
 import { NoConfigRequiredDef } from "@/utils/formily-json-schema/componentDefs/NoConfigRequired";
+import { DefaultAllOfDef } from "@/utils/formily-json-schema/componentDefs/DefaultAllOf";
 
 export const SystemComponentDefs = [
   // Preprocessor Component
@@ -16,6 +17,7 @@ export const SystemComponentDefs = [
   new NoConfigRequiredDef(),
   new TopObjectComponentDef(),
   new NullableBasicAnyOfDef(),
+  new DefaultAllOfDef(),
 
   // Basic Component
   new DefaultNumberComponentDef(),

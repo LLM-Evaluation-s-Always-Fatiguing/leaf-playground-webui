@@ -103,13 +103,15 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
             title="Scene Info"
             items={[
               {
-                key: '4',
+                key: '1',
                 label: 'Config',
+                span: 24,
                 children: <JSONViewer defaultCollapsed={true} jsonObject={resultData?.scene.config.scene_info || {}} />,
               },
               {
-                key: '5',
+                key: '2',
                 label: 'Agents',
+                span: 2,
                 children: (
                   <Space wrap>
                     {Object.entries(resultData?.agents || {}).map(([key, agent]: [string, any]) => {
@@ -118,6 +120,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                           key={key}
                           style={{
                             flexShrink: 0,
+                            whiteSpace: 'nowrap',
                           }}
                         >
                           <div
@@ -136,8 +139,9 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                 ),
               },
               {
-                key: '6',
+                key: '3',
                 label: 'Agents Config',
+                span: 2,
                 children: (
                   <JSONViewer
                     defaultCollapsed={true}
@@ -146,8 +150,9 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                 ),
               },
               {
-                key: '7',
+                key: '4',
                 label: 'Evaluators Config',
+                span: 24,
                 children: (
                   <JSONViewer defaultCollapsed={true} jsonObject={resultData?.scene.config.scene_evaluators || {}} />
                 ),
