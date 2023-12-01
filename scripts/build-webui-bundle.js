@@ -27,10 +27,10 @@ function bundleWebUI() {
 function installDependenciesAndBuild() {
   try {
     console.log('Installing dependencies...');
-    execSync('pnpm install', { stdio: 'inherit' });
+    execSync('yarn install', { stdio: 'inherit' });
 
     console.log('Building project...');
-    execSync('pnpm build', { stdio: 'inherit' });
+    execSync('yarn build', { stdio: 'inherit' });
 
     bundleWebUI();
     console.log('Project build and bundling completed successfully.');
@@ -58,14 +58,14 @@ async function main() {
   fs.removeSync('./bundle'); // Delete old bundle directory
 
   try {
-    const pnpmVersion = execSync('pnpm --version', { encoding: 'utf-8' }).trim();
-    console.log(`pnpm is installed, version: ${pnpmVersion}`);
+    const yarnVersion = execSync('yarn --version', { encoding: 'utf-8' }).trim();
+    console.log(`yarn is installed, version: ${yarnVersion}`);
     installDependenciesAndBuild();
-  } catch (pnpmError) {
-    console.log('pnpm is not installed. Enabling corepack...');
+  } catch (yarnError) {
+    console.log('yarn is not installed. Enabling corepack...');
     try {
       execSync('corepack enable', { stdio: 'inherit' });
-      console.log('Corepack enabled successfully. Installing pnpm...');
+      console.log('Corepack enabled successfully. Installing yarn...');
 
       installDependenciesAndBuild();
     } catch (enableError) {
