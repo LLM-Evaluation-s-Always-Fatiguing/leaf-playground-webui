@@ -118,6 +118,7 @@ export default function HomePage(props: HomePageProps) {
   };
 
   useEffect(() => {
+    globalStore.clearTaskState();
     loadScenes();
     loadTaskHistories();
   }, []);

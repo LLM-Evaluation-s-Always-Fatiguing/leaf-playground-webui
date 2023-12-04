@@ -18,6 +18,8 @@ import DefaultHeader from '@/components/header/DefaultHeader';
 import merge from 'lodash/merge';
 import en_US from 'antd/locale/en_US';
 import useDisplayConfig from '@/managers/DisplayConfigManager/useDisplayConfig';
+import useGlobalStore from '@/stores/global';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 setupStyled({ ThemeContext });
 
@@ -44,7 +46,16 @@ const GlobalLayoutContent = ({ children }: PropsWithChildren) => {
 interface GlobalLayoutProps extends PropsWithChildren {}
 
 const GlobalLayout = ({ children }: GlobalLayoutProps) => {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const displayConfig = useDisplayConfig();
+  const globalStore = useGlobalStore();
+
+  useEffect(() => {
+    globalStore.clearPageTitle();
+  }, [pathname, searchParams]);
+
   return (
     <StyleProvider speedy={true}>
       <ThemeProvider

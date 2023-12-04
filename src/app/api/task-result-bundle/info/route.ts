@@ -27,7 +27,15 @@ export async function GET(req: NextRequest) {
 
     const sceneData = fs.readFileSync(sceneFilePath, { encoding: 'utf8' });
     const configData = fs.readFileSync(configFilePath, { encoding: 'utf8' });
-    const agentsData = fs.readFileSync(agentsFilePath, { encoding: 'utf8' });
+    let agentsData;
+    try {
+      agentsData = fs.readFileSync(agentsFilePath, { encoding: 'utf8' });
+    } catch (e) {
+      const serverAgentsFilePath = path.join(bundlePath, 'agents.json');
+      const serverAgentsData = fs.readFileSync(serverAgentsFilePath, { encoding: 'utf8' });
+      const serverAgents = JSON.parse(serverAgentsData) as Record<string, any>;
+      agentsData = JSON.stringify(Object.keys(serverAgents).map((a) => serverAgents[a].config));
+    }
     const taskInfoData = fs.readFileSync(taskInfoPath, { encoding: 'utf8' });
 
     return new Response(

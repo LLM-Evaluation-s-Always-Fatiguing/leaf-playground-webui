@@ -12,6 +12,7 @@ import HeaderPrimaryColorPicker from '@/components/header/PrimaryColorPicker';
 import { useRouter } from 'next/navigation';
 import AboutModal from '@/components/AboutModal';
 import { useState } from 'react';
+import useGlobalStore from '@/stores/global';
 
 const { Header } = Layout;
 
@@ -26,6 +27,11 @@ const HeaderLogoArea = styled.div`
     margin-left: 12px;
     font-size: 21px;
   }
+`;
+
+const HeaderTitleArea = styled.div`
+  font-size: 24px;
+  font-weight: 600;
 `;
 
 const HeaderActionsArea = styled.div`
@@ -58,8 +64,11 @@ const DefaultHeaderContent = styled.div`
 
 const DefaultHeader = () => {
   const theme = useTheme();
-  const displayConfig = useDisplayConfig();
   const router = useRouter();
+
+  const displayConfig = useDisplayConfig();
+  const globalStore = useGlobalStore();
+
   const [aboutModalOpen, setAboutModalOpen] = useState<boolean>(false);
 
   return (
@@ -79,6 +88,7 @@ const DefaultHeader = () => {
             <LEAFLogo />
             <div className="title">Playground</div>
           </HeaderLogoArea>
+          {globalStore.pageTitle && <HeaderTitleArea>{globalStore.pageTitle}</HeaderTitleArea>}
           <HeaderActionsArea>
             <Tooltip title={'Github'}>
               <Button

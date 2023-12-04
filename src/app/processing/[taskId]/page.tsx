@@ -100,9 +100,11 @@ const ProcessingPage = ({
           globalStore.updateCurrentScene(taskDetail.scene);
           globalStore.updateRunSceneConfig(taskDetail.runConfig);
           globalStore.updateAgentFullFilledConfigs(taskDetail.agentFullFilledConfigs);
+          globalStore.updatePageTitle(taskDetail.scene.scene_metadata.name);
           if (taskStatusResp.status === SceneTaskStatus.FINISHED) {
             setLoadingTip('Task finished!');
             message.success('Task finished!');
+            router.replace(`/result/${taskId}?bundlePath=${encodeURIComponent(bundlePath!)}`);
           } else {
             return true;
           }
@@ -110,7 +112,7 @@ const ProcessingPage = ({
         case SceneTaskStatus.INTERRUPTED:
         case SceneTaskStatus.FAILED:
           setLoadingTip('Task failed!');
-          message.error('Task finished!');
+          message.error('Task failed!');
           break;
         default:
           break;
@@ -135,6 +137,8 @@ const ProcessingPage = ({
           return;
         }
       }
+
+      globalStore.updatePageTitle(globalStore.currentScene?.scene_metadata.name || '');
 
       setLoadingTip('Connecting to server...');
       if (!wsRef.current) {
@@ -164,7 +168,7 @@ const ProcessingPage = ({
               await LocalAPI.dict.open(endMessage.data.save_dir);
               message.success('Result dict opened.');
               globalStore.updateTaskResultSavedDir(endMessage.data.save_dir);
-              router.replace(`/result/${taskId}?bundlePath=${encodeURIComponent(endMessage.data.save_dir)}`);
+              // router.replace(`/result/${taskId}?bundlePath=${encodeURIComponent(endMessage.data.save_dir)}`);
               break;
             default:
               break;
@@ -218,7 +222,7 @@ const ProcessingPage = ({
         <VisualizationComponent logs={logs} />
       </VisualizationArea>
       <ConsoleArea>
-        <ProcessingConsole wsConnected={wsConnected} />
+        <ProcessingConsole wsConnected={wsConnected} logs={logs} />
       </ConsoleArea>
       {loading && (
         <div className="loadingArea">
