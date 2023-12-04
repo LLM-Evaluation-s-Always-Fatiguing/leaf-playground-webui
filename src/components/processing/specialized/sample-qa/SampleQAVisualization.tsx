@@ -89,6 +89,8 @@ const Container = styled.div`
         flex-direction: column;
         white-space: pre-line;
         padding: 16px 12px;
+        border-radius: 0 0 6px 6px;
+        background: ${props=>props.theme.isDarkMode ? 'rgba(255,255,255,0.08)' : 'white'};
       }
     }
   }
@@ -127,6 +129,8 @@ const Container = styled.div`
         white-space: pre-line;
         word-break: break-all;
         padding: 16px 12px;
+        border-radius: 0 0 6px 6px;
+        background: ${props=>props.theme.isDarkMode ? 'rgba(255,255,255,0.08)' : 'white'};
       }
     }
   }
