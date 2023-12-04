@@ -4,12 +4,13 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import LocalAPI from '@/services/local';
 import styled from '@emotion/styled';
-import { Button, Card, Descriptions, Space, Table } from 'antd';
+import { Button, ButtonProps, Card, Descriptions, Space, Table } from 'antd';
 import JSONViewer from '@/components/common/JSONViewer';
 import SceneLog from '@/types/server/Log';
 import dayjs from 'dayjs';
 import JSONViewerModal from '@/components/common/JSONViewer/Modal';
 import ReactECharts from 'echarts-for-react';
+import { useTheme } from 'antd-style';
 
 const Container = styled.div`
   width: 100%;
@@ -35,9 +36,11 @@ const Container = styled.div`
 `;
 
 const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
+  const theme = useTheme();
+
   const taskId = params.taskId;
   const searchParams = useSearchParams();
-  const taskResultSavedDir = searchParams.get('taskResultSavedDir');
+  const bundlePath = searchParams.get('bundlePath');
 
   const [loading, setLoading] = useState(false);
   const [resultData, setResultData] = useState<Record<string, any>>();
@@ -45,17 +48,17 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
   const [jsonViewerModalOpen, setJSONViewerModalOpen] = useState<boolean>(false);
 
   const loadDataFromLocal = async () => {
-    if (!taskResultSavedDir || resultData) return;
+    if (!bundlePath || resultData) return;
     setLoading(true);
-    const sceneFilePath = taskResultSavedDir + '/scene.json';
+    const sceneFilePath = bundlePath + '/scene.json';
     const scene = await LocalAPI.file.readJSON(sceneFilePath);
-    const logsFilePath = taskResultSavedDir + '/logs.jsonl';
+    const logsFilePath = bundlePath + '/logs.jsonl';
     const logs = await LocalAPI.file.readJSONL(logsFilePath);
-    const agentsFilePath = taskResultSavedDir + '/agents.json';
+    const agentsFilePath = bundlePath + '/agents.json';
     const agents = await LocalAPI.file.readJSON(agentsFilePath);
-    const metricsFilePath = taskResultSavedDir + '/metrics.jsonl';
+    const metricsFilePath = bundlePath + '/metrics.jsonl';
     const metrics = await LocalAPI.file.readJSONL(metricsFilePath);
-    const chartsDictPath = taskResultSavedDir + '/charts';
+    const chartsDictPath = bundlePath + '/charts';
     const chartJSONFiles = (await LocalAPI.dict.read(chartsDictPath)).filter((f) => f.fullPath.endsWith('.json'));
     const chartOptions = [];
     for (let chartJson of chartJSONFiles) {
@@ -88,7 +91,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
           <div className="title">{`${resultData?.scene.metadata.name}`}</div>
           <Button
             onClick={async () => {
-              await LocalAPI.dict.open(taskResultSavedDir!);
+              await LocalAPI.dict.open(bundlePath!);
             }}
           >
             Open Source Dict
@@ -131,7 +134,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                               background: agent.config.chart_major_color,
                             }}
                           />
-                          Agent: {agent.config.profile.name}({agent.type.obj})
+                          {agent.config.profile.name}({agent.type.obj})
                         </Space>
                       );
                     })}
@@ -233,10 +236,17 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
               {
                 title: 'Operation',
                 render: (_, record) => {
+                  const buttonProps: ButtonProps = {
+                    type: 'text',
+                    size: 'small',
+                    style: {
+                      color: theme.colorPrimary,
+                    },
+                  };
                   return (
                     <Space>
                       <Button
-                        type={'link'}
+                        {...buttonProps}
                         onClick={() => {
                           setOperatingLog(record);
                           setJSONViewerModalOpen(true);

@@ -13,11 +13,12 @@ import {
   NumberPicker,
   Select,
   Radio,
+  Checkbox,
   Space,
   Switch,
 } from '@formily/antd-v5';
 import { Card, Flex, Input as AntdInput } from 'antd';
-import ColorPicker from "@/components/formily/ColorPicker";
+import ColorPicker from '@/components/formily/ColorPicker';
 
 const NoConfigRequired = () => {
   return (
@@ -49,6 +50,7 @@ const FormilyDefaultSchemaField = createSchemaField({
     NumberPicker,
     Select,
     Radio,
+    Checkbox,
     Space,
     Switch,
 

@@ -54,20 +54,15 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
   const onConfirm = async () => {
     if (!sceneAgentDefinition) return;
     try {
-      console.log(form.values);
       await form.validate();
-      const formValues = form.values;
       onSubmit({
         agent_id: sceneAgentDefinition?.agent_id,
         agent_config_data: form.values,
       });
-      console.log(formValues);
     } catch (e) {
       console.error(e);
     }
   };
-
-  console.log(sceneAgentDefinition);
 
   return (
     <Modal

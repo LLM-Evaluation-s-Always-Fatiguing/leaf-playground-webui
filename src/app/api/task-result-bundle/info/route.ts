@@ -4,6 +4,7 @@ import path from 'path';
 import dayjs from 'dayjs';
 import RunSceneConfig from '@/types/server/RunSceneConfig';
 import Scene from '@/types/server/Scene';
+import { SceneAgentFullFilledConfig } from '@/types/server/Agent';
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -21,10 +22,12 @@ export async function GET(req: NextRequest) {
   try {
     const sceneFilePath = path.join(baseFullPath, 'scene.json');
     const configFilePath = path.join(baseFullPath, 'config.json');
+    const agentsFilePath = path.join(baseFullPath, 'agents.json');
     const taskInfoPath = path.join(baseFullPath, 'task.json');
 
     const sceneData = fs.readFileSync(sceneFilePath, { encoding: 'utf8' });
     const configData = fs.readFileSync(configFilePath, { encoding: 'utf8' });
+    const agentsData = fs.readFileSync(agentsFilePath, { encoding: 'utf8' });
     const taskInfoData = fs.readFileSync(taskInfoPath, { encoding: 'utf8' });
 
     return new Response(
@@ -32,6 +35,7 @@ export async function GET(req: NextRequest) {
         taskInfo: JSON.parse(taskInfoData),
         scene: JSON.parse(sceneData),
         runConfig: JSON.parse(configData),
+        agentFullFilledConfigs: JSON.parse(agentsData),
       }),
       {
         status: 200,
@@ -58,11 +62,13 @@ export async function POST(req: NextRequest) {
       taskId,
       scene,
       runConfig,
+      agentFullFilledConfigs,
     }: {
       bundlePath: string;
       taskId: string;
       scene: Scene;
       runConfig: RunSceneConfig;
+      agentFullFilledConfigs: SceneAgentFullFilledConfig[];
     } = await req.json();
 
     if (!bundlePath || !taskId || !scene || !runConfig) {
@@ -82,6 +88,9 @@ export async function POST(req: NextRequest) {
 
     const configFilePath = path.join(baseFullPath, 'config.json');
     writeFile(configFilePath, JSON.stringify(runConfig, null, 2));
+
+    const agentsFilePath = path.join(baseFullPath, 'agents.json');
+    writeFile(agentsFilePath, JSON.stringify(agentFullFilledConfigs, null, 2));
 
     const taskInfoPath = path.join(baseFullPath, 'task.json');
     writeFile(

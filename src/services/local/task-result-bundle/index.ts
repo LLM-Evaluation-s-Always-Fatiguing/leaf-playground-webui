@@ -3,6 +3,7 @@ import DirectoryItem from '@/types/api-router/DirectoryItem';
 import Scene from '@/types/server/Scene';
 import RunSceneConfig from '@/types/server/RunSceneConfig';
 import TaskInfo from '@/types/api-router/TaskInfo';
+import { SceneAgentFullFilledConfig } from '@/types/server/Agent';
 
 const prefix = '/task-result-bundle';
 
@@ -11,6 +12,7 @@ const taskResultBundleLocalAPI = {
     task: TaskInfo;
     scene: Scene;
     runConfig: RunSceneConfig;
+    agentFullFilledConfigs: SceneAgentFullFilledConfig[];
   }> {
     return (
       await request.get(`${prefix}/info`, {
@@ -24,7 +26,8 @@ const taskResultBundleLocalAPI = {
     bundlePath: string,
     taskId: string,
     scene: Scene,
-    runConfig: RunSceneConfig
+    runConfig: RunSceneConfig,
+    agentFullFilledConfigs: SceneAgentFullFilledConfig[]
   ): Promise<DirectoryItem[]> {
     return (
       await request.post(`${prefix}/info`, {
@@ -32,6 +35,7 @@ const taskResultBundleLocalAPI = {
         taskId,
         scene,
         runConfig,
+        agentFullFilledConfigs,
       })
     ).data;
   },

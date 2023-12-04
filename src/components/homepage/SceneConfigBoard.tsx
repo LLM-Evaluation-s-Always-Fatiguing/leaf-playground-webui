@@ -18,11 +18,10 @@ import RunSceneConfig from '@/types/server/RunSceneConfig';
 import useGlobalStore from '@/stores/global';
 import ServerAPI from '@/services/server';
 import EvaluatorConfig, { EvaluatorConfigData } from '@/types/server/Evaluator';
-import { getRandomAgentColor } from '@/utils/color';
-import { saveWebUITaskOriginalDataToLocal } from '@/utils/task-result-bundle';
 import TaskInfo from '@/types/api-router/TaskInfo';
 import { MdOutlineHistory } from 'react-icons/md';
 import TaskHistoriesModal from '@/components/task/TaskHistoriesModal';
+import LocalAPI from '@/services/local';
 
 const Container = styled.div`
   width: 100%;
@@ -120,6 +119,9 @@ const SceneConfigBoard = ({ scene, taskHistories }: SceneConfigBoardProps) => {
       },
     });
   }, []);
+
+  const [loading, setLoading] = useState(false);
+  const [loadingTip, setLoadingTip] = useState('');
 
   const [selectAgentModalOpen, setSelectAgentModalOpen] = useState(false);
   const [sceneAgentConfigs, setSceneAgentConfigs] = useState<SceneAgentConfig[]>([]);
@@ -313,11 +315,10 @@ const SceneConfigBoard = ({ scene, taskHistories }: SceneConfigBoardProps) => {
                     additional_config_data: additionalConfig,
                     scene_evaluators_config_data: evaluatorConfig,
                   };
-                  const { task_id, save_dir } = await ServerAPI.sceneTask.createSceneTask(finalConfig);
-                  await saveWebUITaskOriginalDataToLocal(save_dir, task_id, scene, finalConfig);
-                  globalStore.updateRunSceneConfig(finalConfig);
-                  globalStore.updateTaskId(task_id);
-                  router.push(`/processing?taskId=${task_id}`);
+                  const { task_id, save_dir, agent_configs } = await ServerAPI.sceneTask.createSceneTask(finalConfig);
+                  await LocalAPI.taskResultBundle.saveInfo(save_dir, task_id, scene, finalConfig, agent_configs);
+                  globalStore.updateInfoAfterSceneTaskCreated(save_dir, task_id, scene, finalConfig, agent_configs);
+                  router.push(`/processing/${task_id}?bundlePath=${encodeURIComponent(save_dir)}`);
                 } catch (e) {
                   console.error(e);
                   message.error('Create scene task failed.');

@@ -3,16 +3,26 @@ import { immer } from 'zustand/middleware/immer';
 import { devtools } from 'zustand/middleware';
 import RunSceneConfig from '@/types/server/RunSceneConfig';
 import Scene from '@/types/server/Scene';
+import { SceneAgentFullFilledConfig } from '@/types/server/Agent';
 
 interface GlobalState {
   currentScene?: Scene;
   runSceneConfig?: RunSceneConfig;
   taskId?: string;
-  taskResultSavedDir?: string;
+  bundlePath?: string;
+  agentFullFilledConfigs?: SceneAgentFullFilledConfig[];
   updateCurrentScene: (scene: Scene) => void;
   updateRunSceneConfig: (runSceneConfig: RunSceneConfig) => void;
   updateTaskId: (taskId: string) => void;
-  updateTaskResultSavedDir: (taskResultSavedDir: string) => void;
+  updateTaskResultSavedDir: (bundlePath: string) => void;
+  updateAgentFullFilledConfigs: (agentFullFilledConfigs: SceneAgentFullFilledConfig[]) => void;
+  updateInfoAfterSceneTaskCreated: (
+    bundlePath: string,
+    taskId: string,
+    scene: Scene,
+    runConfig: RunSceneConfig,
+    agentFullFilledConfigs: SceneAgentFullFilledConfig[]
+  ) => void;
 }
 
 const useGlobalStore = create<GlobalState>()(
@@ -20,6 +30,9 @@ const useGlobalStore = create<GlobalState>()(
     devtools((set) => ({
       currentScene: undefined,
       runSceneConfig: undefined,
+      taskId: undefined,
+      bundlePath: undefined,
+      agentFullFilledConfigs: undefined,
       updateCurrentScene: (scene) =>
         set((state) => {
           state.currentScene = scene;
@@ -32,9 +45,21 @@ const useGlobalStore = create<GlobalState>()(
         set((state) => {
           state.taskId = taskId;
         }),
-      updateTaskResultSavedDir: (taskResultSavedDir) =>
+      updateTaskResultSavedDir: (bundlePath) =>
         set((state) => {
-          state.taskResultSavedDir = taskResultSavedDir;
+          state.bundlePath = bundlePath;
+        }),
+      updateAgentFullFilledConfigs: (agentFullFilledConfigs) =>
+        set((state) => {
+          state.agentFullFilledConfigs = agentFullFilledConfigs;
+        }),
+      updateInfoAfterSceneTaskCreated: (bundlePath, taskId, scene, runConfig, agentFullFilledConfigs) =>
+        set((state) => {
+          state.bundlePath = bundlePath;
+          state.taskId = taskId;
+          state.currentScene = scene;
+          state.runSceneConfig = runConfig;
+          state.agentFullFilledConfigs = agentFullFilledConfigs;
         }),
     }))
   )

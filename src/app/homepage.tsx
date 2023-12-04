@@ -37,6 +37,7 @@ const ScenesArea = styled.div`
     flex-direction: row;
     justify-content: center;
     align-items: center;
+    backdrop-filter: blur(3px);
     z-index: 3;
   }
 `;

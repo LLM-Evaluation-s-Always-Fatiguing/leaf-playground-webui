@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { Button, Modal, Space, Table } from 'antd';
+import { Button, ButtonProps, Modal, Space, Table, theme } from 'antd';
 import TaskInfo from '@/types/api-router/TaskInfo';
 import RunSceneConfig from '@/types/server/RunSceneConfig';
 import Scene from '@/types/server/Scene';
 import { useRouter } from 'next/navigation';
 import LocalAPI from '@/services/local';
+import { useTheme } from 'antd-style';
 
 interface TaskHistoriesModalProps {
   open: boolean;
@@ -23,7 +24,7 @@ const TaskHistoriesModal: React.FC<TaskHistoriesModalProps> = ({
   onApplyHistoryTaskConfig,
   onNeedClose,
 }) => {
-  const router = useRouter();
+  const theme = useTheme();
 
   const resetState = () => {};
 
@@ -71,11 +72,17 @@ const TaskHistoriesModal: React.FC<TaskHistoriesModalProps> = ({
           {
             title: 'Operation',
             render: (_, record) => {
+              const buttonProps: ButtonProps = {
+                type: 'text',
+                size: 'small',
+                style: {
+                  color: theme.colorPrimary,
+                },
+              };
               return (
                 <Space wrap>
                   <Button
-                    type="link"
-                    size={'small'}
+                    {...buttonProps}
                     onClick={async () => {
                       const taskDetail = await LocalAPI.taskResultBundle.getInfo(record.bundlePath);
                       onApplyHistoryTaskConfig(taskDetail.runConfig);
@@ -84,8 +91,7 @@ const TaskHistoriesModal: React.FC<TaskHistoriesModalProps> = ({
                     Replay
                   </Button>
                   <Button
-                    type="link"
-                    size={'small'}
+                    {...buttonProps}
                     onClick={async () => {
                       await LocalAPI.dict.open(record.bundlePath);
                     }}
@@ -93,13 +99,9 @@ const TaskHistoriesModal: React.FC<TaskHistoriesModalProps> = ({
                     Result Dict
                   </Button>
                   <Button
-                    type="link"
-                    size={'small'}
+                    {...buttonProps}
                     onClick={() => {
-                      window.open(
-                        `/result/${record.id}?taskResultSavedDir=${encodeURIComponent(record.bundlePath)}`,
-                        '_blank'
-                      );
+                      window.open(`/result/${record.id}?bundlePath=${encodeURIComponent(record.bundlePath)}`, '_blank');
                     }}
                   >
                     Result

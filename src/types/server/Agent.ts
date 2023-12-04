@@ -26,3 +26,7 @@ export interface SceneAgentDefinition {
   name: string;
   schema: FormilyJSONSchema;
 }
+
+export interface SceneAgentFullFilledConfig extends SceneAgentConfigData {
+  profile: AgentProfile & { id: string };
+}

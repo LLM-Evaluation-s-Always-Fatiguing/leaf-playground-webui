@@ -5,7 +5,7 @@ import { DefaultProcessingVisualizationComponentProps } from '@/components/proce
 
 function VisualizationComponentWithExtraProps<P extends DefaultProcessingVisualizationComponentProps>(
   WrappedComponent: React.ComponentType<P>,
-  extraProps: Omit<P, 'logs'>
+  extraProps: Pick<P, Exclude<keyof P, keyof DefaultProcessingVisualizationComponentProps>>
 ) {
   const ComponentWithExtraProps: React.FC<DefaultProcessingVisualizationComponentProps> = (props) => {
     const finalProps = { ...extraProps, ...props } as P;
