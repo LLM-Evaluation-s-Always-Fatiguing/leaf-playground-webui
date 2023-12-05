@@ -14,7 +14,7 @@ import { DefaultProcessingVisualizationComponentProps } from '@/components/proce
 import VisualizationComponentWithExtraProps from '@/components/processing/common/VisualizationComponentWithExtraProps';
 import useGlobalStore from '@/stores/global';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { message, Spin } from 'antd';
+import { Button, message, Spin } from 'antd';
 import LocalAPI from '@/services/local';
 import ProcessingConsole from '@/components/processing/common/Console';
 import ServerAPI from '@/services/server';
@@ -58,6 +58,27 @@ const ConsoleArea = styled.div`
   width: calc(100% - 45% - 1px);
   min-width: 680px;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+
+  .controlBar {
+    flex-shrink: 0;
+    height: 55px;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+    background: ${(props) => (props.theme.isDarkMode ? 'rgba(255,255,255,0.15)' : 'white')};
+
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0 16px;
+
+    position: relative;
+
+    z-index: 5;
+  }
 `;
 
 const ProcessingPage = ({
@@ -77,13 +98,13 @@ const ProcessingPage = ({
   const [loading, setLoading] = useState(true);
   const [loadingTip, setLoadingTip] = useState('Loading...');
 
-  const [autoPlay, setAutoPlay] = useState(true);
-
   const wsRef = useRef<WebSocket>();
   const wsOpenRef = useRef(false);
 
   const [wsConnected, setWSConnected] = useState(false);
   const [logs, setLogs] = useState<SceneLog[]>([]);
+
+  const [finished, setFinished] = useState(false);
 
   const checkTaskStatus = async () => {
     try {
@@ -102,9 +123,12 @@ const ProcessingPage = ({
           globalStore.updateAgentFullFilledConfigs(taskDetail.agentFullFilledConfigs);
           globalStore.updatePageTitle(taskDetail.scene.scene_metadata.name);
           if (taskStatusResp.status === SceneTaskStatus.FINISHED) {
-            setLoadingTip('Task finished!');
+            const logsFilePath = bundlePath + '/logs.jsonl';
+            const logs = await LocalAPI.file.readJSONL(logsFilePath);
+            setLogs(logs);
+            setFinished(true);
             message.success('Task finished!');
-            router.replace(`/result/${taskId}?bundlePath=${encodeURIComponent(bundlePath!)}`);
+            setLoading(false);
           } else {
             return true;
           }
@@ -164,11 +188,9 @@ const ProcessingPage = ({
             case ServerWebSocketMessageType.End:
               const endMessage = wsMessage as ServerWebSocketEndMessage;
               message.success('Task Finished!');
-              wsRef.current?.close();
-              await LocalAPI.dict.open(endMessage.data.save_dir);
-              message.success('Result dict opened.');
               globalStore.updateTaskResultSavedDir(endMessage.data.save_dir);
-              router.replace(`/result/${taskId}?bundlePath=${encodeURIComponent(endMessage.data.save_dir)}`);
+              setFinished(true);
+              wsRef.current?.close();
               break;
             default:
               break;
@@ -197,6 +219,12 @@ const ProcessingPage = ({
     };
   }, []);
 
+  const goToResult = () => {
+    if (globalStore.bundlePath) {
+      router.replace(`/result/${taskId}?bundlePath=${encodeURIComponent(globalStore.bundlePath)}`);
+    }
+  };
+
   function getProcessingVisualizationComponent(): React.FC<DefaultProcessingVisualizationComponentProps> {
     switch (globalStore.currentScene?.scene_metadata.name) {
       case 'RAG QA Examine':
@@ -223,6 +251,20 @@ const ProcessingPage = ({
       </VisualizationArea>
       <ConsoleArea>
         <ProcessingConsole wsConnected={wsConnected} logs={logs} />
+        {finished && (
+          <div className="controlBar">
+            {finished && (
+              <Button
+                type="primary"
+                onClick={() => {
+                  goToResult();
+                }}
+              >
+                Complete evaluation and generate report
+              </Button>
+            )}
+          </div>
+        )}
       </ConsoleArea>
       {loading && (
         <div className="loadingArea">

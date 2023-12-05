@@ -19,6 +19,7 @@ const Container = styled.div`
   flex-direction: column;
   justify-content: flex-start;
   align-items: stretch;
+  flex-shrink: 0;
 `;
 
 const Header = styled.div`

@@ -13,7 +13,7 @@ import { BsFillArrowUpLeftCircleFill } from 'react-icons/bs';
 
 const Container = styled.div`
   width: 100%;
-  height: 100%;
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -216,7 +216,7 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
         </div>
         <div>
           <span>Console</span>
-          {props.logs.length && (
+          {!!props.logs.length && (
             <span
               style={{
                 fontSize: '14px',
