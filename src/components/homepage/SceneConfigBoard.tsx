@@ -20,7 +20,7 @@ import ServerAPI from '@/services/server';
 import EvaluatorConfig, { EvaluatorConfigData } from '@/types/server/Evaluator';
 import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskInfo';
 import { MdOutlineHistory } from 'react-icons/md';
-import TaskHistoriesModal from '@/components/task/TaskHistoriesModal';
+import TaskHistoryModal from '@/components/task/TaskHistoryModal';
 import LocalAPI from '@/services/local';
 
 const Container = styled.div`
@@ -86,14 +86,14 @@ const Footer = styled.div`
 
 interface SceneConfigBoardProps {
   scene: Scene;
-  taskHistories: WebUITaskBundleTaskInfo[];
+  taskHistory: WebUITaskBundleTaskInfo[];
 }
 
-const SceneConfigBoard = ({ scene, taskHistories }: SceneConfigBoardProps) => {
+const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
   const router = useRouter();
   const globalStore = useGlobalStore();
 
-  const hasHistories = taskHistories.length > 0;
+  const hasHistory = taskHistory.length > 0;
 
   const creatingSceneRef = useRef(false);
   const [creatingScene, setCreatingScene] = useState(false);
@@ -128,7 +128,7 @@ const SceneConfigBoard = ({ scene, taskHistories }: SceneConfigBoardProps) => {
   const [operatingAgentDefinition, setOperatingAgentDefinition] = useState<SceneAgentDefinition>();
   const [operatingAgentConfigIndex, setOperatingAgentConfigIndex] = useState(-1);
   const [createOrUpdateAgentModalOpen, setCreateOrUpdateAgentModalOpen] = useState(false);
-  const [taskHistoriesModalOpen, setTaskHistoriesModalOpen] = useState(false);
+  const [taskHistoryModalOpen, setTaskHistoryModalOpen] = useState(false);
 
   return (
     <>
@@ -331,11 +331,11 @@ const SceneConfigBoard = ({ scene, taskHistories }: SceneConfigBoardProps) => {
             </Button>
           </Space>
         </Footer>
-        {hasHistories && (
+        {hasHistory && (
           <div
             className="historyButton"
             onClick={() => {
-              setTaskHistoriesModalOpen(true);
+              setTaskHistoryModalOpen(true);
             }}
           >
             <MdOutlineHistory size={'1em'} />
@@ -377,10 +377,10 @@ const SceneConfigBoard = ({ scene, taskHistories }: SceneConfigBoardProps) => {
           setCreateOrUpdateAgentModalOpen(false);
         }}
       />
-      <TaskHistoriesModal
-        open={taskHistoriesModalOpen}
+      <TaskHistoryModal
+        open={taskHistoryModalOpen}
         scene={scene}
-        tasks={taskHistories}
+        tasks={taskHistory}
         onApplyHistoryTaskConfig={(runConfig) => {
           console.log(runConfig);
           sceneForm.setValues(runConfig.scene_info_config_data);
@@ -397,10 +397,10 @@ const SceneConfigBoard = ({ scene, taskHistories }: SceneConfigBoardProps) => {
             );
           }
           setSceneAgentConfigs(runConfig.scene_agents_config_data);
-          setTaskHistoriesModalOpen(false);
+          setTaskHistoryModalOpen(false);
         }}
         onNeedClose={() => {
-          setTaskHistoriesModalOpen(false);
+          setTaskHistoryModalOpen(false);
         }}
       />
     </>

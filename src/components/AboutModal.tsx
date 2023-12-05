@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Descriptions, message, Modal, Space, Button, Spin } from 'antd';
+import React, { CSSProperties, useEffect, useState } from 'react';
+import { Descriptions, message, Modal, Space, Button, Spin, ButtonProps } from 'antd';
 import ServerAPI from '@/services/server';
 import ServerInfo from '@/types/server/ServerInfo';
 import { AiOutlineFolderOpen } from 'react-icons/ai';
@@ -40,12 +40,18 @@ const AboutModal: React.FC<AboutModalProps> = ({ open, onNeedClose }) => {
     }
   }, [open]);
 
-  const labelStyle: any = {
+  const labelStyle: CSSProperties = {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     flexWrap: 'nowrap',
+  };
+
+  const openDictButtonProps: ButtonProps = {
+    size: 'small',
+    type: 'link',
+    style: { lineHeight: 1 },
   };
 
   return (
@@ -78,9 +84,7 @@ const AboutModal: React.FC<AboutModalProps> = ({ open, onNeedClose }) => {
                 <Space>
                   {serverInfo?.paths.root}
                   <Button
-                    size={'small'}
-                    type="text"
-                    style={{ lineHeight: 1 }}
+                    {...openDictButtonProps}
                     icon={<AiOutlineFolderOpen size={'1.2em'} />}
                     onClick={() => {
                       if (serverInfo?.paths.root) {
@@ -100,9 +104,7 @@ const AboutModal: React.FC<AboutModalProps> = ({ open, onNeedClose }) => {
                 <Space>
                   {serverInfo?.paths.zoo_root}
                   <Button
-                    size={'small'}
-                    type="text"
-                    style={{ lineHeight: 1 }}
+                    {...openDictButtonProps}
                     icon={<AiOutlineFolderOpen size={'1.2em'} />}
                     onClick={() => {
                       if (serverInfo?.paths.zoo_root) {
@@ -122,9 +124,7 @@ const AboutModal: React.FC<AboutModalProps> = ({ open, onNeedClose }) => {
                 <Space>
                   {serverInfo?.paths.save_root}
                   <Button
-                    size={'small'}
-                    type="text"
-                    style={{ lineHeight: 1 }}
+                    {...openDictButtonProps}
                     icon={<AiOutlineFolderOpen size={'1.2em'} />}
                     onClick={() => {
                       if (serverInfo?.paths.save_root) {

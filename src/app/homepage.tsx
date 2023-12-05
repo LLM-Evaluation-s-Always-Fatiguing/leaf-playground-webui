@@ -63,13 +63,13 @@ const PageContainer = styled.div`
 interface HomePageProps {
   serverInfo: ServerInfo;
   scenes: SceneListItem[];
-  taskHistories: Record<string, WebUITaskBundleTaskInfo[]>;
+  taskHistory: Record<string, WebUITaskBundleTaskInfo[]>;
 }
 
 export default function HomePage(props: HomePageProps) {
   const globalStore = useGlobalStore();
 
-  const [taskHistories, setTaskHistories] = useState<Record<string, WebUITaskBundleTaskInfo[]>>(props.taskHistories);
+  const [taskHistory, setTaskHistory] = useState<Record<string, WebUITaskBundleTaskInfo[]>>(props.taskHistory);
 
   const [scenesLoading, setScenesLoading] = useState(false);
   const [scenes, setScenes] = useState<SceneListItem[]>(props.scenes);
@@ -107,20 +107,20 @@ export default function HomePage(props: HomePageProps) {
     }
   };
 
-  const loadTaskHistories = async () => {
+  const loadTaskHistory = async () => {
     try {
-      const taskHistories = await LocalAPI.taskBundle.webui.getAll(props.serverInfo.paths.save_root);
-      setTaskHistories(taskHistories);
+      const taskHistory = await LocalAPI.taskBundle.webui.getAll(props.serverInfo.paths.save_root);
+      setTaskHistory(taskHistory);
     } catch (e) {
       console.error(e);
-      message.error('Failed to load task histories');
+      message.error('Failed to load task history');
     }
   };
 
   useEffect(() => {
     globalStore.clearTaskState();
     loadScenes();
-    loadTaskHistories();
+    loadTaskHistory();
   }, []);
 
   return (
@@ -152,7 +152,7 @@ export default function HomePage(props: HomePageProps) {
           <SceneConfigBoard
             key={scenes[selectedSceneIndex].id}
             scene={selectedSceneDetail}
-            taskHistories={taskHistories[scenes[selectedSceneIndex].id] || []}
+            taskHistory={taskHistory[scenes[selectedSceneIndex].id] || []}
           />
         ) : (
           <SceneInfoBoard

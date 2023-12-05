@@ -24,8 +24,6 @@ const Container = styled.div`
   align-items: stretch;
   overflow: hidden;
 
-  border-right: 1px solid ${(props) => props.theme.dividerColor};
-
   .simulateArea {
     flex-shrink: 0;
     padding: 16px 12px;

@@ -52,6 +52,8 @@ const VisualizationArea = styled.div`
   width: 45%;
   min-width: 480px;
   height: 100%;
+
+  border-right: 1px solid ${(props) => props.theme.dividerColor};
 `;
 
 const ConsoleArea = styled.div`

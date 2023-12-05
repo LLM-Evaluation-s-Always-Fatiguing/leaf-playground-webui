@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import LocalAPI from '@/services/local';
 import { useTheme } from 'antd-style';
 
-interface TaskHistoriesModalProps {
+interface TaskHistoryModalProps {
   open: boolean;
   scene: Scene;
   tasks: WebUITaskBundleTaskInfo[];
@@ -17,7 +17,7 @@ interface TaskHistoriesModalProps {
   onNeedClose: () => void;
 }
 
-const TaskHistoriesModal: React.FC<TaskHistoriesModalProps> = ({
+const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
   open,
   scene,
   tasks,
@@ -49,7 +49,7 @@ const TaskHistoriesModal: React.FC<TaskHistoriesModalProps> = ({
       onCancel={() => {
         onNeedClose();
       }}
-      title={`${scene.scene_metadata.name} Task Histories`}
+      title={`${scene.scene_metadata.name} Task History`}
     >
       <Table
         columns={[
@@ -117,4 +117,4 @@ const TaskHistoriesModal: React.FC<TaskHistoriesModalProps> = ({
   );
 };
 
-export default TaskHistoriesModal;
+export default TaskHistoryModal;
