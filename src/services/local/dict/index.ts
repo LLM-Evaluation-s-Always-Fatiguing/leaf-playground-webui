@@ -1,5 +1,5 @@
 import request from '@/services/local/request';
-import DirectoryItem from '@/types/api-router/DirectoryItem';
+import DirectoryItem from '@/types/api-router/webui/DirectoryItem';
 
 const prefix = '/dict';
 
@@ -15,7 +15,7 @@ const dictLocalAPI = {
   },
   async open(dictPath: string): Promise<void> {
     await request.post(`${prefix}/open`, {
-      directoryPath: dictPath,
+      dictPath,
     });
   },
 };

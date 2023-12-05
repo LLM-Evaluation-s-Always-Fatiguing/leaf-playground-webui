@@ -1,11 +1,11 @@
-import fileLocalAPI from '@/services/local/file';
-import taskResultBundleLocalAPI from '@/services/local/task-result-bundle';
 import dictLocalAPI from '@/services/local/dict';
+import fileLocalAPI from '@/services/local/file';
+import taskBundleLocalAPI from '@/services/local/task-bundle';
 
 const LocalAPI = {
   dict: dictLocalAPI,
   file: fileLocalAPI,
-  taskResultBundle: taskResultBundleLocalAPI,
+  taskBundle: taskBundleLocalAPI,
 };
 
 export default LocalAPI;

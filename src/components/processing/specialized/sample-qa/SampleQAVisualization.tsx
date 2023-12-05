@@ -201,7 +201,7 @@ const SampleQAVisualization = (props: SampleQAVisualizationProps) => {
           <AskerAvatar size={'1em'} />
         </SampleStatusAvatar>
         <Space wrap size={[4, 8]}>
-          {(globalStore.agentFullFilledConfigs || [])
+          {(globalStore.agentConfigs || [])
             .filter((a) => !a.profile.role.is_static)
             .map((agent) => {
               return (
@@ -265,7 +265,7 @@ const SampleQAVisualization = (props: SampleQAVisualizationProps) => {
       <div className="detailArea">
         {currentDisplayLogs.map((log, index) => {
           const isAnswerer = !!log.references;
-          const agentMap = keyBy(globalStore.agentFullFilledConfigs, (c) => c.profile.id);
+          const agentMap = keyBy(globalStore.agentConfigs, (c) => c.profile.id);
           const avatarColor = isAnswerer ? agentMap[log.response.sender.id]?.chart_major_color : theme.colorPrimary;
           return (
             <div key={index} className={isAnswerer ? 'answerer' : 'asker'}>

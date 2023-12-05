@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { Button, ButtonProps, Modal, Space, Table, theme } from 'antd';
-import TaskInfo from '@/types/api-router/TaskInfo';
+import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskInfo';
 import RunSceneConfig from '@/types/server/RunSceneConfig';
 import Scene from '@/types/server/Scene';
 import { useRouter } from 'next/navigation';
@@ -12,7 +12,7 @@ import { useTheme } from 'antd-style';
 interface TaskHistoriesModalProps {
   open: boolean;
   scene: Scene;
-  tasks: TaskInfo[];
+  tasks: WebUITaskBundleTaskInfo[];
   onApplyHistoryTaskConfig: (runConfig: RunSceneConfig) => void;
   onNeedClose: () => void;
 }
@@ -84,7 +84,7 @@ const TaskHistoriesModal: React.FC<TaskHistoriesModalProps> = ({
                   <Button
                     {...buttonProps}
                     onClick={async () => {
-                      const taskDetail = await LocalAPI.taskResultBundle.getInfo(record.bundlePath);
+                      const taskDetail = await LocalAPI.taskBundle.webui.get(record.bundlePath);
                       onApplyHistoryTaskConfig(taskDetail.runConfig);
                     }}
                   >

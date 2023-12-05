@@ -50,32 +50,8 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
   const loadDataFromLocal = async () => {
     if (!bundlePath || resultData) return;
     setLoading(true);
-    const sceneFilePath = bundlePath + '/scene.json';
-    const scene = await LocalAPI.file.readJSON(sceneFilePath);
-    const logsFilePath = bundlePath + '/logs.jsonl';
-    const logs = await LocalAPI.file.readJSONL(logsFilePath);
-    const agentsFilePath = bundlePath + '/agents.json';
-    const agents = await LocalAPI.file.readJSON(agentsFilePath);
-    const metricsFilePath = bundlePath + '/metrics.jsonl';
-    const metrics = await LocalAPI.file.readJSONL(metricsFilePath);
-    const chartsDictPath = bundlePath + '/charts';
-    const chartJSONFiles = (await LocalAPI.dict.read(chartsDictPath)).filter((f) => f.fullPath.endsWith('.json'));
-    const chartOptions = [];
-    for (let chartJson of chartJSONFiles) {
-      let content = await LocalAPI.file.readJSON(chartJson.fullPath);
-      if (typeof content === 'string') {
-        const cmd = `(() => (${content}))()`;
-        content = eval(cmd);
-      }
-      chartOptions.push(content);
-    }
-    setResultData({
-      scene,
-      logs,
-      agents,
-      metrics,
-      chartOptions,
-    });
+    const taskBundle = await LocalAPI.taskBundle.server.get(bundlePath);
+    setResultData(taskBundle);
     setLoading(false);
   };
 

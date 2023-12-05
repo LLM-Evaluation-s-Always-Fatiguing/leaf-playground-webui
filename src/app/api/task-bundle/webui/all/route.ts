@@ -1,9 +1,9 @@
 import { NextRequest } from 'next/server';
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 import groupBy from 'lodash/groupBy';
 import dayjs from 'dayjs';
-import TaskInfo from '@/types/api-router/TaskInfo';
+import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskInfo';
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -17,19 +17,27 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const directories = fs
-      .readdirSync(bundlesPath, { withFileTypes: true })
-      .filter((dirent) => dirent.isDirectory())
-      .map((dirent) => dirent.name);
+    const dirents = await fs.readdir(bundlesPath, { withFileTypes: true });
+    const directories = dirents.filter((dirent) => dirent.isDirectory()).map((dirent) => dirent.name);
 
-    const tasks: TaskInfo[] = [];
+    const tasks: WebUITaskBundleTaskInfo[] = [];
 
     for (const dir of directories) {
       const webuiPath = path.join(bundlesPath, dir, '.webui');
-      if (fs.existsSync(webuiPath)) {
+      if (
+        await fs.stat(webuiPath).then(
+          () => true,
+          () => false
+        )
+      ) {
         const taskFilePath = path.join(webuiPath, 'task.json');
-        if (fs.existsSync(taskFilePath)) {
-          const taskData = fs.readFileSync(taskFilePath, { encoding: 'utf8' });
+        if (
+          await fs.stat(taskFilePath).then(
+            () => true,
+            () => false
+          )
+        ) {
+          const taskData = await fs.readFile(taskFilePath, { encoding: 'utf8' });
           tasks.push(JSON.parse(taskData));
         }
       }

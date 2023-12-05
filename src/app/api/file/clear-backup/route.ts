@@ -1,38 +1,44 @@
 import { NextRequest } from 'next/server';
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 import { FILE_API_BACKUP_DIR } from '@/project-settings/api';
 
-function deleteLeafBackupDirectories(dirPath: string) {
-  if (fs.existsSync(dirPath)) {
-    fs.readdirSync(dirPath, { withFileTypes: true }).forEach((dirent) => {
-      const currentPath = path.join(dirPath, dirent.name);
+async function deleteLeafBackupDirectories(dictPath: string) {
+  if (
+    await fs.stat(dictPath).then(
+      () => true,
+      () => false
+    )
+  ) {
+    const dirents = await fs.readdir(dictPath, { withFileTypes: true });
+    for (const dirent of dirents) {
+      const currentPath = path.join(dictPath, dirent.name);
       if (dirent.isDirectory()) {
         if (dirent.name === FILE_API_BACKUP_DIR) {
-          fs.rmSync(currentPath, { recursive: true });
+          await fs.rm(currentPath, { recursive: true });
         } else {
-          deleteLeafBackupDirectories(currentPath);
+          await deleteLeafBackupDirectories(currentPath);
         }
       }
-    });
+    }
   }
 }
 
 export async function POST(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
-  const dirPath = searchParams.get('dirPath');
+  const dictPath = searchParams.get('dictPath');
 
-  if (!dirPath) {
-    return new Response(JSON.stringify({ error: 'dirPath is required.' }), {
+  if (!dictPath) {
+    return new Response(JSON.stringify({ error: 'dictPath is required.' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' },
     });
   }
 
-  const fullPath = path.resolve(process.cwd(), dirPath);
+  const fullPath = path.resolve(process.cwd(), dictPath);
 
   try {
-    deleteLeafBackupDirectories(fullPath);
+    await deleteLeafBackupDirectories(fullPath);
 
     return new Response(JSON.stringify({ message: 'All leaf-backup directories cleared.' }), {
       status: 200,

@@ -18,7 +18,7 @@ import RunSceneConfig from '@/types/server/RunSceneConfig';
 import useGlobalStore from '@/stores/global';
 import ServerAPI from '@/services/server';
 import EvaluatorConfig, { EvaluatorConfigData } from '@/types/server/Evaluator';
-import TaskInfo from '@/types/api-router/TaskInfo';
+import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskInfo';
 import { MdOutlineHistory } from 'react-icons/md';
 import TaskHistoriesModal from '@/components/task/TaskHistoriesModal';
 import LocalAPI from '@/services/local';
@@ -86,7 +86,7 @@ const Footer = styled.div`
 
 interface SceneConfigBoardProps {
   scene: Scene;
-  taskHistories: TaskInfo[];
+  taskHistories: WebUITaskBundleTaskInfo[];
 }
 
 const SceneConfigBoard = ({ scene, taskHistories }: SceneConfigBoardProps) => {
@@ -316,7 +316,7 @@ const SceneConfigBoard = ({ scene, taskHistories }: SceneConfigBoardProps) => {
                     scene_evaluators_config_data: evaluatorConfig,
                   };
                   const { task_id, save_dir, agent_configs } = await ServerAPI.sceneTask.createSceneTask(finalConfig);
-                  await LocalAPI.taskResultBundle.saveInfo(save_dir, task_id, scene, finalConfig, agent_configs);
+                  await LocalAPI.taskBundle.webui.save(save_dir, task_id, scene, finalConfig, agent_configs);
                   globalStore.updateInfoAfterSceneTaskCreated(save_dir, task_id, scene, finalConfig, agent_configs);
                   router.push(`/processing/${task_id}?bundlePath=${encodeURIComponent(save_dir)}`);
                 } catch (e) {

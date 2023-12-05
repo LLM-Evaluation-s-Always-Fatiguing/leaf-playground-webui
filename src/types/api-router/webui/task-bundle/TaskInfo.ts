@@ -1,4 +1,4 @@
-export default interface TaskInfo {
+export default interface WebUITaskBundleTaskInfo {
   id: string;
   sceneId: string;
   bundlePath: string;

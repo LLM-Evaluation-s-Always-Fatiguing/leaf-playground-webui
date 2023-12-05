@@ -251,7 +251,7 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
             label: 'All',
             key: '',
           },
-          ...(globalStore.agentFullFilledConfigs || [])
+          ...(globalStore.agentConfigs || [])
             .filter((a) => !a.profile.role.is_static)
             .map((a) => {
               return {

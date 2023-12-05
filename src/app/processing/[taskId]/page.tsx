@@ -115,13 +115,9 @@ const ProcessingPage = ({
         case SceneTaskStatus.RUNNING:
         case SceneTaskStatus.PAUSED:
         case SceneTaskStatus.FINISHED:
-          const taskDetail = await LocalAPI.taskResultBundle.getInfo(bundlePath!);
-          globalStore.updateTaskId(taskId);
-          globalStore.updateTaskResultSavedDir(bundlePath!);
-          globalStore.updateCurrentScene(taskDetail.scene);
-          globalStore.updateRunSceneConfig(taskDetail.runConfig);
-          globalStore.updateAgentFullFilledConfigs(taskDetail.agentFullFilledConfigs);
-          globalStore.updatePageTitle(taskDetail.scene.scene_metadata.name);
+          const webUIBundle = await LocalAPI.taskBundle.webui.get(bundlePath!);
+          globalStore.updateInfoFromWebUITaskBundle(webUIBundle);
+
           if (taskStatusResp.status === SceneTaskStatus.FINISHED) {
             const logsFilePath = bundlePath + '/logs.jsonl';
             const logs = await LocalAPI.file.readJSONL(logsFilePath);

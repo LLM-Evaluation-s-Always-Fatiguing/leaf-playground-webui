@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 import mime from 'mime-types';
 import { FILE_API_BACKUP_DIR } from '@/project-settings/api';
@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
 
   const fullPath = path.resolve(process.cwd(), filePath);
   try {
-    const fileContent = fs.readFileSync(fullPath);
+    const fileContent = await fs.readFile(fullPath);
     const mimeType = mime.lookup(fullPath) || 'application/octet-stream';
 
     return new Response(fileContent, { status: 200, headers: { 'Content-Type': mimeType } });
@@ -46,20 +46,28 @@ export async function POST(req: NextRequest) {
   const mimeType = req.headers.get('Content-Type') || 'application/octet-stream';
 
   try {
+    const parentDir = path.dirname(fullPath);
+    await fs.mkdir(parentDir, { recursive: true });
+
     let backupPath = null;
-    if (fs.existsSync(fullPath)) {
+    if (
+      await fs.stat(fullPath).then(
+        () => true,
+        () => false
+      )
+    ) {
       const backupDir = path.join(
         path.dirname(fullPath),
         FILE_API_BACKUP_DIR,
         dayjs().format('YYYY-MM-DD_HH-mm-ss-SSS')
       );
-      fs.mkdirSync(backupDir, { recursive: true });
+      await fs.mkdir(backupDir, { recursive: true });
       backupPath = path.join(backupDir, path.basename(fullPath));
-      fs.copyFileSync(fullPath, backupPath);
+      await fs.copyFile(fullPath, backupPath);
     }
 
     const buffer = await req.arrayBuffer();
-    fs.writeFileSync(fullPath, Buffer.from(buffer), { encoding: mimeType === 'text/plain' ? 'utf8' : undefined });
+    await fs.writeFile(fullPath, Buffer.from(buffer), { encoding: mimeType === 'text/plain' ? 'utf8' : undefined });
 
     return new Response(
       JSON.stringify({ message: 'File written successfully', ...(backupPath ? { backupPath } : {}) }),

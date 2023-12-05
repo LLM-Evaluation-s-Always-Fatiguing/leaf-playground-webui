@@ -10,7 +10,7 @@ import SceneInfoBoard from '@/components/homepage/SceneInfoBoard';
 import SceneConfigBoard from '@/components/homepage/SceneConfigBoard';
 import useGlobalStore from '@/stores/global';
 import ServerInfo from '@/types/server/ServerInfo';
-import TaskInfo from '@/types/api-router/TaskInfo';
+import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskInfo';
 import LocalAPI from '@/services/local';
 
 const ScenesArea = styled.div`
@@ -63,13 +63,13 @@ const PageContainer = styled.div`
 interface HomePageProps {
   serverInfo: ServerInfo;
   scenes: SceneListItem[];
-  taskHistories: Record<string, TaskInfo[]>;
+  taskHistories: Record<string, WebUITaskBundleTaskInfo[]>;
 }
 
 export default function HomePage(props: HomePageProps) {
   const globalStore = useGlobalStore();
 
-  const [taskHistories, setTaskHistories] = useState<Record<string, TaskInfo[]>>(props.taskHistories);
+  const [taskHistories, setTaskHistories] = useState<Record<string, WebUITaskBundleTaskInfo[]>>(props.taskHistories);
 
   const [scenesLoading, setScenesLoading] = useState(false);
   const [scenes, setScenes] = useState<SceneListItem[]>(props.scenes);
@@ -109,7 +109,7 @@ export default function HomePage(props: HomePageProps) {
 
   const loadTaskHistories = async () => {
     try {
-      const taskHistories = await LocalAPI.taskResultBundle.getAll(props.serverInfo.paths.save_root);
+      const taskHistories = await LocalAPI.taskBundle.webui.getAll(props.serverInfo.paths.save_root);
       setTaskHistories(taskHistories);
     } catch (e) {
       console.error(e);
