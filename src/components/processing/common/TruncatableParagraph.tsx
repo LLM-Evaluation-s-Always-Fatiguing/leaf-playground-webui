@@ -35,7 +35,10 @@ const TruncatableParagraph = ({
   children,
 }: TruncatableParagraphProps) => {
   const textRef = useRef<HTMLDivElement>(null);
-  const [isTruncatable, setIsTruncatable] = useState(false);
+  const [isTruncatable, setIsTruncatable] = useState(
+    ellipsisStatus === TruncatableParagraphEllipsisStatus.Ellipsis ||
+      ellipsisStatus === TruncatableParagraphEllipsisStatus.Expanded
+  );
 
   useEffect(() => {
     if (!textRef.current) return;
