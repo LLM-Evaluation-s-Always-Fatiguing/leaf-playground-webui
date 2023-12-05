@@ -108,13 +108,13 @@ const SceneConfigBoard = ({ scene, taskHistories }: SceneConfigBoardProps) => {
       validateFirst: true,
     });
   }, []);
-  const [assessmentMethod, setAssessmentMethod] = useState('evaluators');
+  const [evaluationMethod, setEvaluationMethod] = useState('evaluators');
   const evaluatorForm = useMemo(() => {
     return createForm({
       validateFirst: true,
       effects() {
         onFormValuesChange((form) => {
-          setAssessmentMethod(form.values.assessment_method);
+          setEvaluationMethod(form.values.evaluation_method);
         });
       },
     });
@@ -143,7 +143,7 @@ const SceneConfigBoard = ({ scene, taskHistories }: SceneConfigBoardProps) => {
               }}
             >
               <Collapse
-                defaultActiveKey={['basic', 'additional', 'assessment']}
+                defaultActiveKey={['basic', 'additional', 'evaluation']}
                 style={{
                   borderRadius: 0,
                   border: 'none',
@@ -179,14 +179,14 @@ const SceneConfigBoard = ({ scene, taskHistories }: SceneConfigBoardProps) => {
                   ...(scene.evaluatorsConfigFormilySchemas
                     ? [
                         {
-                          key: 'assessment',
-                          label: 'Assessment',
+                          key: 'evaluation',
+                          label: 'Evaluation',
                           children: (
                             <Form form={evaluatorForm} labelCol={5} wrapperCol={16}>
                               <FormilyDefaultSchemaField>
                                 <FormilyDefaultSchemaField.Markup
-                                  title={'Assessment method'}
-                                  name={'assessment_method'}
+                                  title={'Evaluation method'}
+                                  name={'evaluation_method'}
                                   x-decorator="FormItem"
                                   x-component="Radio.Group"
                                   default={'evaluators'}
@@ -196,7 +196,7 @@ const SceneConfigBoard = ({ scene, taskHistories }: SceneConfigBoardProps) => {
                                   ]}
                                 />
                               </FormilyDefaultSchemaField>
-                              {assessmentMethod === 'evaluators' && (
+                              {evaluationMethod === 'evaluators' && (
                                 <FormilyDefaultSchemaField schema={scene.evaluatorsConfigFormilySchemas} />
                               )}
                             </Form>
@@ -297,10 +297,10 @@ const SceneConfigBoard = ({ scene, taskHistories }: SceneConfigBoardProps) => {
                   const sceneConfig = merge({}, DefaultSceneInfoConfig, sceneForm.values);
                   const additionalConfig = sceneAdditionalForm.values;
                   let evaluatorConfig: EvaluatorConfig[] | null = null;
-                  if (assessmentMethod === 'evaluators') {
+                  if (evaluationMethod === 'evaluators') {
                     evaluatorConfig = [];
                     Object.entries(evaluatorForm.values)
-                      .filter((entry) => entry[0] !== 'assessment_method')
+                      .filter((entry) => entry[0] !== 'evaluation_method')
                       .forEach(([name, config]) => {
                         evaluatorConfig?.push({
                           evaluator_name: name,
