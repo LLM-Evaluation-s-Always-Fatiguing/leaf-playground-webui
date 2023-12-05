@@ -13,6 +13,7 @@ import ReactECharts from 'echarts-for-react';
 import { useTheme } from 'antd-style';
 import ServerTaskBundle from '@/types/api-router/server/task-bundle';
 import WebUITaskBundle from '@/types/api-router/webui/task-bundle';
+import { getSceneLogMessageDisplayContent } from '@/components/processing/utils/log';
 
 const Container = styled.div`
   width: 100%;
@@ -68,15 +69,19 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
 
   return (
     <>
-      {loading && <div style={{
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-        <Spin />
-      </div>}
+      {loading && (
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Spin />
+        </div>
+      )}
       {!loading && serverBundle && webuiBundle && (
         <Container>
           <div className="header">
@@ -225,8 +230,11 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                 },
                 {
                   title: 'Response',
-                  dataIndex: ['response', 'content', 'text'],
+                  dataIndex: 'response',
                   ellipsis: true,
+                  render: (_, record) => {
+                    return getSceneLogMessageDisplayContent(record.response);
+                  },
                 },
                 {
                   title: 'Operation',
