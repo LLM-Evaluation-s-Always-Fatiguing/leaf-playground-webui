@@ -17,7 +17,7 @@ const sceneAPI = {
     const agentsConfigFormilySchemas: Record<string, FormilyJSONSchema> = {};
     for (const [agent_id, agent_config_schema] of Object.entries(serverScene.agents_config_schemas)) {
       const agentFormilySchema = await transferStandardJSONSchemaToFormilyJSONSchema(agent_config_schema);
-
+      agentFormilySchema.title = agentFormilySchema.title.replace(/Config$/, '')
       if (agentFormilySchema.properties?.chart_major_color) {
         agentFormilySchema.properties.chart_major_color['x-component'] = 'ColorPicker';
         agentFormilySchema.properties.chart_major_color['x-component-props'] = {

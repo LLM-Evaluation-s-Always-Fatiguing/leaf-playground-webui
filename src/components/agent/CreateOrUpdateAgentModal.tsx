@@ -66,7 +66,7 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
 
   return (
     <Modal
-      title={`${sceneAgentConfig ? 'Edit' : 'Create'} Agent`}
+      title={`${sceneAgentConfig ? 'Edit' : 'Create'} Agent （${sceneAgentDefinition?.name}）`}
       open={open}
       width={640}
       destroyOnClose

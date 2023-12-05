@@ -53,9 +53,9 @@ export async function GET(req: NextRequest) {
   }
 }
 
-async function readAgentsData(webUIAgentsFilePath: string, bundlePath: string) {
+async function readAgentsData(webuiAgentsFilePath: string, bundlePath: string) {
   try {
-    return await fs.readFile(webUIAgentsFilePath, { encoding: 'utf8' });
+    return await fs.readFile(webuiAgentsFilePath, { encoding: 'utf8' });
   } catch (e) {
     const serverAgentsFilePath = path.join(bundlePath, 'agents.json');
     const serverAgentsData = await fs.readFile(serverAgentsFilePath, { encoding: 'utf8' });

@@ -117,8 +117,8 @@ const ProcessingPage = ({
         case SceneTaskStatus.RUNNING:
         case SceneTaskStatus.PAUSED:
         case SceneTaskStatus.FINISHED:
-          const webUIBundle = await LocalAPI.taskBundle.webui.get(bundlePath!);
-          globalStore.updateInfoFromWebUITaskBundle(webUIBundle);
+          const webuiBundle = await LocalAPI.taskBundle.webui.get(bundlePath!);
+          globalStore.updateInfoFromWebUITaskBundle(webuiBundle);
 
           if (taskStatusResp.status === SceneTaskStatus.FINISHED) {
             const logsFilePath = bundlePath + '/logs.jsonl';

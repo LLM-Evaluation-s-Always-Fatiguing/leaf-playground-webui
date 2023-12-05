@@ -4,13 +4,15 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import LocalAPI from '@/services/local';
 import styled from '@emotion/styled';
-import { Button, ButtonProps, Card, Descriptions, Space, Table } from 'antd';
+import { Button, ButtonProps, Card, Descriptions, Space, Spin, Table } from 'antd';
 import JSONViewer from '@/components/common/JSONViewer';
 import SceneLog from '@/types/server/Log';
 import dayjs from 'dayjs';
 import JSONViewerModal from '@/components/common/JSONViewer/Modal';
 import ReactECharts from 'echarts-for-react';
 import { useTheme } from 'antd-style';
+import ServerTaskBundle from '@/types/api-router/server/task-bundle';
+import WebUITaskBundle from '@/types/api-router/webui/task-bundle';
 
 const Container = styled.div`
   width: 100%;
@@ -38,20 +40,25 @@ const Container = styled.div`
 const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
   const theme = useTheme();
 
-  const taskId = params.taskId;
+  const _taskId = params.taskId;
   const searchParams = useSearchParams();
   const bundlePath = searchParams.get('bundlePath');
 
   const [loading, setLoading] = useState(true);
-  const [resultData, setResultData] = useState<Record<string, any>>();
+  const [serverBundle, setServerBundle] = useState<ServerTaskBundle>();
+  const [webuiBundle, setWebUIBundle] = useState<WebUITaskBundle>();
   const [operatingLog, setOperatingLog] = useState<SceneLog>();
   const [jsonViewerModalOpen, setJSONViewerModalOpen] = useState<boolean>(false);
 
   const loadDataFromLocal = async () => {
-    if (!bundlePath || resultData) return;
+    if (!bundlePath) return;
     setLoading(true);
-    const taskBundle = await LocalAPI.taskBundle.server.get(bundlePath);
-    setResultData(taskBundle);
+    const serverBundle = await LocalAPI.taskBundle.server.get(bundlePath);
+    const webuiBundle = await LocalAPI.taskBundle.webui.get(bundlePath);
+    console.log(serverBundle);
+    console.log(webuiBundle);
+    setServerBundle(serverBundle);
+    setWebUIBundle(webuiBundle);
     setLoading(false);
   };
 
@@ -61,11 +68,20 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
 
   return (
     <>
-      {!loading && (
+      {loading && <div style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        <Spin />
+      </div>}
+      {!loading && serverBundle && webuiBundle && (
         <Container>
           <div className="header">
             <div></div>
-            <div className="title">{`${resultData?.scene.metadata.name}`}</div>
+            <div className="title">{`${webuiBundle.scene.scene_metadata.name}`}</div>
             <Button
               onClick={async () => {
                 await LocalAPI.dict.open(bundlePath!);
@@ -87,7 +103,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                   label: 'Config',
                   span: 24,
                   children: (
-                    <JSONViewer defaultCollapsed={true} jsonObject={resultData?.scene.config.scene_info || {}} />
+                    <JSONViewer defaultCollapsed={true} jsonObject={serverBundle.scene.config.scene_info || {}} />
                   ),
                 },
                 {
@@ -96,7 +112,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                   span: 2,
                   children: (
                     <Space wrap>
-                      {Object.entries(resultData?.agents || {}).map(([key, agent]: [string, any]) => {
+                      {Object.entries(serverBundle.agents || {}).map(([key, agent]: [string, any]) => {
                         return (
                           <Space
                             key={key}
@@ -127,7 +143,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                   children: (
                     <JSONViewer
                       defaultCollapsed={true}
-                      jsonObject={resultData?.scene.config.scene_agents?.agents || {}}
+                      jsonObject={serverBundle.scene.config.scene_agents?.agents || {}}
                     />
                   ),
                 },
@@ -136,7 +152,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                   label: 'Evaluators Config',
                   span: 24,
                   children: (
-                    <JSONViewer defaultCollapsed={true} jsonObject={resultData?.scene.config.scene_evaluators || {}} />
+                    <JSONViewer defaultCollapsed={true} jsonObject={serverBundle.scene.config.scene_evaluators || {}} />
                   ),
                 },
               ]}
@@ -153,7 +169,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
               flexWrap: 'wrap',
             }}
           >
-            {(resultData?.chartOptions || []).map((option: object, index: number) => {
+            {(serverBundle?.chartOptions || []).map((option: object, index: number) => {
               return (
                 <ReactECharts
                   key={index}
@@ -238,7 +254,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                   },
                 },
               ]}
-              dataSource={resultData?.logs || []}
+              dataSource={serverBundle?.logs || []}
               pagination={{
                 responsive: true,
                 showSizeChanger: true,

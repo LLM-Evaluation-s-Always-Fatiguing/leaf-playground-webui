@@ -58,7 +58,7 @@ const AgentContent = styled.div`
 
   .infoArea {
     align-self: stretch;
-    margin-top: 8px;
+    margin-top: 0;
     flex-grow: 1;
     overflow: hidden auto;
   }
@@ -114,6 +114,7 @@ const AgentContent = styled.div`
 
 interface AgentCardProps {
   role: 'agent' | 'add';
+  displayMode?: boolean;
   sceneAgentConfig?: SceneAgentConfig;
   agentsConfigFormilySchemas: Record<string, FormilyJSONSchema>;
   onAddNewClick?: () => void;
@@ -125,6 +126,7 @@ const AgentCard = (props: AgentCardProps) => {
   const theme = useTheme();
 
   const isAddCard = props.role === 'add';
+  const displayMode = !!props.displayMode;
 
   const requiredBackendConfigs = useMemo(() => {
     if (!props.sceneAgentConfig) return [];
@@ -178,6 +180,16 @@ const AgentCard = (props: AgentCardProps) => {
           </div>
           <div className="name">{props.sceneAgentConfig?.agent_config_data.profile.name}</div>
           <div className="infoArea">
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center',
+              }}
+            >
+              {props.agentsConfigFormilySchemas[props.sceneAgentConfig?.agent_id || ''].title}
+            </div>
             {displayKV.map((kv, index) => {
               return (
                 <div
@@ -201,38 +213,42 @@ const AgentCard = (props: AgentCardProps) => {
               );
             })}
           </div>
-          <div className="connectionStatus">
-            <FaCheck
-              style={{
-                color: theme.colorSuccess,
-              }}
-            />
-            <div
-              style={{
-                marginLeft: '3px',
-                color: theme.colorSuccess,
-                fontWeight: 500,
-              }}
-            >
-              Connected
-            </div>
-          </div>
-          <div
-            className="editButton"
-            onClick={() => {
-              props.onEditButtonClick?.();
-            }}
-          >
-            <MdOutlineSettings size={'1em'} />
-          </div>
-          <div
-            className="deleteButton"
-            onClick={() => {
-              props.onDeleteButtonClick?.();
-            }}
-          >
-            <MdClose size={'1em'} />
-          </div>
+          {!displayMode && (
+            <>
+              <div className="connectionStatus">
+                <FaCheck
+                  style={{
+                    color: theme.colorSuccess,
+                  }}
+                />
+                <div
+                  style={{
+                    marginLeft: '3px',
+                    color: theme.colorSuccess,
+                    fontWeight: 500,
+                  }}
+                >
+                  Connected
+                </div>
+              </div>
+              <div
+                className="editButton"
+                onClick={() => {
+                  props.onEditButtonClick?.();
+                }}
+              >
+                <MdOutlineSettings size={'1em'} />
+              </div>
+              <div
+                className="deleteButton"
+                onClick={() => {
+                  props.onDeleteButtonClick?.();
+                }}
+              >
+                <MdClose size={'1em'} />
+              </div>
+            </>
+          )}
         </AgentContent>
       )}
     </Card>
