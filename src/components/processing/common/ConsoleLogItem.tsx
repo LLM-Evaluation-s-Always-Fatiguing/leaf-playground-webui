@@ -1,14 +1,21 @@
 import styled from '@emotion/styled';
-import SceneLog from '@/types/server/Log';
-import React, { useEffect, useState } from 'react';
-import { Typography } from 'antd';
-
-const { Paragraph } = Typography;
+import SceneLog, {
+  SceneLogJSONContent,
+  SceneLogMediaType,
+  SceneLogMessage,
+  SceneLogTextContent,
+} from '@/types/server/Log';
+import React, { useEffect } from 'react';
+import { Button, Space } from 'antd';
+import { TbCodeDots } from 'react-icons/tb';
+import TruncatableParagraph, {
+  TruncatableParagraphEllipsisStatus,
+} from '@/components/processing/common/TruncatableParagraph';
 
 const Container = styled.div`
-  margin: 0 16px 18px 16px;
-  padding: 12px 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin: 9px 16px;
+  padding: 0 16px 12px 16px;
+  box-shadow: 0 3px 9px rgba(0, 0, 0, 0.1);
   background: ${(props) => (props.theme.isDarkMode ? 'rgba(255,255,255,0.08)' : 'white')};
   border-radius: ${(props) => props.theme.borderRadius}px;
 
@@ -23,51 +30,95 @@ const Header = styled.div`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  height: 32px;
+  height: 40px;
   color: ${(props) => props.theme.colorTextTertiary};
   font-weight: 500;
 `;
 
-interface ConsoleLogItemProps {
-  log: SceneLog;
-  ellipsis?: boolean;
-  onEllipsisChange: (ellipsis: boolean) => void;
-  needMeasure: () => void;
+const Body = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  flex-shrink: 0;
+`;
+
+function getSceneLogMessageDisplayContent(message: SceneLogMessage) {
+  switch (message.content.type) {
+    case SceneLogMediaType.TEXT: {
+      const content = message.content as SceneLogTextContent;
+      return content.display_text || content.text;
+    }
+    case SceneLogMediaType.AUDIO:
+      return 'Audio';
+    case SceneLogMediaType.IMAGE:
+      return 'Image';
+    case SceneLogMediaType.VIDEO:
+      return 'Video';
+    case SceneLogMediaType.JSON: {
+      const content = message.content as SceneLogJSONContent;
+      return content.display_text || JSON.stringify(content.data, null, 2);
+    }
+    default:
+      return message.content.display_text || 'Log Type Unknown';
+  }
 }
 
-const ConsoleLogItem = ({ log, ellipsis, onEllipsisChange, needMeasure }: ConsoleLogItemProps) => {
+interface ConsoleLogItemProps {
+  log: SceneLog;
+  ellipsisStatus: TruncatableParagraphEllipsisStatus;
+  onEllipsisStatusChange: (status: TruncatableParagraphEllipsisStatus) => void;
+  needMeasure: () => void;
+  onOpenJSONDetail: (log: SceneLog) => void;
+}
+
+const ConsoleLogItem = ({
+  log,
+  ellipsisStatus,
+  onEllipsisStatusChange,
+  needMeasure,
+  onOpenJSONDetail,
+}: ConsoleLogItemProps) => {
   useEffect(() => {
     needMeasure();
-  }, [log, ellipsis]);
+  }, [log, ellipsisStatus]);
 
   return (
     <Container>
-      <Header>{log.narrator}</Header>
-      <div className="body">
-        <Paragraph
-          ellipsis={
-            ellipsis === undefined || ellipsis
-              ? {
-                  rows: 3,
-                  expandable: true,
-                  symbol: 'Read More',
-                  onExpand: () => {
-                    onEllipsisChange(false);
-                  },
-                  onEllipsis: () => {
-                    onEllipsisChange(true);
-                    needMeasure();
-                  },
-                }
-              : false
-          }
+      <Header>
+        {log.narrator}
+        <Button
+          size="small"
+          type="text"
+          style={{
+            fontSize: '18px',
+            lineHeight: 1,
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+          icon={<TbCodeDots size={'1em'} />}
+          onClick={() => {
+            onOpenJSONDetail(log);
+          }}
+        />
+      </Header>
+      <Body>
+        <TruncatableParagraph
+          maxLine={3}
+          ellipsisStatus={ellipsisStatus}
+          onEllipsisStatusChange={(newStatus) => {
+            onEllipsisStatusChange(newStatus);
+            needMeasure();
+          }}
         >
           <strong>
             {`${log.response.sender.name} --> [${log.response.receivers.map((r) => r.name).join(', ')}]: `}
           </strong>
-          {(log.response.content as any).text}
-        </Paragraph>
-      </div>
+          {getSceneLogMessageDisplayContent(log.response)}
+        </TruncatableParagraph>
+      </Body>
     </Container>
   );
 };

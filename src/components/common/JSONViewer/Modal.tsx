@@ -25,9 +25,11 @@ const JSONViewerModal: React.FC<JSONViewerModalProps> = ({ open, title, jsonObje
       open={open}
       width={680}
       destroyOnClose
+      centered
       styles={{
         body: {
           padding: '30px 0 10px 0',
+          maxHeight: '80vh',
           overflow: 'hidden auto',
         },
       }}

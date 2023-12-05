@@ -13,13 +13,18 @@ export interface SceneLogProfile {
   role?: SceneLogRole;
 }
 
-export interface SceneLogContent {}
+export interface SceneLogContent {
+  type: SceneLogMediaType;
+  display_text?: string;
+}
 
 export interface SceneLogTextContent extends SceneLogContent {
   text: string;
 }
 
-export interface SceneLogJSONContent extends SceneLogContent {}
+export interface SceneLogJSONContent extends SceneLogContent {
+  data: Record<string, any>;
+}
 
 export interface SceneLogImageContent extends SceneLogContent {}
 
@@ -47,7 +52,6 @@ export default interface SceneLog {
   created_at: string;
   references?: SceneLogMessage[];
   response: SceneLogMessage;
-  media_type: SceneLogMediaType;
   ground_truth?: SceneLogContent;
   eval_result?: Record<string, boolean | number | string>;
   narrator?: string;

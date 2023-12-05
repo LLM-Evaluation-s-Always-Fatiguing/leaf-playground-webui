@@ -85,7 +85,7 @@ interface SampleStatusAvatarProps extends SampleAvatarProps {
 
 const SampleStatusAvatar = ({ status, ...restProps }: SampleStatusAvatarProps) => {
   const theme = useTheme();
-  console.log(restProps.style?.color || theme.colorPrimary);
+
   return (
     <Container>
       <SampleAvatar {...restProps} />

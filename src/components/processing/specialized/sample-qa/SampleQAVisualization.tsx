@@ -31,7 +31,7 @@ const Container = styled.div`
 
     display: flex;
     flex-direction: row;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: flex-start;
     gap: 16px;
 

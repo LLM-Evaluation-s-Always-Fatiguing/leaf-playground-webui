@@ -1,13 +1,15 @@
 import { useTheme } from 'antd-style';
 import styled from '@emotion/styled';
 import SceneLog from '@/types/server/Log';
-import { Space, Tabs } from 'antd';
+import { Button, Space, Tabs } from 'antd';
 import useGlobalStore from '@/stores/global';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ConsoleLogItem from '@/components/processing/common/ConsoleLogItem';
 import { List, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import { newExpression } from '@babel/types';
+import { TruncatableParagraphEllipsisStatus } from '@/components/processing/common/TruncatableParagraph';
+import JSONViewerModal from '@/components/common/JSONViewer/Modal';
+import { BsFillArrowUpLeftCircleFill } from 'react-icons/bs';
 
 const Container = styled.div`
   width: 100%;
@@ -56,6 +58,47 @@ const Header = styled.div`
     flex-direction: row;
     justify-content: flex-end;
     align-items: center;
+
+    .actionButton {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+
+      padding: 4px;
+      border-radius: ${(props) => props.theme.borderRadius}px;
+
+      .icon {
+        width: 28px;
+        height: 28px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        font-size: 18px;
+        color: ${(props) => props.theme.colorTextQuaternary};
+      }
+
+      .icon.selected {
+        color: ${(props) => props.theme.colorPrimary};
+      }
+
+      .title {
+        font-size: 13px;
+        line-height: 1;
+        font-weight: 500;
+      }
+
+      :hover {
+        background-color: ${(props) => props.theme.colorBgTextHover};
+      }
+    }
+
+    .actionButton + .actionButton {
+      margin-left: 6px;
+    }
   }
 
   > div {
@@ -80,13 +123,15 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
   const logListMeasurerCache = useMemo(() => {
     return new CellMeasurerCache({
       fixedWidth: true,
-      defaultHeight: 80,
+      defaultHeight: 120,
     });
   }, []);
   const listRef = useRef<List>(null);
 
   const [activeKey, setActiveKey] = React.useState<string>('');
   const [autoPlay, setAutoPlay] = useState(true);
+  const [operatingLog, setOperatingLog] = useState<SceneLog>();
+  const [logDetailModalOpen, setLogDetailModalOpen] = useState(false);
 
   const displayLogs = useMemo(() => {
     if (!activeKey) {
@@ -97,7 +142,9 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
     );
   }, [props.logs, activeKey]);
 
-  const [logItemEllipsisCache, setLogItemEllipsisCache] = React.useState<Record<string, boolean>>({});
+  const [logItemEllipsisCache, setLogItemEllipsisCache] = React.useState<
+    Record<string, TruncatableParagraphEllipsisStatus>
+  >({});
 
   const logItemRenderer = ({ key, index, style, parent }: any) => {
     const log = displayLogs[index];
@@ -108,12 +155,12 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
           <div ref={registerChild as any} style={style}>
             <ConsoleLogItem
               log={log}
-              ellipsis={logItemEllipsisCache[log.index]}
-              onEllipsisChange={(newEllipsis) => {
+              ellipsisStatus={logItemEllipsisCache[log.index] || TruncatableParagraphEllipsisStatus.WaitDetect}
+              onEllipsisStatusChange={(newStatus) => {
                 setLogItemEllipsisCache((prev) => {
                   return {
                     ...prev,
-                    [log.index]: newEllipsis,
+                    [log.index]: newStatus,
                   };
                 });
               }}
@@ -124,6 +171,10 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
                   } catch {}
                 }, 0);
               }}
+              onOpenJSONDetail={(log) => {
+                setOperatingLog(log);
+                setLogDetailModalOpen(true);
+              }}
             />
           </div>
         )}
@@ -131,13 +182,25 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
     );
   };
 
-  const [isProgrammaticScroll, setIsProgrammaticScroll] = useState(false);
   useEffect(() => {
-    if (autoPlay) {
-      setIsProgrammaticScroll(true);
-      listRef.current?.scrollToRow(props.logs.length - 1);
+    if (autoPlay && listRef.current) {
+      listRef.current.scrollToRow(props.logs.length - 1);
     }
-  }, [props.logs, autoPlay]);
+  }, [props.logs, autoPlay, activeKey]);
+
+  const logsAreaMouseDownRef = useRef(false);
+
+  useEffect(() => {
+    const onMouseUp = () => {
+      setTimeout(()=>{
+        logsAreaMouseDownRef.current = false;
+      }, 400)
+    };
+    document.addEventListener('mouseup', onMouseUp);
+    return () => {
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+  }, []);
 
   return (
     <Container>
@@ -153,15 +216,29 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
         </div>
         <div>
           <span>Console</span>
-          <span
-            style={{
-              fontSize: '14px',
+          {props.logs.length && (
+            <span
+              style={{
+                fontSize: '14px',
+              }}
+            >
+              （{props.logs.length} Messages）
+            </span>
+          )}
+        </div>
+        <div className="actionsArea">
+          <div
+            className="actionButton"
+            onClick={() => {
+              setAutoPlay(!autoPlay);
             }}
           >
-            （{props.logs.length} Messages）
-          </span>
+            <div className={`icon ${autoPlay ? 'selected' : ''}`}>
+              <BsFillArrowUpLeftCircleFill size={'1em'} />
+            </div>
+            <div className="title">Now</div>
+          </div>
         </div>
-        <div className="actionsArea"></div>
       </Header>
       <Tabs
         type="card"
@@ -196,7 +273,14 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
             }),
         ]}
       />
-      <LogsArea>
+      <LogsArea
+        onWheelCapture={() => {
+          setAutoPlay(false);
+        }}
+        onMouseDownCapture={() => {
+          logsAreaMouseDownRef.current = true;
+        }}
+      >
         <AutoSizer>
           {({ height, width }) => (
             <List
@@ -212,9 +296,7 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
               rowRenderer={logItemRenderer}
               overscanRowCount={5}
               onScroll={() => {
-                if (isProgrammaticScroll) {
-                  setIsProgrammaticScroll(false);
-                } else {
+                if (logsAreaMouseDownRef.current) {
                   setAutoPlay(false);
                 }
               }}
@@ -222,6 +304,14 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
           )}
         </AutoSizer>
       </LogsArea>
+      <JSONViewerModal
+        title={'Log Detail'}
+        open={logDetailModalOpen}
+        jsonObject={operatingLog}
+        onNeedClose={() => {
+          setLogDetailModalOpen(false);
+        }}
+      />
     </Container>
   );
 };

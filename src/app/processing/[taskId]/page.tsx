@@ -168,7 +168,7 @@ const ProcessingPage = ({
               await LocalAPI.dict.open(endMessage.data.save_dir);
               message.success('Result dict opened.');
               globalStore.updateTaskResultSavedDir(endMessage.data.save_dir);
-              // router.replace(`/result/${taskId}?bundlePath=${encodeURIComponent(endMessage.data.save_dir)}`);
+              router.replace(`/result/${taskId}?bundlePath=${encodeURIComponent(endMessage.data.save_dir)}`);
               break;
             default:
               break;

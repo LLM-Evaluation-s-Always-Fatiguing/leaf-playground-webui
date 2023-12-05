@@ -70,6 +70,13 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
       open={open}
       width={640}
       destroyOnClose
+      centered
+      styles={{
+        body: {
+          maxHeight: '80vh',
+          overflow: 'hidden auto',
+        },
+      }}
       okText={sceneAgentConfig ? 'Save' : 'Create'}
       onOk={() => {
         onConfirm();
