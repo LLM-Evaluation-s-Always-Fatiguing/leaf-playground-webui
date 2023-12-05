@@ -12,6 +12,10 @@ export class DefaultAllOfDef extends AbstractComponentDef {
     schema.allOf.forEach((s: any) => {
       merge(schema, s);
     });
+    if (!schema.type && schema.const) {
+      schema.type = typeof schema.const
+    }
+    console.log(schema);
     rootTransform!(schema, level, rootTransform);
   }
 }

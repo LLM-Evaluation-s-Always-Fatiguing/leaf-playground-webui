@@ -1,16 +1,12 @@
 import styled from '@emotion/styled';
-import SceneLog, {
-  SceneLogJSONContent,
-  SceneLogMediaType,
-  SceneLogMessage,
-  SceneLogTextContent,
-} from '@/types/server/Log';
+import SceneLog from '@/types/server/Log';
 import React, { useEffect } from 'react';
-import { Button, Space } from 'antd';
+import { Button } from 'antd';
 import { TbCodeDots } from 'react-icons/tb';
 import TruncatableParagraph, {
   TruncatableParagraphEllipsisStatus,
 } from '@/components/processing/common/TruncatableParagraph';
+import { getSceneLogMessageDisplayContent } from '@/components/processing/utils/log';
 
 const Container = styled.div`
   margin: 9px 16px;
@@ -42,27 +38,6 @@ const Body = styled.div`
   align-items: stretch;
   flex-shrink: 0;
 `;
-
-function getSceneLogMessageDisplayContent(message: SceneLogMessage) {
-  switch (message.content.type) {
-    case SceneLogMediaType.TEXT: {
-      const content = message.content as SceneLogTextContent;
-      return content.display_text || content.text;
-    }
-    case SceneLogMediaType.AUDIO:
-      return 'Audio';
-    case SceneLogMediaType.IMAGE:
-      return 'Image';
-    case SceneLogMediaType.VIDEO:
-      return 'Video';
-    case SceneLogMediaType.JSON: {
-      const content = message.content as SceneLogJSONContent;
-      return content.display_text || JSON.stringify(content.data, null, 2);
-    }
-    default:
-      return message.content.display_text || 'Log Type Unknown';
-  }
-}
 
 interface ConsoleLogItemProps {
   log: SceneLog;

@@ -13,6 +13,7 @@ import keyBy from 'lodash/keyBy';
 import { Button, Slider, Space } from 'antd';
 import SampleStatusAvatar from '@/components/processing/common/SampleStatusAvatar';
 import SampleAvatar from '@/components/processing/common/SampleAvatar';
+import { getSceneLogMessageDisplayContent } from '@/components/processing/utils/log';
 
 const Container = styled.div`
   width: 100%;
@@ -90,7 +91,7 @@ const Container = styled.div`
         white-space: pre-line;
         padding: 16px 12px;
         border-radius: 0 0 6px 6px;
-        background: ${props=>props.theme.isDarkMode ? 'rgba(255,255,255,0.08)' : 'white'};
+        background: ${(props) => (props.theme.isDarkMode ? 'rgba(255,255,255,0.08)' : 'white')};
       }
     }
   }
@@ -130,7 +131,7 @@ const Container = styled.div`
         word-break: break-all;
         padding: 16px 12px;
         border-radius: 0 0 6px 6px;
-        background: ${props=>props.theme.isDarkMode ? 'rgba(255,255,255,0.08)' : 'white'};
+        background: ${(props) => (props.theme.isDarkMode ? 'rgba(255,255,255,0.08)' : 'white')};
       }
     }
   }
@@ -277,7 +278,7 @@ const SampleQAVisualization = (props: SampleQAVisualizationProps) => {
               </SampleAvatar>
               <div className="card">
                 <div className="header">{log.narrator}</div>
-                <div className="body">{(log.response.content as SceneLogTextContent).text}</div>
+                <div className="body">{getSceneLogMessageDisplayContent(log.response)}</div>
               </div>
             </div>
           );
