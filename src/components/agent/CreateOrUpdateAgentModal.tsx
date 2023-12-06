@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Modal, Spin } from 'antd';
+import { Spin } from 'antd';
 import SceneAgentConfig, { SceneAgentDefinition } from '@/types/server/Agent';
 import { Form } from '@formily/antd-v5';
 import { createForm } from '@formily/core';
 import FormilyDefaultSchemaField from '@/components/formily/FormilyDefaultSchemaField';
 import { getRandomAgentColor } from '@/utils/color';
+import CustomScrollableAntdModal from '@/components/basic/CustomScrollableAntdModal';
 
 interface CreateOrUpdateAgentModalProps {
   open: boolean;
@@ -65,7 +66,7 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
   };
 
   return (
-    <Modal
+    <CustomScrollableAntdModal
       title={`${sceneAgentConfig ? 'Edit' : 'Create'} Agent （${sceneAgentDefinition?.name}）`}
       open={open}
       width={640}
@@ -90,7 +91,7 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
           <FormilyDefaultSchemaField schema={sceneAgentDefinition?.schema} />
         </Form>
       </Spin>
-    </Modal>
+    </CustomScrollableAntdModal>
   );
 };
 

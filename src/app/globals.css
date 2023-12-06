@@ -5,8 +5,28 @@
   -webkit-font-smoothing: subpixel-antialiased;
   text-rendering: optimizeLegibility;
   font-family: -apple-system, BlinkMacSystemFont, Georgia, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans',
-    'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-    'Noto Color Emoji';
+  'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+  'Noto Color Emoji';
+
+  .custom-scrollable-antd-modal {
+    .ant-modal-content {
+      padding: 20px 0;
+
+      .ant-modal-header {
+        padding: 0 24px;
+      }
+
+      .ant-modal-body {
+        max-height: 80vh;
+        overflow: hidden auto;
+        padding: 20px 24px;
+      }
+
+      .ant-modal-footer {
+        padding: 0 24px;
+      }
+    }
+  }
 }
 
 * {

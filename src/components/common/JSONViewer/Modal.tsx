@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { Modal } from 'antd';
 import JSONViewer from '@/components/common/JSONViewer/index';
+import CustomScrollableAntdModal from '@/components/basic/CustomScrollableAntdModal';
 
 interface JSONViewerModalProps {
   open: boolean;
@@ -21,14 +21,13 @@ const JSONViewerModal: React.FC<JSONViewerModalProps> = ({ open, title, jsonObje
   }, [open]);
 
   return (
-    <Modal
+    <CustomScrollableAntdModal
       open={open}
       width={680}
       destroyOnClose
       centered
       styles={{
         body: {
-          padding: '30px 0 10px 0',
           maxHeight: '80vh',
           overflow: 'hidden auto',
         },
@@ -40,7 +39,7 @@ const JSONViewerModal: React.FC<JSONViewerModalProps> = ({ open, title, jsonObje
       title={title || 'JSON Viewer'}
     >
       <JSONViewer jsonObject={jsonObject} />
-    </Modal>
+    </CustomScrollableAntdModal>
   );
 };
 
