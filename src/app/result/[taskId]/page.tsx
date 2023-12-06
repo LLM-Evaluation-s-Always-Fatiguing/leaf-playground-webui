@@ -13,7 +13,7 @@ import ReactECharts from 'echarts-for-react';
 import { useTheme } from 'antd-style';
 import ServerTaskBundle from '@/types/api-router/server/task-bundle';
 import WebUITaskBundle from '@/types/api-router/webui/task-bundle';
-import { getSceneLogMessageDisplayContent } from '@/components/processing/utils/log';
+import { getSceneLogMessageDisplayContent } from '@/utils/scene-log';
 
 const Container = styled.div`
   width: 100%;

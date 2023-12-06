@@ -6,7 +6,7 @@ import { TbCodeDots } from 'react-icons/tb';
 import TruncatableParagraph, {
   TruncatableParagraphEllipsisStatus,
 } from '@/components/processing/common/TruncatableParagraph';
-import { getSceneLogMessageDisplayContent } from '@/components/processing/utils/log';
+import { getSceneLogMessageDisplayContent } from '@/utils/scene-log';
 
 const Container = styled.div`
   margin: 9px 16px;

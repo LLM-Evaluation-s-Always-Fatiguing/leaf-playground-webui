@@ -13,7 +13,7 @@ import keyBy from 'lodash/keyBy';
 import { Button, Slider, Space } from 'antd';
 import SampleStatusAvatar from '@/components/processing/common/SampleStatusAvatar';
 import SampleAvatar from '@/components/processing/common/SampleAvatar';
-import { getSceneLogMessageDisplayContent } from '@/components/processing/utils/log';
+import { getSceneLogMessageDisplayContent } from '@/utils/scene-log';
 
 const Container = styled.div`
   width: 100%;
