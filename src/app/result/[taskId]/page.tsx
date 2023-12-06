@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import LocalAPI from '@/services/local';
 import styled from '@emotion/styled';
 import { Button, ButtonProps, Card, Descriptions, Space, Spin, Table } from 'antd';
@@ -14,6 +14,7 @@ import { useTheme } from 'antd-style';
 import ServerTaskBundle from '@/types/api-router/server/task-bundle';
 import WebUITaskBundle from '@/types/api-router/webui/task-bundle';
 import { getSceneLogMessageDisplayContent } from '@/utils/scene-log';
+import LoadingOverlay from '@/components/common/LoadingOverlay';
 
 const Container = styled.div`
   width: 100%;
@@ -69,19 +70,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
 
   return (
     <>
-      {loading && (
-        <div
-          style={{
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Spin />
-        </div>
-      )}
+      <LoadingOverlay spinning={loading} tip={"Loading..."} />
       {!loading && serverBundle && webuiBundle && (
         <Container>
           <div className="header">

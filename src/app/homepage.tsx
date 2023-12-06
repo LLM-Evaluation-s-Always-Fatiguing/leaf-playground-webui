@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Scene, { SceneListItem } from '@/types/server/Scene';
 import styled from '@emotion/styled';
 import { Spin, message } from 'antd';
@@ -12,6 +12,7 @@ import useGlobalStore from '@/stores/global';
 import ServerInfo from '@/types/server/ServerInfo';
 import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskInfo';
 import LocalAPI from '@/services/local';
+import LoadingOverlay from "@/components/common/LoadingOverlay";
 
 const ScenesArea = styled.div`
   width: 24%;
@@ -26,20 +27,6 @@ const ScenesArea = styled.div`
     overflow: hidden auto;
     padding: 16px 12px;
   }
-
-  .loadingOverlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    backdrop-filter: blur(3px);
-    z-index: 3;
-  }
 `;
 
 const OperationArea = styled.div`
@@ -47,6 +34,7 @@ const OperationArea = styled.div`
   width: 76%;
   min-width: 680px;
   overflow: hidden auto;
+  position: relative;
 `;
 
 const PageContainer = styled.div`
@@ -141,11 +129,7 @@ export default function HomePage(props: HomePageProps) {
             );
           })}
         </div>
-        {scenesLoading && (
-          <div className="loadingOverlay">
-            <Spin spinning />
-          </div>
-        )}
+        <LoadingOverlay spinning={scenesLoading} />
       </ScenesArea>
       <OperationArea>
         {started && selectedSceneDetail ? (
@@ -163,6 +147,7 @@ export default function HomePage(props: HomePageProps) {
             }}
           />
         )}
+        <LoadingOverlay spinning={sceneDetailLoading} />
       </OperationArea>
     </PageContainer>
   );

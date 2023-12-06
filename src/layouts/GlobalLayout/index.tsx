@@ -29,6 +29,7 @@ const useStyles = createStyles(({ token, css }) => ({
   content: css`
     height: calc(100vh - ${token.headerHeight}px);
     overflow: hidden auto;
+    position: relative;
   `,
 }));
 

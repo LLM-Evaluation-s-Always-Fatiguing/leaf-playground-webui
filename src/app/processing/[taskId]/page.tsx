@@ -21,6 +21,7 @@ import ServerAPI from '@/services/server';
 import { SceneTaskStatus } from '@/types/server/Scene';
 import BuddhaLogo from '@/components/processing/specialized/buddha/BuddhaLogo';
 import { MdPerson3 } from 'react-icons/md';
+import LoadingOverlay from '@/components/common/LoadingOverlay';
 
 const PageContainer = styled.div`
   width: 100%;
@@ -264,13 +265,7 @@ const ProcessingPage = ({
           </div>
         )}
       </ConsoleArea>
-      {loading && (
-        <div className="loadingArea">
-          <Spin spinning={true} tip={loadingTip}>
-            <div style={{ width: '240px' }} />
-          </Spin>
-        </div>
-      )}
+      <LoadingOverlay spinning={loading} tip={loadingTip} />
     </PageContainer>
   );
 };

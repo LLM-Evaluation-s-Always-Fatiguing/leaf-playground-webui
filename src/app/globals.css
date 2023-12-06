@@ -1,6 +1,8 @@
 :root {
   --scroll-bar-width: 6px;
 
+  --loading-overlay-default-z-index: 400;
+
   -moz-osx-font-smoothing: auto;
   -webkit-font-smoothing: subpixel-antialiased;
   text-rendering: optimizeLegibility;

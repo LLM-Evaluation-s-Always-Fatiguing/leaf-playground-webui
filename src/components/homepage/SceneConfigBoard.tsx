@@ -5,7 +5,7 @@ import styled from '@emotion/styled';
 import { Button, Card, Collapse, message, Space } from 'antd';
 import { Form } from '@formily/antd-v5';
 import { createForm, onFormValuesChange } from '@formily/core';
-import { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import SelectAgentModal from '@/components/agent/SelectAgentModal';
 import FormilyDefaultSchemaField from '@/components/formily/FormilyDefaultSchemaField';
 import CreateOrUpdateAgentModal from '@/components/agent/CreateOrUpdateAgentModal';
@@ -22,6 +22,7 @@ import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskIn
 import { MdOutlineHistory } from 'react-icons/md';
 import TaskHistoryModal from '@/components/task/TaskHistoryModal';
 import LocalAPI from '@/services/local';
+import LoadingOverlay from '@/components/common/LoadingOverlay';
 
 const Container = styled.div`
   width: 100%;
@@ -68,6 +69,7 @@ const Content = styled.div`
   justify-content: flex-start;
   align-items: stretch;
   overflow: hidden auto;
+  position: relative;
 `;
 
 const Footer = styled.div`
@@ -82,6 +84,8 @@ const Footer = styled.div`
   padding: 0 20px;
 
   border-top: 1px solid ${(props) => props.theme.dividerColor};
+
+  z-index: calc(var(--loading-overlay-default-z-index) + 1);
 `;
 
 interface SceneConfigBoardProps {
@@ -120,9 +124,6 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
     });
   }, []);
 
-  const [loading, setLoading] = useState(false);
-  const [loadingTip, setLoadingTip] = useState('');
-
   const [selectAgentModalOpen, setSelectAgentModalOpen] = useState(false);
   const [sceneAgentConfigs, setSceneAgentConfigs] = useState<SceneAgentConfig[]>([]);
   const [operatingAgentDefinition, setOperatingAgentDefinition] = useState<SceneAgentDefinition>();
@@ -133,6 +134,7 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
   return (
     <>
       <Container>
+        <LoadingOverlay spinning={creatingScene} tip={'Creating scene task...'} />
         <Content>
           <Space direction={'vertical'}>
             <Card
@@ -382,9 +384,12 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
         scene={scene}
         tasks={taskHistory}
         onApplyHistoryTaskConfig={(runConfig) => {
-          console.log(runConfig);
           sceneForm.setValues(runConfig.scene_info_config_data);
           sceneAdditionalForm.setValues(runConfig.additional_config_data);
+          try {
+            sceneForm.validate();
+            sceneAdditionalForm.validate();
+          } catch {}
           if (runConfig.scene_evaluators_config_data) {
             evaluatorForm.setValues(
               runConfig.scene_evaluators_config_data.reduce(
