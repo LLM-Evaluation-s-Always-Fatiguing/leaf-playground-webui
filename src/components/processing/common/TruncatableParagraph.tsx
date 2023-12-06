@@ -88,7 +88,7 @@ const TruncatableParagraph = ({
         }}
       >
         <Space align={'center'}>
-          Put Away
+          Collapse
           <IoIosArrowUp
             size={'1.2em'}
             style={{
