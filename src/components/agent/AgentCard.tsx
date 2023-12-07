@@ -186,6 +186,7 @@ const AgentCard = (props: AgentCardProps) => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 textAlign: 'center',
+                wordBreak: 'break-all'
               }}
             >
               {props.agentsConfigFormilySchemas[props.sceneAgentConfig?.agent_id || ''].title}
