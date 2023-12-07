@@ -45,7 +45,7 @@ const JSONViewModal: React.FC<JSONViewModalProps> = ({ open, title, jsonObject, 
   return (
     <CustomFullFillAntdModal
       open={open}
-      width={960}
+      width={'max(960px, 90vw)'}
       destroyOnClose
       centered
       footer={null}
