@@ -5,9 +5,7 @@ function generateRandomAgentColorHex() {
   const saturation = 85 + Math.floor(Math.random() * 15);
   const lightness = 65 + Math.floor(Math.random() * 20);
   const color = new Color(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
-  return color.toString({
-    format: 'hex',
-  });
+  return color.to('srgb').toString({ format: 'hex' });
 }
 
 export function getRandomAgentColor(existingColors: string[]) {
@@ -24,7 +22,12 @@ export function getRandomAgentColor(existingColors: string[]) {
   const colorPool = colorGroups.flat().sort(() => 0.5 - Math.random());
   const remainingColors = colorPool.filter((color) => !existingColors.includes(color));
   if (remainingColors.length === 0) {
-    return generateRandomAgentColorHex();
+    const newColor = generateRandomAgentColorHex();
+    if (existingColors.includes(newColor)) {
+      return getRandomAgentColor(existingColors);
+    } else {
+      return newColor;
+    }
   }
   return remainingColors[Math.floor(Math.random() * remainingColors.length)];
 }
