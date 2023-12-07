@@ -8,7 +8,7 @@ import ConsoleLogItem from '@/components/processing/common/ConsoleLogItem';
 import { List, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { TruncatableParagraphEllipsisStatus } from '@/components/processing/common/TruncatableParagraph';
-import JSONViewerModal from '@/components/common/JSONViewer/Modal';
+import JSONViewModal from '@/components/common/JSONViewModal';
 import { BsFillArrowUpLeftCircleFill } from 'react-icons/bs';
 
 const Container = styled.div`
@@ -304,7 +304,7 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
           )}
         </AutoSizer>
       </LogsArea>
-      <JSONViewerModal
+      <JSONViewModal
         title={'Log Detail'}
         open={logDetailModalOpen}
         jsonObject={operatingLog}

@@ -29,6 +29,21 @@
       }
     }
   }
+
+  .custom-full-fill-antd-modal {
+    .ant-modal-content {
+      padding: 20px 0;
+
+      .ant-modal-header {
+        padding: 0 24px;
+      }
+
+      .ant-modal-body {
+        max-height: 80vh;
+        overflow: hidden;
+      }
+    }
+  }
 }
 
 * {

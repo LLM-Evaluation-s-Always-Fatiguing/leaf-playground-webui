@@ -7,7 +7,7 @@ import styled from '@emotion/styled';
 import { Button, ButtonProps, Card, Collapse, Descriptions, Space, Spin, Table } from 'antd';
 import SceneLog from '@/types/server/Log';
 import dayjs from 'dayjs';
-import JSONViewerModal from '@/components/common/JSONViewer/Modal';
+import JSONViewModal from '@/components/common/JSONViewModal';
 import ReactECharts from 'echarts-for-react';
 import { useTheme } from 'antd-style';
 import ServerTaskBundle from '@/types/api-router/server/task-bundle';
@@ -449,7 +449,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
           </Content>
         </Container>
       )}
-      <JSONViewerModal
+      <JSONViewModal
         title={jsonViewerModalTitle}
         open={jsonViewerModalOpen}
         jsonObject={viewingJSON}

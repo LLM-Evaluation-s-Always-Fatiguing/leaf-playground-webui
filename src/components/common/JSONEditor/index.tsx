@@ -4,15 +4,17 @@ import React, { useEffect, useRef, useState } from 'react';
 import Editor, { Monaco } from '@monaco-editor/react';
 import { editor } from 'monaco-editor';
 import SampleJSONSchemaDef from '@/types/SampleJSONSchemaDef';
+import { useTheme } from 'antd-style';
 
 interface MonacoJSONEditorProps {
   readonly?: boolean;
   value: string;
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
   jsonSchema?: SampleJSONSchemaDef;
 }
 
 export default function MonacoJSONEditor(props: MonacoJSONEditorProps) {
+  const theme = useTheme();
   const monacoRef = useRef<Monaco>();
   const [editorValue, setEditorValue] = useState<string>(props.value);
 
@@ -62,13 +64,14 @@ export default function MonacoJSONEditor(props: MonacoJSONEditorProps) {
     <Editor
       height="90vh"
       defaultLanguage="json"
-      theme={'vs-dark'}
+      theme={theme.appearance === 'dark' ? 'vs-dark' : 'default'}
       value={editorValue}
       options={{
         readOnly: !!props.readonly,
         minimap: {
           enabled: true,
         },
+        wordWrap: 'on'
       }}
       onChange={(value) => {
         setEditorValue(value || '');
