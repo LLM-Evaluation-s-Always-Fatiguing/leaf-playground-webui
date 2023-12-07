@@ -62,7 +62,7 @@ const ConsoleLogItem = ({
   return (
     <Container>
       <Header>
-        {log.narrator}
+        <div>{log.narrator}</div>
         <Button
           size="small"
           type="text"

@@ -90,25 +90,45 @@ const Footer = styled.div`
 `;
 
 const CustomCollapseWrapper = styled.div`
-  .ant-collapse-header {
-    flex-direction: row-reverse !important;
-    align-items: center !important;
+  .ant-collapse {
+    border-radius: 0;
+    border: none;
 
-    .ant-collapse-header-text + .ant-collapse-extra {
-      margin-right: 8px;
+    .ant-collapse-item {
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+      border-color: ${props => props.theme.colorBorderSecondary};
+
+      .ant-collapse-header {
+        flex-direction: row-reverse !important;
+        align-items: center !important;
+
+        .ant-collapse-header-text + .ant-collapse-extra {
+          margin-right: 8px;
+        }
+
+        .ant-collapse-extra {
+          .validate-status-indicator {
+            width: 1em;
+            height: 1em;
+            border-radius: 50%;
+            background-color: ${(props) => props.theme.colorError};
+          }
+
+          .validate-status-indicator.valid {
+            background-color: ${(props) => props.theme.colorSuccess};
+          }
+        }
+      }
+
+      .ant-collapse-content {
+        border-color: ${props => props.theme.colorBorderSecondary};
+      }
     }
 
-    .ant-collapse-extra {
-      .validate-status-indicator {
-        width: 1em;
-        height: 1em;
-        border-radius: 50%;
-        background-color: ${(props) => props.theme.colorError};
-      }
-
-      .validate-status-indicator.valid {
-        background-color: ${(props) => props.theme.colorSuccess};
-      }
+    > .ant-collapse-item:last-child {
+      border-bottom: none;
     }
   }
 `;
@@ -231,10 +251,6 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
               <CustomCollapseWrapper>
                 <Collapse
                   defaultActiveKey={['basic', 'additional', 'evaluation']}
-                  style={{
-                    borderRadius: 0,
-                    border: 'none',
-                  }}
                   items={[
                     {
                       key: 'basic',
@@ -245,11 +261,6 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
                           <FormilyDefaultSchemaField schema={scene.sceneInfoConfigFormilySchema} />
                         </Form>
                       ),
-                      style: {
-                        borderRadius: 0,
-                        borderLeft: 'none',
-                        borderRight: 'none',
-                      },
                     },
                     {
                       key: 'additional',
@@ -260,11 +271,6 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
                           <FormilyDefaultSchemaField schema={scene.additionalConfigFormilySchema} />
                         </Form>
                       ),
-                      style: {
-                        borderRadius: 0,
-                        borderLeft: 'none',
-                        borderRight: 'none',
-                      },
                     },
                     ...(scene.evaluatorsConfigFormilySchemas
                       ? [
@@ -292,10 +298,6 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
                                 )}
                               </Form>
                             ),
-                            style: {
-                              borderRadius: 0,
-                              border: 'none',
-                            },
                           },
                         ]
                       : []),

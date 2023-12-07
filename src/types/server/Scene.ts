@@ -20,6 +20,7 @@ export interface SceneMetaData {
 export interface SceneAgentMetaData {
   description: string;
   actions: Record<string, string>;
+  cls_name: string;
 }
 
 export interface ServerScene {

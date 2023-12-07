@@ -214,40 +214,40 @@ const AgentCard = (props: AgentCardProps) => {
             })}
           </div>
           {!displayMode && (
-            <>
-              <div className="connectionStatus">
-                <FaCheck
-                  style={{
-                    color: theme.colorSuccess,
-                  }}
-                />
-                <div
-                  style={{
-                    marginLeft: '3px',
-                    color: theme.colorSuccess,
-                    fontWeight: 500,
-                  }}
-                >
-                  Connected
-                </div>
-              </div>
+            <div className="connectionStatus">
+              <FaCheck
+                style={{
+                  color: theme.colorSuccess,
+                }}
+              />
               <div
-                className="editButton"
-                onClick={() => {
-                  props.onEditButtonClick?.();
+                style={{
+                  marginLeft: '3px',
+                  color: theme.colorSuccess,
+                  fontWeight: 500,
                 }}
               >
-                <MdOutlineSettings size={'1em'} />
+                Connected
               </div>
-              <div
-                className="deleteButton"
-                onClick={() => {
-                  props.onDeleteButtonClick?.();
-                }}
-              >
-                <MdClose size={'1em'} />
-              </div>
-            </>
+            </div>
+          )}
+          <div
+            className="editButton"
+            onClick={() => {
+              props.onEditButtonClick?.();
+            }}
+          >
+            <MdOutlineSettings size={'1em'} />
+          </div>
+          {!displayMode && (
+            <div
+              className="deleteButton"
+              onClick={() => {
+                props.onDeleteButtonClick?.();
+              }}
+            >
+              <MdClose size={'1em'} />
+            </div>
           )}
         </AgentContent>
       )}
