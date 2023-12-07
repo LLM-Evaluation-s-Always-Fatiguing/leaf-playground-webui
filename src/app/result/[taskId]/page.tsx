@@ -251,6 +251,11 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                                   role={'agent'}
                                   agentsConfigFormilySchemas={webuiBundle.scene.agentsConfigFormilySchemas}
                                   sceneAgentConfig={{ agent_id: agentId, agent_config_data: agentConfig }}
+                                  onEditButtonClick={()=>{
+                                    setViewingJSON(serverBundle.agents[agentConfig.profile.id]);
+                                    setJSONViewerModalTitle('Agent Detail');
+                                    setJSONViewerModalOpen(true);
+                                  }}
                                 />
                               );
                             })}
