@@ -4,8 +4,8 @@ import Scene from '@/types/server/Scene';
 import styled from '@emotion/styled';
 import { Button, Card, Collapse, message, Space } from 'antd';
 import { Form } from '@formily/antd-v5';
-import { createForm, onFormValuesChange } from '@formily/core';
-import React, { useMemo, useRef, useState } from 'react';
+import { createForm, onFormValuesChange, onFormValidateSuccess, onFormValidateFailed } from '@formily/core';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import SelectAgentModal from '@/components/agent/SelectAgentModal';
 import FormilyDefaultSchemaField from '@/components/formily/FormilyDefaultSchemaField';
 import CreateOrUpdateAgentModal from '@/components/agent/CreateOrUpdateAgentModal';
@@ -23,6 +23,7 @@ import { MdOutlineHistory } from 'react-icons/md';
 import TaskHistoryModal from '@/components/task/TaskHistoryModal';
 import LocalAPI from '@/services/local';
 import LoadingOverlay from '@/components/common/LoadingOverlay';
+import { useTheme } from 'antd-style';
 
 const Container = styled.div`
   width: 100%;
@@ -75,7 +76,7 @@ const Content = styled.div`
 const Footer = styled.div`
   flex-shrink: 0;
   width: 100%;
-  height: 85px;
+  height: 55px;
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
@@ -88,6 +89,30 @@ const Footer = styled.div`
   z-index: calc(var(--loading-overlay-default-z-index) + 1);
 `;
 
+const CustomCollapseWrapper = styled.div`
+  .ant-collapse-header {
+    flex-direction: row-reverse !important;
+    align-items: center !important;
+
+    .ant-collapse-header-text + .ant-collapse-extra {
+      margin-right: 8px;
+    }
+
+    .ant-collapse-extra {
+      .validate-status-indicator {
+        width: 1em;
+        height: 1em;
+        border-radius: 50%;
+        background-color: ${(props) => props.theme.colorError};
+      }
+
+      .validate-status-indicator.valid {
+        background-color: ${(props) => props.theme.colorSuccess};
+      }
+    }
+  }
+`;
+
 interface SceneConfigBoardProps {
   scene: Scene;
   taskHistory: WebUITaskBundleTaskInfo[];
@@ -95,6 +120,7 @@ interface SceneConfigBoardProps {
 
 const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
   const router = useRouter();
+  const theme = useTheme();
   const globalStore = useGlobalStore();
 
   const hasHistory = taskHistory.length > 0;
@@ -102,23 +128,54 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
   const creatingSceneRef = useRef(false);
   const [creatingScene, setCreatingScene] = useState(false);
 
+  const [sceneFormValid, setSceneFormValid] = useState(false);
   const sceneForm = useMemo(() => {
     return createForm({
-      validateFirst: true,
+      effects() {
+        onFormValuesChange((form) => {
+          form.validate();
+        });
+        onFormValidateSuccess(() => {
+          setSceneFormValid(true);
+        });
+        onFormValidateFailed(() => {
+          setSceneFormValid(false);
+        });
+      },
     });
   }, []);
+
+  const [sceneAdditionalFormValid, setSceneAdditionalFormValid] = useState(false);
   const sceneAdditionalForm = useMemo(() => {
     return createForm({
-      validateFirst: true,
+      effects() {
+        onFormValuesChange((form) => {
+          form.validate();
+        });
+        onFormValidateSuccess(() => {
+          setSceneAdditionalFormValid(true);
+        });
+        onFormValidateFailed(() => {
+          setSceneAdditionalFormValid(false);
+        });
+      },
     });
   }, []);
+
+  const [evaluatorFormValid, setEvaluatorFormValid] = useState(false);
   const [evaluationMethod, setEvaluationMethod] = useState('evaluators');
   const evaluatorForm = useMemo(() => {
     return createForm({
-      validateFirst: true,
       effects() {
         onFormValuesChange((form) => {
           setEvaluationMethod(form.values.evaluation_method);
+          form.validate();
+        });
+        onFormValidateSuccess(() => {
+          setEvaluatorFormValid(true);
+        });
+        onFormValidateFailed(() => {
+          setEvaluatorFormValid(false);
         });
       },
     });
@@ -130,6 +187,33 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
   const [operatingAgentConfigIndex, setOperatingAgentConfigIndex] = useState(-1);
   const [createOrUpdateAgentModalOpen, setCreateOrUpdateAgentModalOpen] = useState(false);
   const [taskHistoryModalOpen, setTaskHistoryModalOpen] = useState(false);
+
+  useEffect(() => {
+    const doFistFormValidate = async () => {
+      try {
+        await sceneForm.validate();
+        setSceneFormValid(true);
+      } catch {
+        sceneForm.clearErrors();
+        setSceneFormValid(false);
+      }
+      try {
+        await sceneAdditionalForm.validate();
+        setSceneAdditionalFormValid(true);
+      } catch {
+        sceneAdditionalForm.clearErrors();
+        setSceneAdditionalFormValid(false);
+      }
+      try {
+        await evaluatorForm.validate();
+        setEvaluatorFormValid(true);
+      } catch {
+        evaluatorForm.clearErrors();
+        setEvaluatorFormValid(false);
+      }
+    };
+    doFistFormValidate();
+  }, []);
 
   return (
     <>
@@ -144,74 +228,80 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
                 overflow: 'hidden',
               }}
             >
-              <Collapse
-                defaultActiveKey={['basic', 'additional', 'evaluation']}
-                style={{
-                  borderRadius: 0,
-                  border: 'none',
-                }}
-                items={[
-                  {
-                    key: 'basic',
-                    label: 'Basic',
-                    children: (
-                      <Form form={sceneForm} labelCol={5} wrapperCol={16}>
-                        <FormilyDefaultSchemaField schema={scene.sceneInfoConfigFormilySchema} />
-                      </Form>
-                    ),
-                    style: {
-                      borderRadius: 0,
-                      borderLeft: 'none',
-                      borderRight: 'none',
+              <CustomCollapseWrapper>
+                <Collapse
+                  defaultActiveKey={['basic', 'additional', 'evaluation']}
+                  style={{
+                    borderRadius: 0,
+                    border: 'none',
+                  }}
+                  items={[
+                    {
+                      key: 'basic',
+                      label: 'Basic',
+                      extra: <div className={`validate-status-indicator ${sceneFormValid ? 'valid' : ''}`} />,
+                      children: (
+                        <Form form={sceneForm} labelCol={5} wrapperCol={16}>
+                          <FormilyDefaultSchemaField schema={scene.sceneInfoConfigFormilySchema} />
+                        </Form>
+                      ),
+                      style: {
+                        borderRadius: 0,
+                        borderLeft: 'none',
+                        borderRight: 'none',
+                      },
                     },
-                  },
-                  {
-                    key: 'additional',
-                    label: 'Additional',
-                    children: (
-                      <Form form={sceneAdditionalForm} labelCol={5} wrapperCol={16}>
-                        <FormilyDefaultSchemaField schema={scene.additionalConfigFormilySchema} />
-                      </Form>
-                    ),
-                    style: {
-                      borderRadius: 0,
-                      border: 'none',
+                    {
+                      key: 'additional',
+                      label: 'Additional',
+                      extra: <div className={`validate-status-indicator ${sceneAdditionalFormValid ? 'valid' : ''}`} />,
+                      children: (
+                        <Form form={sceneAdditionalForm} labelCol={5} wrapperCol={16}>
+                          <FormilyDefaultSchemaField schema={scene.additionalConfigFormilySchema} />
+                        </Form>
+                      ),
+                      style: {
+                        borderRadius: 0,
+                        borderLeft: 'none',
+                        borderRight: 'none',
+                      },
                     },
-                  },
-                  ...(scene.evaluatorsConfigFormilySchemas
-                    ? [
-                        {
-                          key: 'evaluation',
-                          label: 'Evaluation',
-                          children: (
-                            <Form form={evaluatorForm} labelCol={5} wrapperCol={16}>
-                              <FormilyDefaultSchemaField>
-                                <FormilyDefaultSchemaField.Markup
-                                  title={'Evaluation method'}
-                                  name={'evaluation_method'}
-                                  x-decorator="FormItem"
-                                  x-component="Radio.Group"
-                                  default={'evaluators'}
-                                  enum={[
-                                    { label: 'Only Human', value: 'human' },
-                                    { label: 'With LLM', value: 'evaluators' },
-                                  ]}
-                                />
-                              </FormilyDefaultSchemaField>
-                              {evaluationMethod === 'evaluators' && (
-                                <FormilyDefaultSchemaField schema={scene.evaluatorsConfigFormilySchemas} />
-                              )}
-                            </Form>
-                          ),
-                          style: {
-                            borderRadius: 0,
-                            border: 'none',
+                    ...(scene.evaluatorsConfigFormilySchemas
+                      ? [
+                          {
+                            key: 'evaluation',
+                            label: 'Evaluation',
+                            extra: <div className={`validate-status-indicator ${evaluatorFormValid ? 'valid' : ''}`} />,
+                            children: (
+                              <Form form={evaluatorForm} labelCol={5} wrapperCol={16}>
+                                <FormilyDefaultSchemaField>
+                                  <FormilyDefaultSchemaField.Markup
+                                    title={'Evaluation method'}
+                                    name={'evaluation_method'}
+                                    x-decorator="FormItem"
+                                    x-component="Radio.Group"
+                                    default={'evaluators'}
+                                    enum={[
+                                      { label: 'Only Human', value: 'human' },
+                                      { label: 'With LLM', value: 'evaluators' },
+                                    ]}
+                                  />
+                                </FormilyDefaultSchemaField>
+                                {evaluationMethod === 'evaluators' && (
+                                  <FormilyDefaultSchemaField schema={scene.evaluatorsConfigFormilySchemas} />
+                                )}
+                              </Form>
+                            ),
+                            style: {
+                              borderRadius: 0,
+                              border: 'none',
+                            },
                           },
-                        },
-                      ]
-                    : []),
-                ]}
-              />
+                        ]
+                      : []),
+                  ]}
+                />
+              </CustomCollapseWrapper>
             </Card>
             <Card title={`Agent List (At least ${scene.min_agents_num} agent${scene.min_agents_num > 1 ? 's' : ''})`}>
               <Space wrap={true}>
