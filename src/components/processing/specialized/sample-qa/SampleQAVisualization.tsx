@@ -6,7 +6,7 @@ import styled from '@emotion/styled';
 import { RiRobot2Fill } from 'react-icons/ri';
 import { GiTeacher } from 'react-icons/gi';
 import { FaPlay, FaPause } from 'react-icons/fa6';
-import SceneLog, { SceneLogTextContent } from '@/types/server/Log';
+import SceneLog from '@/types/server/Log';
 import useGlobalStore from '@/stores/global';
 import { useTheme } from 'antd-style';
 import keyBy from 'lodash/keyBy';

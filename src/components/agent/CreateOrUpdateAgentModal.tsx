@@ -39,7 +39,7 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
       validateFirst: true,
       initialValues: sceneAgentConfig?.agent_config_data || {
         chart_major_color: getRandomAgentColor(
-          otherAgentConfigs.map((c) => c.agent_config_data.profile.chart_major_color!)
+          otherAgentConfigs.map((c) => c.agent_config_data.chart_major_color!)
         ),
       },
     });

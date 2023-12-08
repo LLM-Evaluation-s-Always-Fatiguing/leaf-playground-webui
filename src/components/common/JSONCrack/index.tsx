@@ -37,9 +37,11 @@ const JsonCrackViewer = (props: JsonCrackViewerProps) => {
       src="https://jsoncrack.com/widget"
       style={{ width: '100%', height: '100%', border: 'none' }}
       onLoad={() => {
-        if (props.jsonObject) {
-          sendToEmbed(props.jsonObject);
-        }
+        setTimeout(() => {
+          if (props.jsonObject) {
+            sendToEmbed(props.jsonObject);
+          }
+        }, 0);
       }}
     />
   );
