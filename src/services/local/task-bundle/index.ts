@@ -6,7 +6,7 @@ import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskIn
 import { ServerTaskBundleAgentConfig } from '@/types/api-router/server/task-bundle/Agent';
 import WebUITaskBundle from '@/types/api-router/webui/task-bundle';
 import ServerTaskBundle from '@/types/api-router/server/task-bundle';
-import LocalAPI from '@/services/local';
+import ServerTaskBundleChart from '@/types/api-router/server/task-bundle/Chart';
 
 const prefix = '/task-bundle';
 
@@ -56,15 +56,25 @@ const taskBundleLocalAPI = {
             bundlePath,
           },
         })
-      ).data as Omit<ServerTaskBundle, 'chartOptions'> & { chartOptionObjectStrings: string[] };
-      const chartOptions = [];
-      for (const chartOptionString of originResp.chartOptionObjectStrings) {
-        const cmd = `(() => (${chartOptionString}))()`;
-        chartOptions.push(eval(cmd));
+      ).data as Omit<ServerTaskBundle, 'charts'> & {
+        chartDefs: {
+          name: string;
+          fullPath: string;
+          eChatOptionStr: string;
+        }[];
+      };
+      const charts: ServerTaskBundleChart[] = [];
+      for (const chartDef of originResp.chartDefs) {
+        const cmd = `(() => (${chartDef.eChatOptionStr}))()`;
+        charts.push({
+          name: chartDef.name,
+          fullPath: chartDef.fullPath,
+          eChartOption: eval(cmd),
+        });
       }
       return {
         ...originResp,
-        chartOptions,
+        charts,
       };
     },
   },

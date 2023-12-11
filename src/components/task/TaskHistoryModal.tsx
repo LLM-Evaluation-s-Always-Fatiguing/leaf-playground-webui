@@ -5,7 +5,6 @@ import { Button, ButtonProps, Modal, Space, Table, theme } from 'antd';
 import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskInfo';
 import RunSceneConfig from '@/types/server/RunSceneConfig';
 import Scene from '@/types/server/Scene';
-import { useRouter } from 'next/navigation';
 import LocalAPI from '@/services/local';
 import { useTheme } from 'antd-style';
 

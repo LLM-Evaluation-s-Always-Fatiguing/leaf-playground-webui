@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import LocalAPI from '@/services/local';
 import styled from '@emotion/styled';
 import { Button, ButtonProps, Card, Collapse, Descriptions, Space, Spin, Table } from 'antd';
@@ -16,6 +16,7 @@ import { getSceneLogMessageDisplayContent } from '@/utils/scene-log';
 import LoadingOverlay from '@/components/common/LoadingOverlay';
 import { TbCodeDots } from 'react-icons/tb';
 import AgentCard from '@/components/agent/AgentCard';
+import ServerTaskBundleChart from '@/types/api-router/server/task-bundle/Chart';
 
 const Container = styled.div`
   width: 100%;
@@ -251,7 +252,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                                   role={'agent'}
                                   agentsConfigFormilySchemas={webuiBundle.scene.agentsConfigFormilySchemas}
                                   sceneAgentConfig={{ agent_id: agentId, agent_config_data: agentConfig }}
-                                  onEditButtonClick={()=>{
+                                  onEditButtonClick={() => {
                                     setViewingJSON(serverBundle.agents[agentConfig.profile.id]);
                                     setJSONViewerModalTitle('Agent Detail');
                                     setJSONViewerModalOpen(true);
@@ -288,20 +289,25 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                               justifyContent: 'flex-start',
                               alignItems: 'center',
                               flexWrap: 'wrap',
+                              gap: 10,
                             }}
                           >
-                            {(serverBundle?.chartOptions || []).map((option: object, index: number) => {
+                            {(serverBundle?.charts || []).map((chart: ServerTaskBundleChart, index: number) => {
                               return (
                                 <NormalNoBoxShadowCard
-                                  key={index}
+                                  key={chart.name + index}
                                   style={{
-                                    width: '50%',
+                                    width: 'calc(50% - 5px)',
+                                  }}
+                                  bodyStyle={{
+                                    width: '100%',
+                                    padding: '12px 16px',
                                   }}
                                   bordered={false}
                                   hoverable
                                 >
                                   <ReactECharts
-                                    option={option}
+                                    option={chart.eChartOption}
                                     style={{
                                       width: '100%',
                                     }}

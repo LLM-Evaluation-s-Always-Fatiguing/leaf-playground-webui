@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import fs from 'fs/promises';
 import { listDict } from '@/app/api/dict/service';
+import path from 'path';
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -34,6 +35,13 @@ export async function GET(req: NextRequest) {
     const chartOptionObjectStrings = await Promise.all(
       chartFiles.map((chartJson) => fs.readFile(chartJson.fullPath, { encoding: 'utf-8' }))
     );
+    const chartDefs = chartOptionObjectStrings.map((chartJSONStr, index) => {
+      return {
+        name: path.basename(chartFiles[index].name, path.extname(chartFiles[index].name)),
+        fullPath: chartFiles[index].fullPath,
+        eChatOptionStr: chartJSONStr,
+      };
+    });
 
     return new Response(
       JSON.stringify({
@@ -41,7 +49,7 @@ export async function GET(req: NextRequest) {
         logs: parseJSONL(logs),
         agents: JSON.parse(agents),
         metrics: parseJSONL(metrics),
-        chartOptionObjectStrings: chartOptionObjectStrings,
+        chartDefs,
       }),
       {
         status: 200,
