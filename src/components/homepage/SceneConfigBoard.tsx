@@ -98,7 +98,7 @@ const CustomCollapseWrapper = styled.div`
       border-radius: 0;
       border-left: none;
       border-right: none;
-      border-color: ${props => props.theme.colorBorderSecondary};
+      border-color: ${(props) => props.theme.colorBorderSecondary};
 
       .ant-collapse-header {
         flex-direction: row-reverse !important;
@@ -123,7 +123,7 @@ const CustomCollapseWrapper = styled.div`
       }
 
       .ant-collapse-content {
-        border-color: ${props => props.theme.colorBorderSecondary};
+        border-color: ${(props) => props.theme.colorBorderSecondary};
       }
     }
 

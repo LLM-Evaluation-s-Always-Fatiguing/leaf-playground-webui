@@ -1,8 +1,8 @@
 import FormilyJSONSchema from '@/types/FormilyJSONSchema';
-import type { TransformCore } from '../formily-schema';
-import { AbstractComponentDef } from '@/utils/formily-json-schema/abstract-component-def';
+import type { TransformCore } from '../../transformation-unit-defs';
+import { AbstractBasicTransformationUnit } from "../../transformation-unit-defs";
 
-export class DefaultObjectComponentDef extends AbstractComponentDef {
+export default class BasicObjectTransformationUnit extends AbstractBasicTransformationUnit {
   shouldTransform(schema: FormilyJSONSchema, level: number): boolean {
     return schema.type == 'object';
   }

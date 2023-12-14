@@ -1,8 +1,8 @@
 import FormilyJSONSchema from '@/types/FormilyJSONSchema';
-import type { TransformCore } from '../formily-schema';
-import { AbstractComponentDef } from '@/utils/formily-json-schema/abstract-component-def';
+import type { TransformCore } from '../../transformation-unit-defs';
+import { AbstractSpecializedTransformationUnit } from '../../transformation-unit-defs';
 
-export class NoConfigRequiredDef extends AbstractComponentDef {
+export class EmptyObjectNoConfigRequiredTransformationUnit extends AbstractSpecializedTransformationUnit {
   shouldTransform(schema: FormilyJSONSchema, level: number): boolean {
     return schema.type === 'object' && Object.keys(schema.properties || {}).length === 0;
   }

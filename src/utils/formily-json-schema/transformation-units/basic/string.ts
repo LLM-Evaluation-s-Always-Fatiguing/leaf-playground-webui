@@ -1,13 +1,13 @@
 import FormilyJSONSchema from '@/types/FormilyJSONSchema';
-import type { TransformCore } from '../formily-schema';
-import { AbstractComponentDef } from '@/utils/formily-json-schema/abstract-component-def';
+import type { TransformCore } from '../../transformation-unit-defs';
+import { AbstractBasicTransformationUnit } from "../../transformation-unit-defs";
 
-export class DefaultInputComponentDef extends AbstractComponentDef {
+export default class BasicStringTransformationUnit extends AbstractBasicTransformationUnit {
   shouldTransform(schema: FormilyJSONSchema, level: number): boolean {
     return schema.type == 'string';
   }
 
-  transformCore(schema: FormilyJSONSchema, level: number, rootTransform: TransformCore | undefined): void {
+  transformCore(schema: FormilyJSONSchema, level: number, rootTransform: TransformCore): void {
     schema['x-decorator'] = 'FormItem';
     if (schema.enum) {
       schema['x-component'] = 'Select';

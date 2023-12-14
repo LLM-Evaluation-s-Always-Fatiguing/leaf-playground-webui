@@ -1,14 +1,14 @@
 import FormilyJSONSchema from '@/types/FormilyJSONSchema';
-import type { TransformCore } from '../formily-schema';
-import { AbstractComponentDef } from '@/utils/formily-json-schema/abstract-component-def';
+import type { TransformCore } from '../../transformation-unit-defs';
+import { AbstractSpecializedTransformationUnit } from '../../transformation-unit-defs';
 
-export class NullableBasicAnyOfDef extends AbstractComponentDef {
+export class NullableBasicTypeAnyOfTransformationUnit extends AbstractSpecializedTransformationUnit {
   shouldTransform(schema: FormilyJSONSchema, level: number): boolean {
     if (schema.anyOf && schema.anyOf.length) {
       const noNullAnyOf = schema.anyOf.filter((item: any) => item.type !== 'null');
       switch (noNullAnyOf.length) {
         case 1:
-          if (noNullAnyOf[0].type !== 'object') return true;
+          if (noNullAnyOf[0].type !== 'object' && noNullAnyOf[0].type !== 'array') return true;
           break;
         default:
           break;

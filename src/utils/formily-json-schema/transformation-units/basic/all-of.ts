@@ -1,9 +1,9 @@
 import FormilyJSONSchema from '@/types/FormilyJSONSchema';
-import type { TransformCore } from '../formily-schema';
-import { AbstractComponentDef } from '@/utils/formily-json-schema/abstract-component-def';
+import type { TransformCore } from '../../transformation-unit-defs';
+import { AbstractBasicTransformationUnit } from "../../transformation-unit-defs";
 import merge from 'lodash/merge';
 
-export class DefaultAllOfDef extends AbstractComponentDef {
+export class BasicAllOfTransformationUnit extends AbstractBasicTransformationUnit {
   shouldTransform(schema: FormilyJSONSchema, level: number): boolean {
     return !schema.type && schema.allOf;
   }
@@ -15,7 +15,6 @@ export class DefaultAllOfDef extends AbstractComponentDef {
     if (!schema.type && schema.const) {
       schema.type = typeof schema.const
     }
-    console.log(schema);
-    rootTransform!(schema, level, rootTransform);
+    rootTransform(schema, level, rootTransform);
   }
 }
