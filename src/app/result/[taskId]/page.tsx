@@ -17,6 +17,7 @@ import LoadingOverlay from '@/components/common/LoadingOverlay';
 import { TbCodeDots } from 'react-icons/tb';
 import AgentCard from '@/components/agent/AgentCard';
 import ServerTaskBundleChart from '@/types/api-router/server/task-bundle/Chart';
+import VegaChart from '@/components/vega/VegaChart';
 
 const Container = styled.div`
   width: 100%;
@@ -287,7 +288,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                               display: 'flex',
                               flexDirection: 'row',
                               justifyContent: 'flex-start',
-                              alignItems: 'center',
+                              alignItems: 'stretch',
                               flexWrap: 'wrap',
                               gap: 10,
                             }}
@@ -296,22 +297,15 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                               return (
                                 <NormalNoBoxShadowCard
                                   key={chart.name + index}
-                                  style={{
-                                    width: 'calc(50% - 5px)',
-                                  }}
                                   bodyStyle={{
                                     width: '100%',
+                                    height: '100%',
                                     padding: '12px 16px',
                                   }}
                                   bordered={false}
                                   hoverable
                                 >
-                                  <ReactECharts
-                                    option={chart.eChartOption}
-                                    style={{
-                                      width: '100%',
-                                    }}
-                                  />
+                                  <VegaChart chart={chart} />
                                 </NormalNoBoxShadowCard>
                               );
                             })}

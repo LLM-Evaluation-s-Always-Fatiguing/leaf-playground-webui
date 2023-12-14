@@ -50,32 +50,13 @@ const taskBundleLocalAPI = {
   },
   server: {
     async get(bundlePath: string): Promise<ServerTaskBundle> {
-      const originResp = (
+      return (
         await request.get(`${prefix}`, {
           params: {
             bundlePath,
           },
         })
-      ).data as Omit<ServerTaskBundle, 'charts'> & {
-        chartDefs: {
-          name: string;
-          fullPath: string;
-          eChatOptionStr: string;
-        }[];
-      };
-      const charts: ServerTaskBundleChart[] = [];
-      for (const chartDef of originResp.chartDefs) {
-        const cmd = `(() => (${chartDef.eChatOptionStr}))()`;
-        charts.push({
-          name: chartDef.name,
-          fullPath: chartDef.fullPath,
-          eChartOption: eval(cmd),
-        });
-      }
-      return {
-        ...originResp,
-        charts,
-      };
+      ).data;
     },
   },
 };

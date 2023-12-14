@@ -35,11 +35,11 @@ export async function GET(req: NextRequest) {
     const chartOptionObjectStrings = await Promise.all(
       chartFiles.map((chartJson) => fs.readFile(chartJson.fullPath, { encoding: 'utf-8' }))
     );
-    const chartDefs = chartOptionObjectStrings.map((chartJSONStr, index) => {
+    const charts = chartOptionObjectStrings.map((chartJSONStr, index) => {
       return {
         name: path.basename(chartFiles[index].name, path.extname(chartFiles[index].name)),
         fullPath: chartFiles[index].fullPath,
-        eChatOptionStr: chartJSONStr,
+        vegaSpec: JSON.parse(chartJSONStr),
       };
     });
 
@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
         logs: parseJSONL(logs),
         agents: JSON.parse(agents),
         metrics: parseJSONL(metrics),
-        chartDefs,
+        charts,
       }),
       {
         status: 200,
