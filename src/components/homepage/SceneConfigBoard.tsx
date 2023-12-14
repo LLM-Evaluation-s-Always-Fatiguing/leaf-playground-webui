@@ -139,6 +139,7 @@ interface SceneConfigBoardProps {
 }
 
 const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
+  console.log(scene);
   const router = useRouter();
   const theme = useTheme();
   const globalStore = useGlobalStore();

@@ -1,7 +1,7 @@
 import FormilyJSONSchema from '@/types/FormilyJSONSchema';
 import { AbstractPreprocessorTransformationUnit, TransformCore } from '../../transformation-unit-defs';
 
-export class RemoveTitleTempSuffixPreprocessor extends AbstractPreprocessorTransformationUnit {
+export default class RemoveTitleTempSuffixPreprocessor extends AbstractPreprocessorTransformationUnit {
   shouldTransform(schema: FormilyJSONSchema, level: number): boolean {
     return !!schema.title;
   }

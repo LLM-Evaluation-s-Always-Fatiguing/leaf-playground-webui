@@ -3,7 +3,7 @@ import type { TransformCore } from '../../transformation-unit-defs';
 import { AbstractBasicTransformationUnit } from "../../transformation-unit-defs";
 import merge from 'lodash/merge';
 
-export class BasicAllOfTransformationUnit extends AbstractBasicTransformationUnit {
+export default class BasicAllOfTransformationUnit extends AbstractBasicTransformationUnit {
   shouldTransform(schema: FormilyJSONSchema, level: number): boolean {
     return !schema.type && schema.allOf;
   }

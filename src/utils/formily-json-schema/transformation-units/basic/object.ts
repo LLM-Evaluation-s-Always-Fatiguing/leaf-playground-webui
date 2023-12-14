@@ -1,6 +1,6 @@
 import FormilyJSONSchema from '@/types/FormilyJSONSchema';
 import type { TransformCore } from '../../transformation-unit-defs';
-import { AbstractBasicTransformationUnit } from "../../transformation-unit-defs";
+import { AbstractBasicTransformationUnit } from '../../transformation-unit-defs';
 
 export default class BasicObjectTransformationUnit extends AbstractBasicTransformationUnit {
   shouldTransform(schema: FormilyJSONSchema, level: number): boolean {
@@ -26,6 +26,7 @@ export default class BasicObjectTransformationUnit extends AbstractBasicTransfor
         border: 'none',
       },
     };
+
     if (schema.properties) {
       if (Object.keys(schema.properties).length) {
         Object.entries(schema.properties).forEach(([key, property]: [string, any]) => {
