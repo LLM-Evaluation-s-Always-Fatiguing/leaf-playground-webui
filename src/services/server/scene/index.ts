@@ -45,11 +45,18 @@ const sceneAPI = {
                   const agentMetadataConfigSchemaTransformResult = agentMetadata.config_schema
                     ? await transferStandardJSONSchemaToFormilyJSONSchema(agentMetadata.config_schema)
                     : undefined;
-                  delete agentMetadataConfigSchemaTransformResult?.formilySchema.properties?.profile.properties?.role;
+                  delete agentMetadataConfigSchemaTransformResult?.formilySchema.properties?.profile?.properties?.role;
                   if (agentMetadataConfigSchemaTransformResult?.formilySchema.properties?.chart_major_color) {
                     (agentMetadataConfigSchemaTransformResult?.formilySchema.properties.chart_major_color)[
                       'x-component'
                     ] = 'ColorPicker';
+                  }
+                  if (agentMetadataConfigSchemaTransformResult?.formilySchema.properties?.profile?.properties?.id) {
+                    (agentMetadataConfigSchemaTransformResult?.formilySchema.properties.profile?.properties.id)[
+                      'x-component-props'
+                    ] = {
+                      disabled: true,
+                    };
                   }
                   return {
                     ...agentMetadata,

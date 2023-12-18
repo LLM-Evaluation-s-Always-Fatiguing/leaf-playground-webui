@@ -122,9 +122,9 @@ const ProcessingPage = ({
           globalStore.updateInfoFromWebUITaskBundle(webuiBundle);
 
           if (taskStatusResp.status === SceneTaskStatus.FINISHED) {
-            const logsFilePath = bundlePath + '/logs.jsonl';
-            const logs = await LocalAPI.file.readJSONL(logsFilePath);
-            setLogs(logs);
+            // const logsFilePath = bundlePath + '/logs.jsonl';
+            // const logs = await LocalAPI.file.readJSONL(logsFilePath);
+            // setLogs(logs);
             setFinished(true);
             message.success('Task finished!');
             setLoading(false);
@@ -161,7 +161,7 @@ const ProcessingPage = ({
         }
       }
 
-      globalStore.updatePageTitle(globalStore.currentScene?.scene_metadata.name || '');
+      globalStore.updatePageTitle(globalStore.currentScene?.scene_metadata.scene_definition.name || '');
 
       setLoadingTip('Connecting to server...');
       if (!wsRef.current) {
@@ -225,7 +225,7 @@ const ProcessingPage = ({
   };
 
   function getProcessingVisualizationComponent(): React.FC<DefaultProcessingVisualizationComponentProps> {
-    switch (globalStore.currentScene?.scene_metadata.name) {
+    switch (globalStore.currentScene?.scene_metadata.scene_definition.name) {
       case 'RAG QA Examine':
       case 'GeneralMCQExamine':
         return VisualizationComponentWithExtraProps(SampleQAVisualization, {});
@@ -241,7 +241,7 @@ const ProcessingPage = ({
 
   const VisualizationComponent = useMemo(() => {
     return getProcessingVisualizationComponent();
-  }, [globalStore.currentScene, globalStore.runSceneConfig]);
+  }, [globalStore.currentScene, globalStore.createSceneParams]);
 
   return (
     <PageContainer>

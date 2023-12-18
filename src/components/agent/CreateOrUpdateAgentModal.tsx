@@ -9,6 +9,7 @@ import FormilyDefaultSchemaField from '@/components/formily/FormilyDefaultSchema
 import { getRandomAgentColor } from '@/utils/color';
 import CustomScrollableAntdModal from '@/components/basic/CustomScrollableAntdModal';
 import SceneAgentMetadata from '@/types/server/meta/Agent';
+import {v4 as uuidV4} from 'uuid';
 
 interface CreateOrUpdateAgentModalProps {
   open: boolean;
@@ -39,8 +40,11 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
     const newForm = createForm({
       validateFirst: true,
       initialValues: sceneAgentConfig?.config_data || {
+        profile: {
+          id: uuidV4()
+        },
         chart_major_color: getRandomAgentColor(otherAgentColors),
-      },
+      } as any,
     });
     setForm(newForm);
   };

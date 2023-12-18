@@ -10,6 +10,7 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import { TruncatableParagraphEllipsisStatus } from '@/components/processing/common/TruncatableParagraph';
 import JSONViewModal from '@/components/common/JSONViewModal';
 import { BsFillArrowUpLeftCircleFill } from 'react-icons/bs';
+import SceneAgentConfig from "@/types/server/config/Agent";
 
 const Container = styled.div`
   width: 100%;
@@ -202,6 +203,13 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
     };
   }, []);
 
+  const allAgents = Object.entries(globalStore.createSceneParams?.scene_obj_config.scene_config_data.roles_config || {}).reduce(
+    (total, [roleName, roleConfig]) => {
+      return [...total, ...(roleConfig.agents_config || [])];
+    },
+    [] as SceneAgentConfig[]
+  );
+
   return (
     <Container>
       <Header>
@@ -251,8 +259,7 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
             label: 'All',
             key: '',
           },
-          ...(globalStore.agentConfigs || [])
-            .filter((a) => !a.profile.role.is_static)
+          ...(allAgents)
             .map((a) => {
               return {
                 label: (
@@ -262,13 +269,13 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
                         width: '10px',
                         height: '10px',
                         borderRadius: '50%',
-                        background: a.chart_major_color,
+                        background: a.config_data.chart_major_color,
                       }}
                     />
-                    {a.profile.name}
+                    {a.config_data.profile.name}
                   </Space>
                 ),
-                key: a.profile.id,
+                key: a.config_data.profile.id,
               };
             }),
         ]}

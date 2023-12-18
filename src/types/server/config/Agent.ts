@@ -1,6 +1,7 @@
 import DynamicObject from "@/types/server/DynamicObject";
 
 export interface AgentProfile {
+  id: string;
   name: string;
   [key: string]: any;
 }

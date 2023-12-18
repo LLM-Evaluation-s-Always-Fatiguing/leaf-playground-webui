@@ -71,14 +71,14 @@ const useGlobalStore = create<GlobalState>()(
           state.bundlePath = bundle.taskInfo.bundlePath;
           state.taskId = bundle.taskInfo.id;
           state.currentScene = bundle.scene;
-          state.createSceneParams = bundle.runConfig;
+          state.createSceneParams = bundle.createSceneParams;
         }),
       clearTaskState: () =>
         set((state) => {
+          state.bundlePath = undefined;
+          state.taskId = undefined;
           state.currentScene = undefined;
           state.createSceneParams = undefined;
-          state.taskId = undefined;
-          state.bundlePath = undefined;
         }),
     }))
   )

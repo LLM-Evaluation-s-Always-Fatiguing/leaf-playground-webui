@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
       JSON.stringify({
         taskInfo: JSON.parse(taskInfoData),
         scene: JSON.parse(sceneData),
-        runConfig: JSON.parse(configData),
+        createSceneParams: JSON.parse(configData),
       }),
       {
         status: 200,
@@ -46,17 +46,6 @@ export async function GET(req: NextRequest) {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
-  }
-}
-
-async function readAgentsData(webuiAgentsFilePath: string, bundlePath: string) {
-  try {
-    return await fs.readFile(webuiAgentsFilePath, { encoding: 'utf8' });
-  } catch (e) {
-    const serverAgentsFilePath = path.join(bundlePath, 'agents.json');
-    const serverAgentsData = await fs.readFile(serverAgentsFilePath, { encoding: 'utf8' });
-    const serverAgents = JSON.parse(serverAgentsData);
-    return JSON.stringify(Object.keys(serverAgents).map((a) => serverAgents[a].config));
   }
 }
 
@@ -92,6 +81,13 @@ export async function POST(req: NextRequest) {
     const configFilePath = path.join(baseFullPath, 'config.json');
     const taskInfoPath = path.join(baseFullPath, 'task.json');
 
+    const agentsName = Object.entries(createSceneParams.scene_obj_config.scene_config_data.roles_config).reduce(
+      (total, [roleName, roleConfig]) => {
+        return [...total, ...(roleConfig.agents_config || []).map((c) => c.config_data.profile.name)];
+      },
+      [] as string[]
+    );
+
     await Promise.all([
       writeFile(sceneFilePath, JSON.stringify(scene, null, 2)),
       writeFile(configFilePath, JSON.stringify(createSceneParams, null, 2)),
@@ -101,7 +97,7 @@ export async function POST(req: NextRequest) {
           id: taskId,
           sceneName: scene.scene_metadata.scene_definition.name,
           bundlePath: bundlePath,
-          agentsName: [],
+          agentsName,
           time: dayjs().format('YYYY-MM-DD HH:mm:ss'),
         })
       ),

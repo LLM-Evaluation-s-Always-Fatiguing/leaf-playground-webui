@@ -14,6 +14,7 @@ import { Button, Slider, Space } from 'antd';
 import SampleStatusAvatar from '@/components/processing/common/SampleStatusAvatar';
 import SampleAvatar from '@/components/processing/common/SampleAvatar';
 import { getSceneLogMessageDisplayContent } from '@/utils/scene-log';
+import SceneAgentConfig from "@/types/server/config/Agent";
 
 const Container = styled.div`
   width: 100%;
@@ -192,6 +193,13 @@ const SampleQAVisualization = (props: SampleQAVisualizationProps) => {
 
   const currentDisplayLogs = splitLogs[currentQAPartIndex] || [];
 
+  const allAgents = Object.entries(globalStore.createSceneParams?.scene_obj_config.scene_config_data.roles_config || {}).reduce(
+    (total, [roleName, roleConfig]) => {
+      return [...total, ...(roleConfig.agents_config || [])];
+    },
+    [] as SceneAgentConfig[]
+  );
+
   return (
     <Container>
       <div className="simulateArea">
@@ -199,21 +207,20 @@ const SampleQAVisualization = (props: SampleQAVisualizationProps) => {
           <AskerAvatar size={'1em'} />
         </SampleStatusAvatar>
         <Space wrap size={[4, 8]}>
-          {(globalStore.agentConfigs || [])
-            .filter((a) => !a.profile.role.is_static)
+          {allAgents
             .map((agent) => {
               return (
                 <SampleStatusAvatar
-                  key={agent.profile.id}
+                  key={agent.config_data.profile.id}
                   status={
                     !currentDisplayLogs.some((l) => !l.references)
                       ? 'silence'
-                      : currentDisplayLogs.some((l) => l.response.sender.id === agent.profile.id)
+                      : currentDisplayLogs.some((l) => l.response.sender.id === agent.config_data.profile.id)
                         ? 'done'
                         : 'speaking'
                   }
                   style={{
-                    color: agent.chart_major_color,
+                    color: agent.config_data.chart_major_color,
                   }}
                 >
                   <AnswererAvatar size={'1em'} />
@@ -263,8 +270,8 @@ const SampleQAVisualization = (props: SampleQAVisualizationProps) => {
       <div className="detailArea">
         {currentDisplayLogs.map((log, index) => {
           const isAnswerer = !!log.references;
-          const agentMap = keyBy(globalStore.agentConfigs, (c) => c.profile.id);
-          const avatarColor = isAnswerer ? agentMap[log.response.sender.id]?.chart_major_color : theme.colorPrimary;
+          const agentMap = keyBy(allAgents, (c) => c.config_data.profile.id);
+          const avatarColor = isAnswerer ? agentMap[log.response.sender.id]?.config_data.chart_major_color : theme.colorPrimary;
           return (
             <div key={index} className={isAnswerer ? 'answerer' : 'asker'}>
               <SampleAvatar

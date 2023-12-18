@@ -4,7 +4,7 @@ import { ActionConfig } from "@/types/server/config/Action";
 
 export interface SceneRoleConfig {
   actions_config: Record<string, ActionConfig>;
-  agents_config: SceneAgentConfig[];
+  agents_config?: SceneAgentConfig[];
 }
 
 export interface SceneConfigData {
