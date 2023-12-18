@@ -1,13 +1,13 @@
 import request from '@/services/server/request';
-import RunSceneConfig from '@/types/server/RunSceneConfig';
-import { SceneTaskStatus } from '@/types/server/Scene';
-import { ServerTaskBundleAgentConfig } from "@/types/api-router/server/task-bundle/Agent";
+import { CreateSceneParams } from '@/types/server/CreateSceneParams';
+import { SceneTaskStatus } from '@/types/server/SceneTask';
 
 const sceneTaskAPI = {
-  async createSceneTask(config: RunSceneConfig): Promise<{
+  async createSceneTask(config: CreateSceneParams): Promise<{
     task_id: string;
     save_dir: string;
-    agent_configs: ServerTaskBundleAgentConfig[];
+    scene_config: any;
+    evaluator_configs: any;
   }> {
     return (await request.post('/task/create', config)).data;
   },
@@ -16,6 +16,9 @@ const sceneTaskAPI = {
   }> {
     return (await request.get(`/task/status/${taskId}`)).data;
   },
+  async save(taskId: string) {
+    return (await request.post(`/task/save/${taskId}`)).data;
+  }
 };
 
 export default sceneTaskAPI;

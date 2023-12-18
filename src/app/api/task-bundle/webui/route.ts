@@ -2,9 +2,8 @@ import { NextRequest } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
 import dayjs from 'dayjs';
-import Scene from '@/types/server/Scene';
-import RunSceneConfig from '@/types/server/RunSceneConfig';
-import { ServerTaskBundleAgentConfig } from "@/types/api-router/server/task-bundle/Agent";
+import Scene from '@/types/server/meta/Scene';
+import { CreateSceneParams } from '@/types/server/CreateSceneParams';
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -22,13 +21,11 @@ export async function GET(req: NextRequest) {
   try {
     const sceneFilePath = path.join(baseFullPath, 'scene.json');
     const configFilePath = path.join(baseFullPath, 'config.json');
-    const agentsFilePath = path.join(baseFullPath, 'agents.json');
     const taskInfoPath = path.join(baseFullPath, 'task.json');
 
-    const [sceneData, configData, agentsData, taskInfoData] = await Promise.all([
+    const [sceneData, configData, taskInfoData] = await Promise.all([
       fs.readFile(sceneFilePath, { encoding: 'utf8' }),
       fs.readFile(configFilePath, { encoding: 'utf8' }),
-      readAgentsData(agentsFilePath, bundlePath),
       fs.readFile(taskInfoPath, { encoding: 'utf8' }),
     ]);
 
@@ -37,7 +34,6 @@ export async function GET(req: NextRequest) {
         taskInfo: JSON.parse(taskInfoData),
         scene: JSON.parse(sceneData),
         runConfig: JSON.parse(configData),
-        agentConfigs: JSON.parse(agentsData),
       }),
       {
         status: 200,
@@ -74,18 +70,16 @@ export async function POST(req: NextRequest) {
       bundlePath,
       taskId,
       scene,
-      runConfig,
-      agentConfigs,
+      createSceneParams,
     }: {
       bundlePath: string;
       taskId: string;
       scene: Scene;
-      runConfig: RunSceneConfig;
-      agentConfigs: ServerTaskBundleAgentConfig[];
+      createSceneParams: CreateSceneParams;
     } = await req.json();
 
-    if (!bundlePath || !taskId || !scene || !runConfig) {
-      return new Response(JSON.stringify({ error: 'bundlePath, taskId, scene and runConfig are required.' }), {
+    if (!bundlePath || !taskId || !scene || !createSceneParams) {
+      return new Response(JSON.stringify({ error: 'bundlePath, taskId, scene and createSceneParams are required.' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -96,20 +90,18 @@ export async function POST(req: NextRequest) {
 
     const sceneFilePath = path.join(baseFullPath, 'scene.json');
     const configFilePath = path.join(baseFullPath, 'config.json');
-    const agentsFilePath = path.join(baseFullPath, 'agents.json');
     const taskInfoPath = path.join(baseFullPath, 'task.json');
 
     await Promise.all([
       writeFile(sceneFilePath, JSON.stringify(scene, null, 2)),
-      writeFile(configFilePath, JSON.stringify(runConfig, null, 2)),
-      writeFile(agentsFilePath, JSON.stringify(agentConfigs, null, 2)),
+      writeFile(configFilePath, JSON.stringify(createSceneParams, null, 2)),
       writeFile(
         taskInfoPath,
         JSON.stringify({
           id: taskId,
-          sceneId: scene.id,
+          sceneName: scene.scene_metadata.scene_definition.name,
           bundlePath: bundlePath,
-          agentsName: runConfig.scene_agents_config_data.map((c) => c.agent_config_data.profile.name),
+          agentsName: [],
           time: dayjs().format('YYYY-MM-DD HH:mm:ss'),
         })
       ),

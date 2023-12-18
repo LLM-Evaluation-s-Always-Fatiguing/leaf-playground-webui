@@ -18,7 +18,7 @@ import { Button, message, Spin } from 'antd';
 import LocalAPI from '@/services/local';
 import ProcessingConsole from '@/components/processing/common/Console';
 import ServerAPI from '@/services/server';
-import { SceneTaskStatus } from '@/types/server/Scene';
+import { SceneTaskStatus } from '@/types/server/SceneTask';
 import BuddhaLogo from '@/components/processing/specialized/buddha/BuddhaLogo';
 import { MdPerson3 } from 'react-icons/md';
 import LoadingOverlay from '@/components/common/LoadingOverlay';
@@ -154,7 +154,7 @@ const ProcessingPage = ({
         router.replace('/');
         return;
       }
-      if (!globalStore.runSceneConfig) {
+      if (!globalStore.createSceneParams) {
         const pass = await checkTaskStatus();
         if (!pass) {
           return;

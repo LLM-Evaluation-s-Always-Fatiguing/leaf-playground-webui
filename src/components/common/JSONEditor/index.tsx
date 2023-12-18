@@ -3,14 +3,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Editor, { Monaco } from '@monaco-editor/react';
 import { editor } from 'monaco-editor';
-import SampleJSONSchemaDef from '@/types/SampleJSONSchemaDef';
+import SampleJSONSchema from '@/types/SampleJSONSchema';
 import { useTheme } from 'antd-style';
 
 interface MonacoJSONEditorProps {
   readonly?: boolean;
   value: string;
   onChange?: (value: string) => void;
-  jsonSchema?: SampleJSONSchemaDef;
+  jsonSchema?: SampleJSONSchema;
 }
 
 export default function MonacoJSONEditor(props: MonacoJSONEditorProps) {
@@ -18,7 +18,7 @@ export default function MonacoJSONEditor(props: MonacoJSONEditorProps) {
   const monacoRef = useRef<Monaco>();
   const [editorValue, setEditorValue] = useState<string>(props.value);
 
-  function setMonacoJSONDiagnosticsOptions(monaco: Monaco, jsonSchema?: SampleJSONSchemaDef) {
+  function setMonacoJSONDiagnosticsOptions(monaco: Monaco, jsonSchema?: SampleJSONSchema) {
     if (jsonSchema) {
       monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
         validate: true,

@@ -44,5 +44,6 @@ export default class ObjectNullableAnyOfTransformationUnit extends AbstractSpeci
       childSchema: { ...schema },
     };
     schema.properties = {};
+    schema.required = false;
   }
 }

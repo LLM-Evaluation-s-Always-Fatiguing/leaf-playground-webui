@@ -1,31 +1,27 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { devtools } from 'zustand/middleware';
-import RunSceneConfig from '@/types/server/RunSceneConfig';
-import Scene from '@/types/server/Scene';
-import { ServerTaskBundleAgentConfig } from '@/types/api-router/server/task-bundle/Agent';
+import { CreateSceneParams } from '@/types/server/CreateSceneParams';
+import Scene from '@/types/server/meta/Scene';
 import WebUITaskBundle from '@/types/api-router/webui/task-bundle';
 
 interface GlobalState {
   pageTitle?: string;
   currentScene?: Scene;
-  runSceneConfig?: RunSceneConfig;
+  createSceneParams?: CreateSceneParams;
   taskId?: string;
   bundlePath?: string;
-  agentConfigs?: ServerTaskBundleAgentConfig[];
   updatePageTitle: (pageTitle: string) => void;
   clearPageTitle: () => void;
   updateCurrentScene: (scene: Scene) => void;
-  updateRunSceneConfig: (runSceneConfig: RunSceneConfig) => void;
+  updateCreateSceneParams: (createSceneParams: CreateSceneParams) => void;
   updateTaskId: (taskId: string) => void;
   updateTaskResultSavedDir: (bundlePath: string) => void;
-  updateAgentFullFilledConfigs: (agentConfigs: ServerTaskBundleAgentConfig[]) => void;
   updateInfoAfterSceneTaskCreated: (
     bundlePath: string,
     taskId: string,
     scene: Scene,
-    runConfig: RunSceneConfig,
-    agentConfigs: ServerTaskBundleAgentConfig[]
+    createSceneParams: CreateSceneParams
   ) => void;
   updateInfoFromWebUITaskBundle: (bundle: WebUITaskBundle) => void;
   clearTaskState: () => void;
@@ -35,11 +31,10 @@ const useGlobalStore = create<GlobalState>()(
   immer(
     devtools((set) => ({
       pageTitle: undefined,
-      currentScene: undefined,
-      runSceneConfig: undefined,
+      createSceneParams: undefined,
+      create: undefined,
       taskId: undefined,
       bundlePath: undefined,
-      agentConfigs: undefined,
       updatePageTitle: (pageTitle: string) =>
         set((state) => {
           state.pageTitle = pageTitle;
@@ -52,9 +47,9 @@ const useGlobalStore = create<GlobalState>()(
         set((state) => {
           state.currentScene = scene;
         }),
-      updateRunSceneConfig: (runSceneConfig) =>
+      updateCreateSceneParams: (createSceneParams) =>
         set((state) => {
-          state.runSceneConfig = runSceneConfig;
+          state.createSceneParams = createSceneParams;
         }),
       updateTaskId: (taskId) =>
         set((state) => {
@@ -64,33 +59,26 @@ const useGlobalStore = create<GlobalState>()(
         set((state) => {
           state.bundlePath = bundlePath;
         }),
-      updateAgentFullFilledConfigs: (agentConfigs) =>
-        set((state) => {
-          state.agentConfigs = agentConfigs;
-        }),
-      updateInfoAfterSceneTaskCreated: (bundlePath, taskId, scene, runConfig, agentConfigs) =>
+      updateInfoAfterSceneTaskCreated: (bundlePath, taskId, scene, createSceneParams) =>
         set((state) => {
           state.bundlePath = bundlePath;
           state.taskId = taskId;
           state.currentScene = scene;
-          state.runSceneConfig = runConfig;
-          state.agentConfigs = agentConfigs;
+          state.createSceneParams = createSceneParams;
         }),
       updateInfoFromWebUITaskBundle: (bundle) =>
         set((state) => {
           state.bundlePath = bundle.taskInfo.bundlePath;
           state.taskId = bundle.taskInfo.id;
           state.currentScene = bundle.scene;
-          state.runSceneConfig = bundle.runConfig;
-          state.agentConfigs = bundle.agentConfigs;
+          state.createSceneParams = bundle.runConfig;
         }),
       clearTaskState: () =>
         set((state) => {
           state.currentScene = undefined;
-          state.runSceneConfig = undefined;
+          state.createSceneParams = undefined;
           state.taskId = undefined;
           state.bundlePath = undefined;
-          state.agentConfigs = undefined;
         }),
     }))
   )

@@ -1,8 +1,7 @@
-import FormilyJSONSchema from '@/types/FormilyJSONSchema';
+import DynamicObject from "@/types/server/DynamicObject";
 
 export interface AgentProfile {
   name: string;
-
   [key: string]: any;
 }
 
@@ -17,12 +16,6 @@ export interface SceneAgentConfigData {
 }
 
 export default interface SceneAgentConfig {
-  agent_id: string;
-  agent_config_data: SceneAgentConfigData;
-}
-
-export interface SceneAgentDefinition {
-  agent_id: string;
-  name: string;
-  schema: FormilyJSONSchema;
+  obj_for_import: DynamicObject;
+  config_data: SceneAgentConfigData;
 }

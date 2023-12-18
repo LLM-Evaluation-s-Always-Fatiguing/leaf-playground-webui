@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, useEffect, useState } from 'react';
+import React, { PropsWithChildren, useEffect, useRef, useState } from 'react';
 import { Checkbox } from 'antd';
 import FormilyJSONSchema from '@/types/FormilyJSONSchema';
 import FormilyDefaultSchemaField from '@/components/formily/FormilyDefaultSchemaField';
@@ -16,27 +16,29 @@ const NullableObject = observer((props: NullableObjectProps) => {
   const form = useForm();
   const field = useField<ObjectField>();
 
-  const setChildFieldDisplay = (enable: boolean) => {
+  const setChildFieldDisplay = (enable: boolean, validate = false) => {
     if (props.childSchema) {
-      Object.keys(props.childSchema.properties || {}).forEach((property) => {
-        form.query(`${field.address.entire}.${property}`).forEach((subField) => {
-          subField.setDisplay(enable ? 'visible' : 'hidden');
-        });
+      form.query(`${field.address.entire}.*`).forEach((subField) => {
+        subField.setDisplay(enable ? 'visible' : 'hidden');
+        field.setValue(undefined);
       });
       setTimeout(() => {
-        try {
-          form.validate();
-        } catch {}
+        if (validate) {
+          field.validate();
+        }
       }, 0);
     }
   };
 
   useEffect(() => {
-    setChildFieldDisplay(enable);
+    setChildFieldDisplay(enable, true);
   }, [enable]);
+
   useEffect(() => {
     setChildFieldDisplay(enable);
   }, []);
+
+  console.log(enable);
 
   return (
     <FormItem
@@ -53,7 +55,7 @@ const NullableObject = observer((props: NullableObjectProps) => {
       asterisk={false}
     >
       {!enable && 'Nullable config check to enable.'}
-      <FormilyDefaultSchemaField schema={props.childSchema} />
+      {enable && <FormilyDefaultSchemaField required={false} schema={props.childSchema} />}
     </FormItem>
   );
 });

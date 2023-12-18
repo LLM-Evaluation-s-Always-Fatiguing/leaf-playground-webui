@@ -1,7 +1,7 @@
 'use client';
 
 import { Card } from 'antd';
-import SceneAgentConfig from '@/types/server/Agent';
+import SceneAgentConfig from '@/types/server/config/Agent';
 import styled from '@emotion/styled';
 import { FiPlus } from 'react-icons/fi';
 import { FaCheck } from 'react-icons/fa6';
@@ -9,7 +9,7 @@ import { RiRobot2Fill } from 'react-icons/ri';
 import { MdClose, MdOutlineSettings } from 'react-icons/md';
 import { useMemo } from 'react';
 import { useTheme } from 'antd-style';
-import FormilyJSONSchema from '@/types/FormilyJSONSchema';
+import SceneAgentMetadata from '@/types/server/meta/Agent';
 
 const AddContent = styled.div`
   width: 100%;
@@ -22,101 +22,101 @@ const AddContent = styled.div`
 `;
 
 const AgentContent = styled.div`
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  padding: 16px 12px 0 12px;
-  overflow: hidden;
-  position: relative;
-
-  .avatar {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
+    width: 100%;
+    height: 100%;
     display: flex;
-    flex-direction: row;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: flex-start;
     align-items: center;
-    font-size: 28px;
-    background: ${(props) => props.theme.colorFillSecondary};
-    color: ${(props) => props.theme.colorPrimary};
-  }
-
-  .name {
-    align-self: stretch;
-    font-size: 18px;
-    font-weight: 500;
-    margin-top: 8px;
-    text-align: center;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    padding: 16px 12px 0 12px;
     overflow: hidden;
-  }
+    position: relative;
 
-  .infoArea {
-    align-self: stretch;
-    margin-top: 0;
-    flex-grow: 1;
-    overflow: hidden auto;
-  }
-
-  .connectionStatus {
-    align-self: stretch;
-    flex-shrink: 0;
-    height: 40px;
-    margin-top: 8px;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .editButton {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    font-size: 21px;
-    color: ${(props) => props.theme.colorPrimary};
-    cursor: pointer;
-  }
-
-  .deleteButton {
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    font-size: 21px;
-    color: ${(props) => props.theme.colorError};
-    cursor: pointer;
-    visibility: hidden;
-  }
-
-  :hover {
-    .deleteButton {
-      visibility: visible;
+    .avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        font-size: 28px;
+        background: ${(props) => props.theme.colorFillSecondary};
+        color: ${(props) => props.theme.colorPrimary};
     }
-  }
+
+    .name {
+        align-self: stretch;
+        font-size: 18px;
+        font-weight: 500;
+        margin-top: 8px;
+        text-align: center;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+
+    .infoArea {
+        align-self: stretch;
+        margin-top: 0;
+        flex-grow: 1;
+        overflow: hidden auto;
+    }
+
+    .connectionStatus {
+        align-self: stretch;
+        flex-shrink: 0;
+        height: 40px;
+        margin-top: 8px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .editButton {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        font-size: 21px;
+        color: ${(props) => props.theme.colorPrimary};
+        cursor: pointer;
+    }
+
+    .deleteButton {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        font-size: 21px;
+        color: ${(props) => props.theme.colorError};
+        cursor: pointer;
+        visibility: hidden;
+    }
+
+    :hover {
+        .deleteButton {
+            visibility: visible;
+        }
+    }
 `;
 
 interface AgentCardProps {
   role: 'agent' | 'add';
   displayMode?: boolean;
   sceneAgentConfig?: SceneAgentConfig;
-  agentsConfigFormilySchemas: Record<string, FormilyJSONSchema>;
+  sceneAgentMeta?: SceneAgentMetadata;
   onAddNewClick?: () => void;
   onEditButtonClick?: () => void;
   onDeleteButtonClick?: () => void;
@@ -130,11 +130,10 @@ const AgentCard = (props: AgentCardProps) => {
 
   const requiredBackendConfigs = useMemo(() => {
     if (!props.sceneAgentConfig) return [];
-    return (props.agentsConfigFormilySchemas[props.sceneAgentConfig.agent_id].properties?.ai_backend_config.required ||
-      []) as string[];
-  }, [props.sceneAgentConfig, props.agentsConfigFormilySchemas]);
+    return (props.sceneAgentMeta?.configSchema?.properties?.ai_backend_config.required || []) as string[];
+  }, [props.sceneAgentConfig, props.sceneAgentMeta]);
 
-  const displayKV = Object.entries(props.sceneAgentConfig?.agent_config_data.ai_backend_config || {}).filter(([key]) =>
+  const displayKV = Object.entries(props.sceneAgentConfig?.config_data.ai_backend_config || {}).filter(([key]) =>
     requiredBackendConfigs.includes(key)
   );
 
@@ -169,16 +168,16 @@ const AgentCard = (props: AgentCardProps) => {
           <div
             className="avatar"
             style={
-              props.sceneAgentConfig?.agent_config_data.chart_major_color
+              props.sceneAgentConfig?.config_data.chart_major_color
                 ? {
-                    color: props.sceneAgentConfig.agent_config_data.chart_major_color,
+                    color: props.sceneAgentConfig.config_data.chart_major_color,
                   }
                 : {}
             }
           >
             <RiRobot2Fill size={'1em'} />
           </div>
-          <div className="name">{props.sceneAgentConfig?.agent_config_data.profile.name}</div>
+          <div className="name">{props.sceneAgentConfig?.config_data.profile.name}</div>
           <div className="infoArea">
             <div
               style={{
@@ -186,10 +185,10 @@ const AgentCard = (props: AgentCardProps) => {
                 flexDirection: 'column',
                 alignItems: 'center',
                 textAlign: 'center',
-                wordBreak: 'break-all'
+                wordBreak: 'break-all',
               }}
             >
-              {props.agentsConfigFormilySchemas[props.sceneAgentConfig?.agent_id || ''].title}
+              {props.sceneAgentMeta?.configSchema?.title}
             </div>
             {displayKV.map((kv, index) => {
               return (

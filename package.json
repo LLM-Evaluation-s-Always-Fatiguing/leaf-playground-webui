@@ -32,8 +32,6 @@
     "cookies-next": "^4.1.0",
     "copy-to-clipboard": "^3.3.3",
     "dayjs": "^1.11.10",
-    "echarts": "^5.4.3",
-    "echarts-for-react": "^3.0.2",
     "lodash": "^4.17.21",
     "mermaid": "^10.6.1",
     "mime-types": "^2.1.35",

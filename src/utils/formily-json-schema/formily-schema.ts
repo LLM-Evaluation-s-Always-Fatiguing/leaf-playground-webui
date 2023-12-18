@@ -3,6 +3,7 @@ import { SystemTransformationUnits } from './transformation-units';
 import cloneDeep from 'lodash/cloneDeep';
 import { Resolver } from '@stoplight/json-ref-resolver';
 import { TransformationUnit, TransformCore } from './transformation-unit-defs';
+import SampleJSONSchema from '@/types/SampleJSONSchema';
 
 export default class FormilySchemaTransformer {
   private transformationUnits: TransformationUnit[];
@@ -19,22 +20,22 @@ export default class FormilySchemaTransformer {
     });
   }
 
-  private async deref(schema: FormilyJSONSchema): Promise<
-    FormilyJSONSchema & {
-      $defs?: any;
-    }
-  > {
-    const resolved = await this.jsonRefResolver.resolve(schema);
-    return resolved.result;
+  private async deref(schema: FormilyJSONSchema): Promise<SampleJSONSchema> {
+    const result = cloneDeep((await this.jsonRefResolver.resolve(schema)).result);
+    delete result.$defs;
+    return result;
   }
 
-  async transform(schema: FormilyJSONSchema): Promise<FormilyJSONSchema> {
-    const finalSchema = cloneDeep(await this.deref(schema));
-    delete finalSchema.$defs;
+  async transform(schema: FormilyJSONSchema): Promise<{
+    derefSchema: SampleJSONSchema;
+    formilySchema: FormilyJSONSchema;
+  }> {
+    const derefSchema = await this.deref(schema);
+    const formilySchema: FormilyJSONSchema = cloneDeep(derefSchema) as any;
 
     const transformCore = this.transformCore.bind(this);
-    this.transformCore(finalSchema, 0, transformCore);
+    this.transformCore(formilySchema, 0, transformCore);
 
-    return finalSchema;
+    return { derefSchema, formilySchema };
   }
 }

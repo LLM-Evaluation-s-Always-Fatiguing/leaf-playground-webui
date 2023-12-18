@@ -2,20 +2,19 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Modal, Spin, Form, FormInstance } from 'antd';
-import { SceneAgentDefinition } from '@/types/server/Agent';
 import { Select } from '@formily/antd-v5';
-import FormilyJSONSchema from '@/types/FormilyJSONSchema';
+import SceneAgentMetadata from '@/types/server/meta/Agent';
 
 interface SelectAgentModalProps {
   open: boolean;
-  agentsConfigFormilySchemas: Record<string, FormilyJSONSchema>;
-  onSubmit: (agentDefinition: SceneAgentDefinition) => void;
+  selectableAgentsMetadata: SceneAgentMetadata[];
+  onSubmit: (agentMetadata: SceneAgentMetadata) => void;
   onNeedClose: () => void;
 }
 
 const SelectAgentModal: React.FC<SelectAgentModalProps> = ({
   open,
-  agentsConfigFormilySchemas,
+  selectableAgentsMetadata,
   onSubmit,
   onNeedClose,
 }) => {
@@ -23,13 +22,13 @@ const SelectAgentModal: React.FC<SelectAgentModalProps> = ({
   const [modalLoading, setModalLoading] = useState(false);
 
   const selectableAgentOptions = useMemo(() => {
-    return Object.entries(agentsConfigFormilySchemas).map(([key, agentSchema]) => {
+    return selectableAgentsMetadata.map((metadata) => {
       return {
-        label: agentSchema.title,
-        value: key,
+        label: metadata.cls_name,
+        value: metadata.cls_name,
       };
     });
-  }, [agentsConfigFormilySchemas]);
+  }, [selectableAgentsMetadata]);
 
   const resetState = () => {
     setModalLoading(false);
@@ -41,13 +40,11 @@ const SelectAgentModal: React.FC<SelectAgentModalProps> = ({
     }
   }, [open]);
 
-  const onFormFinish = async (formData: { agent_id: string }) => {
-    const schema = agentsConfigFormilySchemas[formData.agent_id];
-    onSubmit({
-      agent_id: formData.agent_id,
-      name: schema.title,
-      schema: schema,
-    });
+  const onFormFinish = async (formData: { cls_name: string }) => {
+    const metadata = selectableAgentsMetadata.find((m) => m.cls_name === formData.cls_name);
+    if (metadata) {
+      onSubmit(metadata);
+    }
   };
 
   return (
@@ -70,7 +67,7 @@ const SelectAgentModal: React.FC<SelectAgentModalProps> = ({
       title={'Choose Agent'}
     >
       <Spin spinning={modalLoading}>
-        <Form<{ agent_id: string }>
+        <Form<{ cls_name: string }>
           layout={'horizontal'}
           preserve={false}
           ref={formRef}
@@ -79,7 +76,7 @@ const SelectAgentModal: React.FC<SelectAgentModalProps> = ({
         >
           <Form.Item
             label={'Agent'}
-            name={'agent_id'}
+            name={'cls_name'}
             required
             rules={[
               {

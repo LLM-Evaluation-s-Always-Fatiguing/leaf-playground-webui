@@ -1,18 +1,18 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import Scene, { SceneListItem } from '@/types/server/Scene';
 import styled from '@emotion/styled';
-import { Spin, message } from 'antd';
+import { message } from 'antd';
 import SceneListComponent from '@/components/scene/SceneListComponent';
 import ServerAPI from '@/services/server';
 import SceneInfoBoard from '@/components/homepage/SceneInfoBoard';
 import SceneConfigBoard from '@/components/homepage/SceneConfigBoard';
 import useGlobalStore from '@/stores/global';
-import ServerInfo from '@/types/server/ServerInfo';
 import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskInfo';
 import LocalAPI from '@/services/local';
-import LoadingOverlay from "@/components/common/LoadingOverlay";
+import LoadingOverlay from '@/components/common/LoadingOverlay';
+import ServerInfo from '@/types/server/meta/ServerInfo';
+import Scene from '@/types/server/meta/Scene';
 
 const ScenesArea = styled.div`
   width: 24%;
@@ -50,7 +50,7 @@ const PageContainer = styled.div`
 
 interface HomePageProps {
   serverInfo: ServerInfo;
-  scenes: SceneListItem[];
+  scenes: Scene[];
   taskHistory: Record<string, WebUITaskBundleTaskInfo[]>;
 }
 
@@ -60,33 +60,17 @@ export default function HomePage(props: HomePageProps) {
   const [taskHistory, setTaskHistory] = useState<Record<string, WebUITaskBundleTaskInfo[]>>(props.taskHistory);
 
   const [scenesLoading, setScenesLoading] = useState(false);
-  const [scenes, setScenes] = useState<SceneListItem[]>(props.scenes);
+  const [scenes, setScenes] = useState<Scene[]>(props.scenes);
   const [selectedSceneIndex, setSelectedSceneIndex] = useState<number>(0);
 
-  const [sceneDetailLoading, setSceneDetailLoading] = useState(false);
-  const [selectedSceneDetail, setSelectedSceneDetail] = useState<Scene>();
+  const selectedScene = scenes[selectedSceneIndex];
   const [started, setStarted] = useState(false);
-
-  const loadSelectedSceneDetail = async () => {
-    if (!scenes[selectedSceneIndex]) return;
-    try {
-      setSceneDetailLoading(true);
-      const scene = await ServerAPI.scene.get(scenes[selectedSceneIndex].id);
-      globalStore.updateCurrentScene(scene);
-      setSelectedSceneDetail(scene);
-    } catch (e) {
-      console.error(e);
-      message.error('Failed to load scene detail');
-    } finally {
-      setSceneDetailLoading(false);
-    }
-  };
 
   const loadScenes = async () => {
     try {
       setScenesLoading(true);
-      const scenesResp = await ServerAPI.scene.getScenes();
-      setScenes(scenesResp.scenes);
+      const scenes = await ServerAPI.scene.getScenes();
+      setScenes(scenes);
     } catch (e) {
       console.error(e);
       message.error('Failed to load scenes');
@@ -118,12 +102,11 @@ export default function HomePage(props: HomePageProps) {
           {scenes.map((scene, index) => {
             return (
               <SceneListComponent
-                key={scene.id}
+                key={scene.scene_metadata.scene_definition.name}
                 scene={scene}
                 selected={selectedSceneIndex === index}
                 onClick={() => {
                   setSelectedSceneIndex(index);
-                  setSelectedSceneDetail(undefined);
                 }}
               />
             );
@@ -132,22 +115,21 @@ export default function HomePage(props: HomePageProps) {
         <LoadingOverlay spinning={scenesLoading} />
       </ScenesArea>
       <OperationArea>
-        {started && selectedSceneDetail ? (
+        {started && selectedScene ? (
           <SceneConfigBoard
-            key={scenes[selectedSceneIndex].id}
-            scene={selectedSceneDetail}
-            taskHistory={taskHistory[scenes[selectedSceneIndex].id] || []}
+            key={selectedScene.scene_metadata.scene_definition.name}
+            scene={selectedScene}
+            taskHistory={taskHistory[selectedScene.scene_metadata.scene_definition.name] || []}
           />
         ) : (
           <SceneInfoBoard
             scene={scenes[selectedSceneIndex]}
             onStartClick={async () => {
-              await loadSelectedSceneDetail();
               setStarted(true);
             }}
           />
         )}
-        <LoadingOverlay spinning={sceneDetailLoading} />
+        <LoadingOverlay spinning={false} />
       </OperationArea>
     </PageContainer>
   );

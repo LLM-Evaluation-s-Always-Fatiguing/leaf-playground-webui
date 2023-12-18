@@ -1,12 +1,10 @@
 import request from '@/services/local/request';
 import DirectoryItem from '@/types/api-router/webui/DirectoryItem';
-import Scene from '@/types/server/Scene';
-import RunSceneConfig from '@/types/server/RunSceneConfig';
 import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskInfo';
-import { ServerTaskBundleAgentConfig } from '@/types/api-router/server/task-bundle/Agent';
 import WebUITaskBundle from '@/types/api-router/webui/task-bundle';
 import ServerTaskBundle from '@/types/api-router/server/task-bundle';
-import ServerTaskBundleChart from '@/types/api-router/server/task-bundle/Chart';
+import Scene from "@/types/server/meta/Scene";
+import { CreateSceneParams } from "@/types/server/CreateSceneParams";
 
 const prefix = '/task-bundle';
 
@@ -25,16 +23,14 @@ const taskBundleLocalAPI = {
       bundlePath: string,
       taskId: string,
       scene: Scene,
-      runConfig: RunSceneConfig,
-      agentConfigs: ServerTaskBundleAgentConfig[]
+      createSceneParams: CreateSceneParams
     ): Promise<DirectoryItem[]> {
       return (
         await request.post(`${prefix}/webui`, {
           bundlePath,
           taskId,
           scene,
-          runConfig,
-          agentConfigs,
+          createSceneParams
         })
       ).data;
     },

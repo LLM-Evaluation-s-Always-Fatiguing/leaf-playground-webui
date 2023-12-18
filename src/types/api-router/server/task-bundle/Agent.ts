@@ -1,5 +1,5 @@
-import { AgentProfile, SceneAgentConfigData } from '@/types/server/Agent';
-import { SceneAgentMetaData } from '@/types/server/Scene';
+import { AgentProfile, SceneAgentConfigData } from '@/types/server/config/Agent';
+import SceneAgentMetadata from '@/types/server/meta/Agent';
 
 export interface ServerTaskBundleAgentConfig extends SceneAgentConfigData {
   profile: AgentProfile & { id: string };
@@ -7,5 +7,5 @@ export interface ServerTaskBundleAgentConfig extends SceneAgentConfigData {
 
 export default interface ServerTaskBundleAgent {
   config: ServerTaskBundleAgentConfig;
-  metadata: SceneAgentMetaData;
+  metadata: SceneAgentMetadata;
 }

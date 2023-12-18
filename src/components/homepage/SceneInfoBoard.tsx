@@ -1,8 +1,8 @@
 'use client';
 
 import styled from '@emotion/styled';
-import { SceneListItem } from '@/types/server/Scene';
 import { Button } from 'antd';
+import Scene from "@/types/server/meta/Scene";
 
 const Header = styled.div`
   width: 100%;
@@ -60,7 +60,7 @@ const Container = styled.div`
 `;
 
 interface SceneInfoBoardProps {
-  scene?: SceneListItem;
+  scene?: Scene;
   onStartClick: () => Promise<void>;
 }
 
@@ -70,10 +70,10 @@ const SceneInfoBoard = (props: SceneInfoBoardProps) => {
       {props.scene && (
         <>
           <Header>
-            <div className="title">{props.scene.metadata.name}</div>
+            <div className="title">{props.scene.scene_metadata.scene_definition.name}</div>
           </Header>
           <div className="infoArea">
-            <div className="desc">{props.scene.metadata.description}</div>
+            <div className="desc">{props.scene.scene_metadata.scene_definition.description}</div>
           </div>
           <Footer>
             <Button

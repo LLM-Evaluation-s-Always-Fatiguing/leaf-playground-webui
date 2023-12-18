@@ -19,8 +19,10 @@ import merge from 'lodash/merge';
 import en_US from 'antd/locale/en_US';
 import useDisplayConfig from '@/managers/DisplayConfigManager/useDisplayConfig';
 import useGlobalStore from '@/stores/global';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { setValidateLanguage } from '@formily/core'
 
+setValidateLanguage('en-US')
 setupStyled({ ThemeContext });
 
 const { Content } = Layout;

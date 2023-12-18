@@ -1,10 +1,10 @@
 'use client';
 
 import styled from '@emotion/styled';
-import { SceneListItem } from '@/types/server/Scene';
 import { Card } from 'antd';
 import { GrTest } from 'react-icons/gr';
 import { useTheme } from 'antd-style';
+import Scene from "@/types/server/meta/Scene";
 
 const CoverImage = styled.div`
   width: 45px;
@@ -52,7 +52,7 @@ const Container = styled.div`
 
 interface SceneListComponentProps {
   selected: boolean;
-  scene: SceneListItem;
+  scene: Scene;
   onClick?: () => void;
 }
 
@@ -87,8 +87,8 @@ const SceneListComponent = (props: SceneListComponentProps) => {
           />
         </CoverImage>
         <div className="info">
-          <div className="title">{props.scene.metadata.name}</div>
-          <div className="desc">{props.scene.metadata.description}</div>
+          <div className="title">{props.scene.scene_metadata.scene_definition.name}</div>
+          <div className="desc">{props.scene.scene_metadata.scene_definition.description}</div>
         </div>
       </Container>
     </Card>

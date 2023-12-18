@@ -2,18 +2,19 @@
 
 import React, { useEffect, useState } from 'react';
 import { Spin } from 'antd';
-import SceneAgentConfig, { SceneAgentDefinition } from '@/types/server/Agent';
+import SceneAgentConfig from '@/types/server/config/Agent';
 import { Form } from '@formily/antd-v5';
 import { createForm } from '@formily/core';
 import FormilyDefaultSchemaField from '@/components/formily/FormilyDefaultSchemaField';
 import { getRandomAgentColor } from '@/utils/color';
 import CustomScrollableAntdModal from '@/components/basic/CustomScrollableAntdModal';
+import SceneAgentMetadata from '@/types/server/meta/Agent';
 
 interface CreateOrUpdateAgentModalProps {
   open: boolean;
   sceneAgentConfig?: SceneAgentConfig;
-  sceneAgentDefinition?: SceneAgentDefinition;
-  otherAgentConfigs: SceneAgentConfig[];
+  operatingAgentMetadata?: SceneAgentMetadata;
+  otherAgentColors: string[];
   onSubmit: (sceneAgent: SceneAgentConfig) => void;
   onNeedClose: () => void;
 }
@@ -21,8 +22,8 @@ interface CreateOrUpdateAgentModalProps {
 const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
   open,
   sceneAgentConfig,
-  sceneAgentDefinition,
-  otherAgentConfigs,
+  operatingAgentMetadata,
+  otherAgentColors,
   onSubmit,
   onNeedClose,
 }) => {
@@ -37,10 +38,8 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
     setModalLoading(false);
     const newForm = createForm({
       validateFirst: true,
-      initialValues: sceneAgentConfig?.agent_config_data || {
-        chart_major_color: getRandomAgentColor(
-          otherAgentConfigs.map((c) => c.agent_config_data.chart_major_color!)
-        ),
+      initialValues: sceneAgentConfig?.config_data || {
+        chart_major_color: getRandomAgentColor(otherAgentColors),
       },
     });
     setForm(newForm);
@@ -53,12 +52,12 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
   }, [open]);
 
   const onConfirm = async () => {
-    if (!sceneAgentDefinition) return;
+    if (!operatingAgentMetadata) return;
     try {
       await form.validate();
       onSubmit({
-        agent_id: sceneAgentDefinition?.agent_id,
-        agent_config_data: form.values,
+        obj_for_import: operatingAgentMetadata?.obj_for_import,
+        config_data: form.values,
       });
     } catch (e) {
       console.error(e);
@@ -67,7 +66,7 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
 
   return (
     <CustomScrollableAntdModal
-      title={`${sceneAgentConfig ? 'Edit' : 'Create'} Agent （${sceneAgentDefinition?.name}）`}
+      title={`${sceneAgentConfig ? 'Edit' : 'Create'} Agent （${operatingAgentMetadata?.cls_name}）`}
       open={open}
       width={640}
       destroyOnClose
@@ -88,7 +87,7 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
     >
       <Spin spinning={modalLoading}>
         <Form form={form} labelCol={6}>
-          <FormilyDefaultSchemaField schema={sceneAgentDefinition?.schema} />
+          <FormilyDefaultSchemaField schema={operatingAgentMetadata?.configSchema} />
         </Form>
       </Spin>
     </CustomScrollableAntdModal>

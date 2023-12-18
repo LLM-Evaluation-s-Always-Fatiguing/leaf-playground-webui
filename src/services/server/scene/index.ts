@@ -1,54 +1,71 @@
 import request from '@/services/server/request';
-import Scene, { SceneListItem, ServerScene } from '@/types/server/Scene';
+
 import { transferStandardJSONSchemaToFormilyJSONSchema } from '@/utils/json-schema';
-import FormilyJSONSchema from '@/types/FormilyJSONSchema';
+import Scene, { ServerScene } from '@/types/server/meta/Scene';
+import SceneAgentMetadata from '@/types/server/meta/Agent';
+
+async function asyncReduce<T, U>(
+  array: T[],
+  reducer: (accumulator: U, value: T, index: number, array: T[]) => Promise<U>,
+  initialValue: U
+): Promise<U> {
+  let accumulator: U = initialValue;
+
+  for (let index = 0; index < array.length; index++) {
+    accumulator = await reducer(accumulator, array[index], index, array);
+  }
+
+  return accumulator;
+}
 
 const sceneAPI = {
-  async getScenes(): Promise<{
-    scenes: SceneListItem[];
-  }> {
-    return (await request.get('/')).data;
-  },
-  async get(id: string): Promise<Scene> {
-    const serverScene: ServerScene = (await request.get(`/scene/${id}`)).data;
-    const sceneInfoConfigFormilySchema = await transferStandardJSONSchemaToFormilyJSONSchema(
-      serverScene.scene_info_config_schema
+  async getScenes(): Promise<Scene[]> {
+    const originScene: ServerScene[] = (await request.get('/')).data;
+    return Promise.all(
+      originScene.map(async (origin) => {
+        const sceneMetadataConfigSchemaTransformResult = await transferStandardJSONSchemaToFormilyJSONSchema(
+          origin.scene_metadata.config_schema
+        );
+        delete sceneMetadataConfigSchemaTransformResult.formilySchema.properties?.roles_config;
+        if (Array.isArray(sceneMetadataConfigSchemaTransformResult.formilySchema.required)) {
+          sceneMetadataConfigSchemaTransformResult.formilySchema.required =
+            sceneMetadataConfigSchemaTransformResult.formilySchema.required.filter((item) => item !== 'roles_config');
+        }
+        return {
+          scene_metadata: {
+            ...origin.scene_metadata,
+            config_schema: sceneMetadataConfigSchemaTransformResult.derefSchema,
+            configSchema: sceneMetadataConfigSchemaTransformResult.formilySchema,
+          },
+          agents_metadata: await asyncReduce(
+            Object.entries(origin.agents_metadata),
+            async (final, [key, agentsMetadata], index) => {
+              final[key] = await Promise.all(
+                agentsMetadata.map(async (agentMetadata) => {
+                  const agentMetadataConfigSchemaTransformResult = agentMetadata.config_schema
+                    ? await transferStandardJSONSchemaToFormilyJSONSchema(agentMetadata.config_schema)
+                    : undefined;
+                  delete agentMetadataConfigSchemaTransformResult?.formilySchema.properties?.profile.properties?.role;
+                  if (agentMetadataConfigSchemaTransformResult?.formilySchema.properties?.chart_major_color) {
+                    (agentMetadataConfigSchemaTransformResult?.formilySchema.properties.chart_major_color)[
+                      'x-component'
+                    ] = 'ColorPicker';
+                  }
+                  return {
+                    ...agentMetadata,
+                    config_schema: agentMetadataConfigSchemaTransformResult?.derefSchema,
+                    configSchema: agentMetadataConfigSchemaTransformResult?.formilySchema,
+                  };
+                })
+              );
+              return final;
+            },
+            {} as Record<string, SceneAgentMetadata[]>
+          ),
+          evaluators_metadata: origin.evaluators_metadata,
+        } as Scene;
+      })
     );
-    const agentsConfigFormilySchemas: Record<string, FormilyJSONSchema> = {};
-    for (const [agent_id, agent_config_schema] of Object.entries(serverScene.agents_config_schemas)) {
-      const agentFormilySchema = await transferStandardJSONSchemaToFormilyJSONSchema(agent_config_schema);
-      agentFormilySchema.title = agentFormilySchema.title.replace(/Config$/, '')
-      if (agentFormilySchema.properties?.chart_major_color) {
-        agentFormilySchema.properties.chart_major_color['x-component'] = 'ColorPicker';
-        agentFormilySchema.properties.chart_major_color['x-component-props'] = {
-          format: 'hex',
-        };
-      }
-
-      agentsConfigFormilySchemas[agent_id] = agentFormilySchema;
-    }
-    const additionalConfigFormilySchema = await transferStandardJSONSchemaToFormilyJSONSchema(
-      serverScene.additional_config_schema
-    );
-    let evaluatorsConfigFormilySchemas: FormilyJSONSchema | undefined;
-    if (serverScene.evaluators_config_schemas) {
-      evaluatorsConfigFormilySchemas = {
-        type: 'object',
-        'x-decoration': 'FormItem',
-        properties: {},
-      };
-      for (const [evaluator_id, evaluator_config_schema] of Object.entries(serverScene.evaluators_config_schemas)) {
-        evaluatorsConfigFormilySchemas.properties![evaluator_id] =
-          await transferStandardJSONSchemaToFormilyJSONSchema(evaluator_config_schema);
-      }
-    }
-    return {
-      ...serverScene,
-      sceneInfoConfigFormilySchema,
-      agentsConfigFormilySchemas,
-      additionalConfigFormilySchema,
-      evaluatorsConfigFormilySchemas,
-    };
   },
 };
 

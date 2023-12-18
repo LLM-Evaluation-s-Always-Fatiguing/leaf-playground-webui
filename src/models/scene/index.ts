@@ -1,3 +1,1 @@
-export const DefaultSceneInfoConfig = {
-  environments: {},
-};
+export const DefaultSceneInfoConfig = {};

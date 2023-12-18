@@ -1,6 +1,5 @@
 'use client';
 
-import Scene from '@/types/server/Scene';
 import styled from '@emotion/styled';
 import { Button, Card, Collapse, message, Space } from 'antd';
 import { Form } from '@formily/antd-v5';
@@ -9,21 +8,26 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import SelectAgentModal from '@/components/agent/SelectAgentModal';
 import FormilyDefaultSchemaField from '@/components/formily/FormilyDefaultSchemaField';
 import CreateOrUpdateAgentModal from '@/components/agent/CreateOrUpdateAgentModal';
-import SceneAgentConfig, { SceneAgentDefinition } from '@/types/server/Agent';
+import SceneAgentConfig from '@/types/server/config/Agent';
 import AgentCard from '@/components/agent/AgentCard';
 import { useRouter } from 'next/navigation';
 import merge from 'lodash/merge';
 import { DefaultSceneInfoConfig } from '@/models/scene';
-import RunSceneConfig from '@/types/server/RunSceneConfig';
 import useGlobalStore from '@/stores/global';
 import ServerAPI from '@/services/server';
 import EvaluatorConfig, { EvaluatorConfigData } from '@/types/server/Evaluator';
 import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskInfo';
 import { MdOutlineHistory } from 'react-icons/md';
-import TaskHistoryModal from '@/components/task/TaskHistoryModal';
+// import TaskHistoryModal from '@/components/task/TaskHistoryModal';
 import LocalAPI from '@/services/local';
 import LoadingOverlay from '@/components/common/LoadingOverlay';
 import { useTheme } from 'antd-style';
+import Scene from '@/types/server/meta/Scene';
+import SceneAgentMetadata from '@/types/server/meta/Agent';
+import { CreateSceneParams } from '@/types/server/CreateSceneParams';
+import { SceneRoleConfig } from '@/types/server/config/Scene';
+import { ActionConfig } from '@/types/server/config/Action';
+import { MetricConfig } from '@/types/server/config/MetricConfig';
 
 const Container = styled.div`
   width: 100%;
@@ -139,7 +143,7 @@ interface SceneConfigBoardProps {
 }
 
 const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
-  console.log(scene);
+  console.log(JSON.stringify(scene));
   const router = useRouter();
   const theme = useTheme();
   const globalStore = useGlobalStore();
@@ -152,8 +156,19 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
   const [sceneFormValid, setSceneFormValid] = useState(false);
   const sceneForm = useMemo(() => {
     return createForm({
+      initialValues: {
+        dataset_config: {
+          path: 'AsakusaRinne/gaokao_bench',
+          name: '2010-2022_History_MCQs',
+          split: 'dev',
+          question_column: 'question',
+          golden_answer_column: 'answer',
+          num_questions: 3,
+        },
+      },
       effects() {
         onFormValuesChange((form) => {
+          console.log(form.values);
           form.validate();
         });
         onFormValidateSuccess(() => {
@@ -161,23 +176,6 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
         });
         onFormValidateFailed(() => {
           setSceneFormValid(false);
-        });
-      },
-    });
-  }, []);
-
-  const [sceneAdditionalFormValid, setSceneAdditionalFormValid] = useState(false);
-  const sceneAdditionalForm = useMemo(() => {
-    return createForm({
-      effects() {
-        onFormValuesChange((form) => {
-          form.validate();
-        });
-        onFormValidateSuccess(() => {
-          setSceneAdditionalFormValid(true);
-        });
-        onFormValidateFailed(() => {
-          setSceneAdditionalFormValid(false);
         });
       },
     });
@@ -202,10 +200,14 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
     });
   }, []);
 
+  const [operatingRoleName, setOperatingRoleName] = useState<string>();
   const [selectAgentModalOpen, setSelectAgentModalOpen] = useState(false);
-  const [sceneAgentConfigs, setSceneAgentConfigs] = useState<SceneAgentConfig[]>([]);
-  const [operatingAgentDefinition, setOperatingAgentDefinition] = useState<SceneAgentDefinition>();
-  const [operatingAgentConfigIndex, setOperatingAgentConfigIndex] = useState(-1);
+  const [roleAgentConfigsMap, setRoleAgentConfigsMap] = useState<Record<string, SceneAgentConfig[]>>({});
+  const [operatingAgentMetadata, setOperatingAgentMetadata] = useState<SceneAgentMetadata>();
+  const [operatingAgent, setOperatingAgent] = useState<{
+    index: number;
+    agent: SceneAgentConfig;
+  }>();
   const [createOrUpdateAgentModalOpen, setCreateOrUpdateAgentModalOpen] = useState(false);
   const [taskHistoryModalOpen, setTaskHistoryModalOpen] = useState(false);
 
@@ -217,13 +219,6 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
       } catch {
         sceneForm.clearErrors();
         setSceneFormValid(false);
-      }
-      try {
-        await sceneAdditionalForm.validate();
-        setSceneAdditionalFormValid(true);
-      } catch {
-        sceneAdditionalForm.clearErrors();
-        setSceneAdditionalFormValid(false);
       }
       try {
         await evaluatorForm.validate();
@@ -250,98 +245,100 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
               }}
             >
               <CustomCollapseWrapper>
-                <Collapse
-                  defaultActiveKey={['basic', 'additional', 'evaluation']}
-                  items={[
-                    {
-                      key: 'basic',
-                      label: 'Basic',
-                      extra: <div className={`validate-status-indicator ${sceneFormValid ? 'valid' : ''}`} />,
-                      children: (
-                        <Form form={sceneForm} labelCol={5} wrapperCol={16}>
-                          <FormilyDefaultSchemaField schema={scene.sceneInfoConfigFormilySchema} />
-                        </Form>
-                      ),
-                    },
-                    {
-                      key: 'additional',
-                      label: 'Additional',
-                      extra: <div className={`validate-status-indicator ${sceneAdditionalFormValid ? 'valid' : ''}`} />,
-                      children: (
-                        <Form form={sceneAdditionalForm} labelCol={5} wrapperCol={16}>
-                          <FormilyDefaultSchemaField schema={scene.additionalConfigFormilySchema} />
-                        </Form>
-                      ),
-                    },
-                    ...(scene.evaluatorsConfigFormilySchemas
-                      ? [
-                          {
-                            key: 'evaluation',
-                            label: 'Evaluation',
-                            extra: <div className={`validate-status-indicator ${evaluatorFormValid ? 'valid' : ''}`} />,
-                            children: (
-                              <Form form={evaluatorForm} labelCol={5} wrapperCol={16}>
-                                <FormilyDefaultSchemaField>
-                                  <FormilyDefaultSchemaField.Markup
-                                    title={'Evaluation method'}
-                                    name={'evaluation_method'}
-                                    x-decorator="FormItem"
-                                    x-component="Radio.Group"
-                                    default={'evaluators'}
-                                    enum={[
-                                      { label: 'Only Human', value: 'human' },
-                                      { label: 'With LLM', value: 'evaluators' },
-                                    ]}
-                                  />
-                                </FormilyDefaultSchemaField>
-                                {evaluationMethod === 'evaluators' && (
-                                  <FormilyDefaultSchemaField schema={scene.evaluatorsConfigFormilySchemas} />
-                                )}
-                              </Form>
-                            ),
-                          },
-                        ]
-                      : []),
-                  ]}
-                />
+                <Form form={sceneForm} labelCol={5} wrapperCol={16}>
+                  <Collapse
+                    defaultActiveKey={(scene.scene_metadata.configSchema.required as string[]) || []}
+                    items={Object.entries(scene.scene_metadata.configSchema.properties || {})
+                      .filter(([_, property]) => property.type)
+                      .map(([key, property], index) => {
+                        const required = (scene.scene_metadata.configSchema.required as string[]) || [];
+                        return {
+                          key: key,
+                          label: property.title || key,
+                          children: (
+                            <FormilyDefaultSchemaField
+                              name={key}
+                              required={required.includes(key)}
+                              schema={{
+                                ...property,
+                                title: undefined,
+                                ...(property.type === 'object' ? { 'x-decorator': undefined } : {}),
+                              }}
+                            />
+                          ),
+                        };
+                      })}
+                  />
+                </Form>
               </CustomCollapseWrapper>
             </Card>
-            <Card title={`Agent List (At least ${scene.min_agents_num} agent${scene.min_agents_num > 1 ? 's' : ''})`}>
-              <Space wrap={true}>
-                {(scene.max_agents_num <= 0 || sceneAgentConfigs.length <= scene.max_agents_num) && (
-                  <AgentCard
-                    role={'add'}
-                    agentsConfigFormilySchemas={scene.agentsConfigFormilySchemas}
-                    onAddNewClick={() => {
-                      setSelectAgentModalOpen(true);
-                    }}
-                  />
-                )}
-                {sceneAgentConfigs.map((agentConfig, index) => {
-                  return (
-                    <AgentCard
-                      key={index}
-                      role={'agent'}
-                      agentsConfigFormilySchemas={scene.agentsConfigFormilySchemas}
-                      sceneAgentConfig={agentConfig}
-                      onEditButtonClick={() => {
-                        setOperatingAgentConfigIndex(index);
-                        setOperatingAgentDefinition({
-                          agent_id: agentConfig.agent_id,
-                          name: scene.agentsConfigFormilySchemas[agentConfig.agent_id].title,
-                          schema: scene.agentsConfigFormilySchemas[agentConfig.agent_id],
-                        });
-                        setCreateOrUpdateAgentModalOpen(true);
-                      }}
-                      onDeleteButtonClick={() => {
-                        const newSceneAgentConfigs = [...sceneAgentConfigs];
-                        newSceneAgentConfigs.splice(index, 1);
-                        setSceneAgentConfigs(newSceneAgentConfigs);
-                      }}
-                    />
-                  );
-                })}
-              </Space>
+            <Card
+              title={'Agent List'}
+              bodyStyle={{
+                padding: 0,
+                overflow: 'hidden',
+              }}
+            >
+              <CustomCollapseWrapper>
+                <Collapse
+                  defaultActiveKey={scene.scene_metadata.scene_definition.roles.map((r) => r.name)}
+                  items={scene.scene_metadata.scene_definition.roles
+                    .filter((r) => !r.is_static)
+                    .map((role, index) => {
+                      return {
+                        key: role.name,
+                        label: `${role.name} Agents (At least ${role.num_agents_range[0]} agent${
+                          role.num_agents_range[0] > 1 ? 's' : ''
+                        }${
+                          role.num_agents_range[1] > 0
+                            ? `, but no more than ${role.num_agents_range[1]} agent${
+                                role.num_agents_range[1] > 1 ? 's' : ''
+                              }`
+                            : ''
+                        })`,
+                        children: (
+                          <Space wrap={true}>
+                            <AgentCard
+                              role={'add'}
+                              onAddNewClick={() => {
+                                setOperatingRoleName(role.name);
+                                setSelectAgentModalOpen(true);
+                              }}
+                            />
+                            {(roleAgentConfigsMap[role.name] || []).map((agentConfig, index) => {
+                              const agentsMetadata = scene.agents_metadata[role.name];
+                              const sceneAgentMeta = agentsMetadata.find(
+                                (m) => m.obj_for_import.obj === agentConfig.obj_for_import.obj
+                              );
+                              return (
+                                <AgentCard
+                                  key={index}
+                                  role={'agent'}
+                                  sceneAgentMeta={sceneAgentMeta}
+                                  sceneAgentConfig={agentConfig}
+                                  onEditButtonClick={() => {
+                                    setOperatingRoleName(role.name);
+                                    setOperatingAgentMetadata(sceneAgentMeta);
+                                    setOperatingAgent({
+                                      index,
+                                      agent: agentConfig,
+                                    });
+                                    setCreateOrUpdateAgentModalOpen(true);
+                                  }}
+                                  onDeleteButtonClick={() => {
+                                    const newRoleAgentConfigsMap = { ...roleAgentConfigsMap };
+                                    newRoleAgentConfigsMap[role.name].splice(index, 1);
+                                    setRoleAgentConfigsMap(newRoleAgentConfigsMap);
+                                  }}
+                                />
+                              );
+                            })}
+                          </Space>
+                        ),
+                      };
+                    })}
+                />
+              </CustomCollapseWrapper>
             </Card>
           </Space>
         </Content>
@@ -357,9 +354,8 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
               }}
               onClick={async () => {
                 await sceneForm.reset();
-                await sceneAdditionalForm.reset();
                 await evaluatorForm.reset();
-                setSceneAgentConfigs([]);
+                setRoleAgentConfigsMap({});
               }}
             >
               Reset
@@ -379,18 +375,16 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
                 setCreatingScene(true);
                 try {
                   await sceneForm.validate();
-                  await sceneAdditionalForm.validate();
                   await evaluatorForm.validate();
-                  if (sceneAgentConfigs.length < scene.min_agents_num) {
-                    message.error(
-                      `At least ${scene.min_agents_num} agent${scene.min_agents_num > 1 ? 's' : ''} are required.`
-                    );
-                    creatingSceneRef.current = false;
-                    setCreatingScene(false);
-                    return;
-                  }
+                  // if (sceneAgentConfigs.length < scene.min_agents_num) {
+                  //   message.error(
+                  //     `At least ${scene.min_agents_num} agent${scene.min_agents_num > 1 ? 's' : ''} are required.`
+                  //   );
+                  //   creatingSceneRef.current = false;
+                  //   setCreatingScene(false);
+                  //   return;
+                  // }
                   const sceneConfig = merge({}, DefaultSceneInfoConfig, sceneForm.values);
-                  const additionalConfig = sceneAdditionalForm.values;
                   let evaluatorConfig: EvaluatorConfig[] | null = null;
                   if (evaluationMethod === 'evaluators') {
                     evaluatorConfig = [];
@@ -403,16 +397,50 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
                         });
                       });
                   }
-                  const finalConfig: RunSceneConfig = {
-                    id: scene.id,
-                    scene_info_config_data: sceneConfig,
-                    scene_agents_config_data: sceneAgentConfigs,
-                    additional_config_data: additionalConfig,
-                    scene_evaluators_config_data: evaluatorConfig,
+                  const roleConfig: Record<string, SceneRoleConfig> = {};
+                  scene.scene_metadata.scene_definition.roles.forEach((role) => {
+                    const actionsConfig: Record<string, ActionConfig> = {};
+                    role.actions.forEach((action) => {
+                      const metricsConfig: Record<string, MetricConfig> = {};
+                      action.metrics?.forEach((metric) => {
+                        metricsConfig[metric.name] = {
+                          enable: true,
+                        };
+                      });
+                      actionsConfig[action.name] = {
+                        metrics_config: metricsConfig,
+                      };
+                    });
+                    roleConfig[role.name] = {
+                      actions_config: actionsConfig,
+                      agents_config: roleAgentConfigsMap[role.name],
+                    };
+                  });
+                  const createSceneParams: CreateSceneParams = {
+                    scene_obj_config: {
+                      scene_obj: scene.scene_metadata.obj_for_import,
+                      scene_config_data: {
+                        ...sceneConfig,
+                        roles_config: roleConfig,
+                      },
+                    },
+                    metric_evaluator_objs_config: {
+                      evaluators: [],
+                    },
                   };
-                  const { task_id, save_dir, agent_configs } = await ServerAPI.sceneTask.createSceneTask(finalConfig);
-                  await LocalAPI.taskBundle.webui.save(save_dir, task_id, scene, finalConfig, agent_configs);
-                  globalStore.updateInfoAfterSceneTaskCreated(save_dir, task_id, scene, finalConfig, agent_configs);
+                  const { task_id, save_dir } = await ServerAPI.sceneTask.createSceneTask(createSceneParams);
+                  await LocalAPI.taskBundle.webui.save(
+                    save_dir,
+                    task_id,
+                    scene,
+                    createSceneParams
+                  );
+                  globalStore.updateInfoAfterSceneTaskCreated(
+                    save_dir,
+                    task_id,
+                    scene,
+                    createSceneParams
+                  );
                   router.push(`/processing/${task_id}?bundlePath=${encodeURIComponent(save_dir)}`);
                 } catch (e) {
                   console.error(e);
@@ -439,9 +467,9 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
       </Container>
       <SelectAgentModal
         open={selectAgentModalOpen}
-        agentsConfigFormilySchemas={scene.agentsConfigFormilySchemas}
-        onSubmit={(agentDefinition) => {
-          setOperatingAgentDefinition(agentDefinition);
+        selectableAgentsMetadata={operatingRoleName ? scene.agents_metadata[operatingRoleName] : []}
+        onSubmit={(agentMetadata) => {
+          setOperatingAgentMetadata(agentMetadata);
           setSelectAgentModalOpen(false);
           setCreateOrUpdateAgentModalOpen(true);
         }}
@@ -451,56 +479,70 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
       />
       <CreateOrUpdateAgentModal
         open={createOrUpdateAgentModalOpen}
-        sceneAgentConfig={operatingAgentConfigIndex >= 0 ? sceneAgentConfigs[operatingAgentConfigIndex] : undefined}
-        sceneAgentDefinition={operatingAgentDefinition}
-        otherAgentConfigs={sceneAgentConfigs}
+        sceneAgentConfig={
+          operatingRoleName && operatingAgent ? roleAgentConfigsMap[operatingRoleName][operatingAgent.index] : undefined
+        }
+        operatingAgentMetadata={operatingAgentMetadata}
+        otherAgentColors={Object.entries(roleAgentConfigsMap).reduce((total, [key, agents]) => {
+          return [...total, ...agents.map((agent) => agent.config_data.chart_major_color!)];
+        }, [] as string[])}
         onSubmit={(agentConfig) => {
-          if (operatingAgentConfigIndex >= 0) {
-            const newSceneAgentConfigs = [...sceneAgentConfigs];
-            newSceneAgentConfigs[operatingAgentConfigIndex] = agentConfig;
-            setSceneAgentConfigs(newSceneAgentConfigs);
+          if (!operatingRoleName) return;
+          if (operatingAgent) {
+            const newRoleAgentConfigsMap = { ...roleAgentConfigsMap };
+            newRoleAgentConfigsMap[operatingRoleName][operatingAgent.index] = agentConfig;
+            setRoleAgentConfigsMap(newRoleAgentConfigsMap);
           } else {
-            setSceneAgentConfigs([...sceneAgentConfigs, agentConfig]);
+            const newRoleAgentConfigsMap = { ...roleAgentConfigsMap };
+            let roleAgentConfigs = newRoleAgentConfigsMap[operatingRoleName];
+            if (!roleAgentConfigs) {
+              roleAgentConfigs = [];
+              newRoleAgentConfigsMap[operatingRoleName] = roleAgentConfigs;
+            }
+            newRoleAgentConfigsMap[operatingRoleName] = [...roleAgentConfigs, agentConfig];
+            setRoleAgentConfigsMap(newRoleAgentConfigsMap);
           }
-          setOperatingAgentConfigIndex(-1);
-          setOperatingAgentDefinition(undefined);
+          setOperatingRoleName(undefined);
+          setOperatingAgentMetadata(undefined);
+          setOperatingAgent(undefined);
           setCreateOrUpdateAgentModalOpen(false);
         }}
         onNeedClose={() => {
-          setOperatingAgentConfigIndex(-1);
-          setOperatingAgentDefinition(undefined);
+          setOperatingRoleName(undefined);
+          setOperatingAgentMetadata(undefined);
+          setOperatingAgent(undefined);
           setCreateOrUpdateAgentModalOpen(false);
         }}
       />
-      <TaskHistoryModal
-        open={taskHistoryModalOpen}
-        scene={scene}
-        tasks={taskHistory}
-        onApplyHistoryTaskConfig={(runConfig) => {
-          sceneForm.setValues(runConfig.scene_info_config_data);
-          sceneAdditionalForm.setValues(runConfig.additional_config_data);
-          try {
-            sceneForm.validate();
-            sceneAdditionalForm.validate();
-          } catch {}
-          if (runConfig.scene_evaluators_config_data) {
-            evaluatorForm.setValues(
-              runConfig.scene_evaluators_config_data.reduce(
-                (acc, evaluator) => {
-                  acc[evaluator.evaluator_name] = evaluator.evaluator_config_data;
-                  return acc;
-                },
-                {} as Record<string, EvaluatorConfigData>
-              )
-            );
-          }
-          setSceneAgentConfigs(runConfig.scene_agents_config_data);
-          setTaskHistoryModalOpen(false);
-        }}
-        onNeedClose={() => {
-          setTaskHistoryModalOpen(false);
-        }}
-      />
+      {/*<TaskHistoryModal*/}
+      {/*  open={taskHistoryModalOpen}*/}
+      {/*  scene={scene}*/}
+      {/*  tasks={taskHistory}*/}
+      {/*  onApplyHistoryTaskConfig={(runConfig) => {*/}
+      {/*    sceneForm.setValues(runConfig.scene_info_config_data);*/}
+      {/*    sceneAdditionalForm.setValues(runConfig.additional_config_data);*/}
+      {/*    try {*/}
+      {/*      sceneForm.validate();*/}
+      {/*      sceneAdditionalForm.validate();*/}
+      {/*    } catch {}*/}
+      {/*    if (runConfig.scene_evaluators_config_data) {*/}
+      {/*      evaluatorForm.setValues(*/}
+      {/*        runConfig.scene_evaluators_config_data.reduce(*/}
+      {/*          (acc, evaluator) => {*/}
+      {/*            acc[evaluator.evaluator_name] = evaluator.evaluator_config_data;*/}
+      {/*            return acc;*/}
+      {/*          },*/}
+      {/*          {} as Record<string, EvaluatorConfigData>*/}
+      {/*        )*/}
+      {/*      );*/}
+      {/*    }*/}
+      {/*    setSceneAgentConfigs(runConfig.scene_agents_config_data);*/}
+      {/*    setTaskHistoryModalOpen(false);*/}
+      {/*  }}*/}
+      {/*  onNeedClose={() => {*/}
+      {/*    setTaskHistoryModalOpen(false);*/}
+      {/*  }}*/}
+      {/*/>*/}
     </>
   );
 };

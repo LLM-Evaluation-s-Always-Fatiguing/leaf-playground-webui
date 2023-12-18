@@ -8,7 +8,6 @@ import { Button, ButtonProps, Card, Collapse, Descriptions, Space, Spin, Table }
 import SceneLog from '@/types/server/Log';
 import dayjs from 'dayjs';
 import JSONViewModal from '@/components/common/JSONViewModal';
-import ReactECharts from 'echarts-for-react';
 import { useTheme } from 'antd-style';
 import ServerTaskBundle from '@/types/api-router/server/task-bundle';
 import WebUITaskBundle from '@/types/api-router/webui/task-bundle';
@@ -177,7 +176,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
         <Container>
           <div className="header">
             <div></div>
-            <div className="title">{`${webuiBundle.scene.scene_metadata.name}`}</div>
+            <div className="title">{`${webuiBundle.scene.scene_metadata.scene_definition.name}`}</div>
             <Button
               onClick={async () => {
                 await LocalAPI.dict.open(bundlePath!);
@@ -208,13 +207,13 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                                 key: '1',
                                 label: 'Name',
                                 span: 24,
-                                children: webuiBundle.scene.scene_metadata.name,
+                                children: webuiBundle.scene.scene_metadata.scene_definition.name,
                               },
                               {
                                 key: '2',
                                 label: 'Description',
                                 span: 24,
-                                children: webuiBundle.scene.scene_metadata.description,
+                                children: webuiBundle.scene.scene_metadata.scene_definition.description,
                               },
                               {
                                 key: '3',
