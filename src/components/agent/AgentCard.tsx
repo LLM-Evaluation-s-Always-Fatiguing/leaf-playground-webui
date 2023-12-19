@@ -188,7 +188,7 @@ const AgentCard = (props: AgentCardProps) => {
                 wordBreak: 'break-all',
               }}
             >
-              {props.sceneAgentMeta?.configSchema?.title}
+              {props.sceneAgentMeta?.cls_name}
             </div>
             {displayKV.map((kv, index) => {
               return (

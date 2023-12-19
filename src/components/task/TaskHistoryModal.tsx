@@ -1,18 +1,18 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { Button, ButtonProps, Modal, Space, Table, theme } from 'antd';
+import { Button, ButtonProps, Modal, Space, Table } from 'antd';
 import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskInfo';
-import RunSceneConfig from '@/types/server/RunSceneConfig';
-import Scene from '@/types/server/Scene';
+import Scene from '@/types/server/meta/Scene';
 import LocalAPI from '@/services/local';
 import { useTheme } from 'antd-style';
+import { CreateSceneParams } from '@/types/server/CreateSceneParams';
 
 interface TaskHistoryModalProps {
   open: boolean;
   scene: Scene;
   tasks: WebUITaskBundleTaskInfo[];
-  onApplyHistoryTaskConfig: (runConfig: RunSceneConfig) => void;
+  onApplyHistoryTaskConfig: (createSceneParams: CreateSceneParams) => void;
   onNeedClose: () => void;
 }
 
@@ -48,7 +48,7 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
       onCancel={() => {
         onNeedClose();
       }}
-      title={`${scene.scene_metadata.name} Task History`}
+      title={`${scene.scene_metadata.scene_definition.name} Task History`}
     >
       <Table
         columns={[
@@ -84,7 +84,7 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
                     {...buttonProps}
                     onClick={async () => {
                       const taskDetail = await LocalAPI.taskBundle.webui.get(record.bundlePath);
-                      onApplyHistoryTaskConfig(taskDetail.runConfig);
+                      onApplyHistoryTaskConfig(taskDetail.createSceneParams);
                     }}
                   >
                     Replay

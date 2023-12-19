@@ -24,21 +24,25 @@ const NullableObject = observer((props: NullableObjectProps) => {
       });
       setTimeout(() => {
         if (validate) {
-          field.validate();
+          form.validate();
         }
       }, 0);
     }
   };
 
+  const mountedRef = useRef(false);
   useEffect(() => {
+    if (!mountedRef.current) return;
     setChildFieldDisplay(enable, true);
   }, [enable]);
 
   useEffect(() => {
+    mountedRef.current = true;
     setChildFieldDisplay(enable);
+    return ()=>{
+      mountedRef.current = false;
+    }
   }, []);
-
-  console.log(enable);
 
   return (
     <FormItem

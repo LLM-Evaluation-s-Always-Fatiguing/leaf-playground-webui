@@ -4,6 +4,7 @@ import path from 'path';
 import dayjs from 'dayjs';
 import Scene from '@/types/server/meta/Scene';
 import { CreateSceneParams } from '@/types/server/CreateSceneParams';
+import md5 from 'crypto-js/md5';
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -95,7 +96,7 @@ export async function POST(req: NextRequest) {
         taskInfoPath,
         JSON.stringify({
           id: taskId,
-          sceneName: scene.scene_metadata.scene_definition.name,
+          uuid: md5(`${scene.scene_metadata.obj_for_import.obj}+${scene.scene_metadata.obj_for_import.module}`).toString(),
           bundlePath: bundlePath,
           agentsName,
           time: dayjs().format('YYYY-MM-DD HH:mm:ss'),

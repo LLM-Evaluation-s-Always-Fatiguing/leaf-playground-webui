@@ -1,4 +1,3 @@
-import FormilyJSONSchema from '@/types/FormilyJSONSchema';
 import FormilySchemaTransformer from '@/utils/formily-json-schema/formily-schema';
 
 const transformer = new FormilySchemaTransformer();

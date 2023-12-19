@@ -13,6 +13,7 @@ import LocalAPI from '@/services/local';
 import LoadingOverlay from '@/components/common/LoadingOverlay';
 import ServerInfo from '@/types/server/meta/ServerInfo';
 import Scene from '@/types/server/meta/Scene';
+import md5 from 'crypto-js/md5';
 
 const ScenesArea = styled.div`
   width: 24%;
@@ -119,7 +120,13 @@ export default function HomePage(props: HomePageProps) {
           <SceneConfigBoard
             key={selectedScene.scene_metadata.scene_definition.name}
             scene={selectedScene}
-            taskHistory={taskHistory[selectedScene.scene_metadata.scene_definition.name] || []}
+            taskHistory={
+              taskHistory[
+                md5(
+                  `${selectedScene.scene_metadata.obj_for_import.obj}+${selectedScene.scene_metadata.obj_for_import.module}`
+                ).toString()
+              ] || []
+            }
           />
         ) : (
           <SceneInfoBoard

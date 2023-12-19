@@ -1,6 +1,6 @@
 export default interface WebUITaskBundleTaskInfo {
   id: string;
-  sceneId: string;
+  uuid: string;
   bundlePath: string;
   agentsName: string[];
   time: string;
