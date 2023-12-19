@@ -15,16 +15,14 @@ import merge from 'lodash/merge';
 import { DefaultSceneInfoConfig } from '@/models/scene';
 import useGlobalStore from '@/stores/global';
 import ServerAPI from '@/services/server';
-import EvaluatorConfig, { EvaluatorConfigData } from '@/types/server/Evaluator';
 import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskInfo';
 import { MdOutlineHistory } from 'react-icons/md';
 import TaskHistoryModal from '@/components/task/TaskHistoryModal';
 import LocalAPI from '@/services/local';
 import LoadingOverlay from '@/components/common/LoadingOverlay';
-import { useTheme } from 'antd-style';
 import Scene from '@/types/server/meta/Scene';
 import SceneAgentMetadata from '@/types/server/meta/Agent';
-import { CreateSceneParams } from '@/types/server/CreateSceneParams';
+import { CreateSceneParams, getRoleAgentConfigsMapFromCreateSceneParams } from "@/types/server/CreateSceneParams";
 import { SceneConfigData, SceneRoleConfig } from "@/types/server/config/Scene";
 import { ActionConfig } from '@/types/server/config/Action';
 import { MetricConfig } from '@/types/server/config/MetricConfig';
@@ -144,16 +142,9 @@ function splitCreateSceneParamsToState(createSceneParams: CreateSceneParams): {
   sceneFormValues: any;
   roleAgentConfigsMap: Record<string, SceneAgentConfig[]>;
 } {
-  const configObj = createSceneParams.scene_obj_config.scene_config_data;
-  const roleConfig = configObj.roles_config;
-  const  sceneFormValues: Partial<SceneConfigData> = configObj;
+  const roleAgentConfigsMap = getRoleAgentConfigsMapFromCreateSceneParams(createSceneParams)
+  const  sceneFormValues: Partial<SceneConfigData> = createSceneParams.scene_obj_config.scene_config_data;
   delete sceneFormValues.roles_config;
-  const roleAgentConfigsMap: Record<string, SceneAgentConfig[]> = {}
-  Object.keys(roleConfig).forEach((roleName)=>{
-    if (roleConfig[roleName].agents_config) {
-      roleAgentConfigsMap[roleName] = roleConfig[roleName].agents_config!;
-    }
-  })
   return  {
     sceneFormValues,
     roleAgentConfigsMap,
@@ -173,16 +164,6 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
   const [sceneFormValid, setSceneFormValid] = useState(false);
   const sceneForm = useMemo(() => {
     return createForm({
-      initialValues: {
-        dataset_config: {
-          path: 'AsakusaRinne/gaokao_bench',
-          name: '2010-2022_History_MCQs',
-          split: 'dev',
-          question_column: 'question',
-          golden_answer_column: 'answer',
-          num_questions: 3,
-        },
-      },
       effects() {
         onFormValuesChange((form) => {
           form.validate();
@@ -207,25 +188,6 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
   }>();
   const [createOrUpdateAgentModalOpen, setCreateOrUpdateAgentModalOpen] = useState(false);
 
-  const [evaluatorFormValid, setEvaluatorFormValid] = useState(false);
-  const [evaluationMethod, setEvaluationMethod] = useState('evaluators');
-  const evaluatorForm = useMemo(() => {
-    return createForm({
-      effects() {
-        onFormValuesChange((form) => {
-          setEvaluationMethod(form.values.evaluation_method);
-          form.validate();
-        });
-        onFormValidateSuccess(() => {
-          setEvaluatorFormValid(true);
-        });
-        onFormValidateFailed(() => {
-          setEvaluatorFormValid(false);
-        });
-      },
-    });
-  }, []);
-
   useEffect(() => {
     const doFistFormValidate = async () => {
       try {
@@ -234,13 +196,6 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
       } catch {
         sceneForm.clearErrors();
         setSceneFormValid(false);
-      }
-      try {
-        await evaluatorForm.validate();
-        setEvaluatorFormValid(true);
-      } catch {
-        evaluatorForm.clearErrors();
-        setEvaluatorFormValid(false);
       }
     };
     doFistFormValidate();
@@ -387,7 +342,6 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
               }}
               onClick={async () => {
                 await sceneForm.reset();
-                await evaluatorForm.reset();
                 setRoleAgentConfigsMap({});
               }}
             >
@@ -408,12 +362,10 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
                 setCreatingScene(true);
                 try {
                   await sceneForm.validate();
-                  await evaluatorForm.validate();
                   const noStaticRoles = scene.scene_metadata.scene_definition.roles.filter((r) => !r.is_static);
                   for (let i = 0; i < noStaticRoles.length; i++) {
                     const role = noStaticRoles[i];
                     const roleAgentConfigs = roleAgentConfigsMap[role.name] || [];
-                    console.log(role.num_agents_range[0] > 0, roleAgentConfigs.length < role.num_agents_range[0]);
                     if (role.num_agents_range[0] > 0 && roleAgentConfigs.length < role.num_agents_range[0]) {
                       message.error(
                         `At least ${role.num_agents_range[0]} ${role.name} agent${
@@ -426,18 +378,6 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
                     }
                   }
                   const sceneConfig = merge({}, DefaultSceneInfoConfig, sceneForm.values);
-                  let evaluatorConfig: EvaluatorConfig[] | null = null;
-                  if (evaluationMethod === 'evaluators') {
-                    evaluatorConfig = [];
-                    Object.entries(evaluatorForm.values)
-                      .filter((entry) => entry[0] !== 'evaluation_method')
-                      .forEach(([name, config]) => {
-                        evaluatorConfig?.push({
-                          evaluator_name: name,
-                          evaluator_config_data: config as EvaluatorConfigData,
-                        });
-                      });
-                  }
                   const roleConfig: Record<string, SceneRoleConfig> = {};
                   scene.scene_metadata.scene_definition.roles.forEach((role) => {
                     const actionsConfig: Record<string, ActionConfig> = {};

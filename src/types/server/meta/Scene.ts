@@ -21,20 +21,25 @@ export interface ServerActionSignatureDefinition {
   signature: ServerActionSignatureParameterDefinition;
 }
 
-export enum ServerMetricValueDType {
+export enum ServerMetricRecordValueDType {
   SCALAR = 'scalar',
   VECTOR = 'vector',
   NESTED_SCALAR = 'nested_scalar',
   NESTED_VECTOR = 'nested_vector',
 }
 
+export enum ServerMetricRecordDisplayType {
+  FiveStarsRate = 'FiveStarsRate',
+  NumberInput = 'NumberInput',
+  BooleanRadio = 'BooleanRadio',
+}
+
 export interface ServerMetricDefinition {
   name: string;
   description: string;
-  record_dtype: ServerMetricValueDType;
-  metric_dtype: ServerMetricValueDType;
-  expect_resp_msg_type: any;
-  aggregation_methods: Record<string, any>;
+  record_value_dtype: ServerMetricRecordValueDType;
+  record_display_type?: ServerMetricRecordDisplayType;
+  expect_resp_msg_type: string;
   is_comparison: boolean;
 }
 

@@ -2,19 +2,13 @@
 
 import styled from '@emotion/styled';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  ServerWebSocketEndMessage,
-  ServerWebSocketLogMessage,
-  ServerWebSocketMessage,
-  ServerWebSocketMessageType,
-} from '@/types/server/web-socket';
-import SceneLog from '@/types/server/Log';
+import SceneLog, { SceneActionLog, SceneLogType, SceneSystemLog, SceneSystemLogEvent } from '@/types/server/Log';
 import SampleQAVisualization from '@/components/processing/specialized/sample-qa/SampleQAVisualization';
 import { DefaultProcessingVisualizationComponentProps } from '@/components/processing/def';
 import VisualizationComponentWithExtraProps from '@/components/processing/common/VisualizationComponentWithExtraProps';
 import useGlobalStore from '@/stores/global';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Button, message, Spin } from 'antd';
+import { Button, message } from 'antd';
 import LocalAPI from '@/services/local';
 import ProcessingConsole from '@/components/processing/common/Console';
 import ServerAPI from '@/services/server';
@@ -22,6 +16,7 @@ import { SceneTaskStatus } from '@/types/server/SceneTask';
 import BuddhaLogo from '@/components/processing/specialized/buddha/BuddhaLogo';
 import { MdPerson3 } from 'react-icons/md';
 import LoadingOverlay from '@/components/common/LoadingOverlay';
+import { WebsocketMessage, WebsocketMessageOperation } from '@/types/server/WebsocketMessage';
 
 const PageContainer = styled.div`
   width: 100%;
@@ -105,7 +100,7 @@ const ProcessingPage = ({
   const wsOpenRef = useRef(false);
 
   const [wsConnected, setWSConnected] = useState(false);
-  const [logs, setLogs] = useState<SceneLog[]>([]);
+  const [logs, setLogs] = useState<SceneActionLog[]>([]);
 
   const [finished, setFinished] = useState(false);
 
@@ -120,14 +115,11 @@ const ProcessingPage = ({
         case SceneTaskStatus.FINISHED:
           const webuiBundle = await LocalAPI.taskBundle.webui.get(bundlePath!);
           globalStore.updateInfoFromWebUITaskBundle(webuiBundle);
-
           if (taskStatusResp.status === SceneTaskStatus.FINISHED) {
-            // const logsFilePath = bundlePath + '/logs.jsonl';
-            // const logs = await LocalAPI.file.readJSONL(logsFilePath);
-            // setLogs(logs);
             setFinished(true);
             message.success('Task finished!');
             setLoading(false);
+            return true;
           } else {
             return true;
           }
@@ -170,28 +162,42 @@ const ProcessingPage = ({
         wsRef.current.onopen = function () {
           wsOpenRef.current = true;
           setWSConnected(true);
-          console.log('WebSocket opened');
+          console.info('WebSocket opened');
           setLoading(false);
         };
 
         wsRef.current.onmessage = async (event) => {
-          const wsMessage: ServerWebSocketMessage = JSON.parse(JSON.parse(event.data));
-          console.log('WebSocket Received Message:', wsMessage);
-          switch (wsMessage.type) {
-            case ServerWebSocketMessageType.LOG:
-              const logMessage = wsMessage as ServerWebSocketLogMessage;
-              setLogs((prev) => {
-                return [...prev, logMessage.data];
-              });
+          const wsMessage: WebsocketMessage = JSON.parse(JSON.parse(event.data));
+          console.info('WebSocket Received Message:', wsMessage);
+          const log = wsMessage.data;
+          switch (wsMessage.operation) {
+            case WebsocketMessageOperation.CREATE:
+              switch (log.log_type) {
+                case SceneLogType.ACTION:
+                  const actionLog = log as SceneActionLog;
+                  setLogs((prev) => {
+                    return [...prev, actionLog];
+                  });
+                  break;
+                case SceneLogType.SYSTEM:
+                  const systemLog = log as SceneSystemLog;
+                  switch (systemLog.system_event) {
+                    case SceneSystemLogEvent.SIMULATION_START:
+                    case SceneSystemLogEvent.SIMULATION_FINISHED:
+                    case SceneSystemLogEvent.EVALUATION_FINISHED:
+                      break;
+                    case SceneSystemLogEvent.EVERYTHING_DONE:
+                      message.success('Task Finished!');
+                      setFinished(true);
+                      wsRef.current?.close();
+                      break;
+                  }
+                  break;
+                default:
+                  break;
+              }
               break;
-            case ServerWebSocketMessageType.End:
-              const endMessage = wsMessage as ServerWebSocketEndMessage;
-              message.success('Task Finished!');
-              globalStore.updateTaskResultSavedDir(endMessage.data.save_dir);
-              setFinished(true);
-              wsRef.current?.close();
-              break;
-            default:
+            case WebsocketMessageOperation.UPDATE:
               break;
           }
         };
@@ -203,7 +209,7 @@ const ProcessingPage = ({
         wsRef.current.onclose = () => {
           wsOpenRef.current = false;
           setWSConnected(false);
-          console.log('WebSocket closed.');
+          console.info('WebSocket closed.');
         };
       }
     };
@@ -255,7 +261,10 @@ const ProcessingPage = ({
             {finished && (
               <Button
                 type="primary"
-                onClick={() => {
+                onClick={async () => {
+                  setLoadingTip('Saving task result...');
+                  setLoading(true)
+                  await ServerAPI.sceneTask.save(taskId);
                   goToResult();
                 }}
               >

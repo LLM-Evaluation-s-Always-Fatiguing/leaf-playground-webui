@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import SceneLog from '@/types/server/Log';
+import { SceneActionLog } from "@/types/server/Log";
 import React, { useEffect } from 'react';
 import { Button } from 'antd';
 import { TbCodeDots } from 'react-icons/tb';
@@ -41,11 +41,11 @@ const Body = styled.div`
 `;
 
 interface ConsoleLogItemProps {
-  log: SceneLog;
+  log: SceneActionLog;
   ellipsisStatus: TruncatableParagraphEllipsisStatus;
   onEllipsisStatusChange: (status: TruncatableParagraphEllipsisStatus) => void;
   needMeasure: () => void;
-  onOpenJSONDetail: (log: SceneLog) => void;
+  onOpenJSONDetail: (log: SceneActionLog) => void;
 }
 
 const ConsoleLogItem = ({
@@ -62,7 +62,7 @@ const ConsoleLogItem = ({
   return (
     <Container>
       <Header>
-        <div>{log.narrator}</div>
+        <div>{log.log_msg}</div>
         <Button
           size="small"
           type="text"

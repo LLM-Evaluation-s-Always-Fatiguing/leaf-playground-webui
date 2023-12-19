@@ -1,11 +1,11 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import LocalAPI from '@/services/local';
 import styled from '@emotion/styled';
-import { Button, ButtonProps, Card, Collapse, Descriptions, Space, Spin, Table } from 'antd';
-import SceneLog from '@/types/server/Log';
+import { Button, ButtonProps, Card, Collapse, Descriptions, Space, Table } from 'antd';
+import SceneLog, { SceneActionLog, SceneLogType } from '@/types/server/Log';
 import dayjs from 'dayjs';
 import JSONViewModal from '@/components/common/JSONViewModal';
 import { useTheme } from 'antd-style';
@@ -17,6 +17,9 @@ import { TbCodeDots } from 'react-icons/tb';
 import AgentCard from '@/components/agent/AgentCard';
 import ServerTaskBundleChart from '@/types/api-router/server/task-bundle/Chart';
 import VegaChart from '@/components/vega/VegaChart';
+import { getRoleAgentConfigsMapFromCreateSceneParams } from '@/types/server/CreateSceneParams';
+import flatten from 'lodash/flatten';
+import keyBy from 'lodash/keyBy';
 
 const Container = styled.div`
   width: 100%;
@@ -149,6 +152,25 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
   const [loading, setLoading] = useState(true);
   const [serverBundle, setServerBundle] = useState<ServerTaskBundle>();
   const [webuiBundle, setWebUIBundle] = useState<WebUITaskBundle>();
+  const actionLogs = useMemo(() => {
+    return (serverBundle?.logs || []).filter((l) => l.log_type === SceneLogType.ACTION) as SceneActionLog[];
+  }, [serverBundle?.logs]);
+  const roleAgentConfigMap = useMemo(() => {
+    if (webuiBundle?.createSceneParams) {
+      return getRoleAgentConfigsMapFromCreateSceneParams(webuiBundle.createSceneParams);
+    }
+    return {};
+  }, [webuiBundle?.createSceneParams]);
+  const agentConfigMap = useMemo(() => {
+    return keyBy(
+      flatten(
+        Object.keys(roleAgentConfigMap).map((key) => {
+          return roleAgentConfigMap[key];
+        })
+      ),
+      (a) => a.config_data.profile.id
+    );
+  }, [roleAgentConfigMap]);
   const [viewingJSON, setViewingJSON] = useState<any>();
   const [jsonViewerModalTitle, setJSONViewerModalTitle] = useState<string>();
   const [jsonViewerModalOpen, setJSONViewerModalOpen] = useState<boolean>(false);
@@ -188,14 +210,14 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
           <Content>
             <Space direction={'vertical'}>
               <Card
-                title={'Basic'}
+                title={'Task Info'}
                 bodyStyle={{
                   padding: 0,
                 }}
               >
                 <CustomCollapseWrapper>
                   <Collapse
-                    defaultActiveKey={['basic', 'agents']}
+                    defaultActiveKey={['basic', ...(Object.keys(roleAgentConfigMap).map(rn=>`${rn}-agents`))]}
                     items={[
                       {
                         key: 'basic',
@@ -217,13 +239,13 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                               },
                               {
                                 key: '3',
-                                label: 'Scene Instance',
+                                label: 'Scene Config',
                                 children: (
                                   <Button
                                     {...jsonCodeButtonCommonProps}
                                     onClick={() => {
-                                      setViewingJSON(serverBundle?.scene);
-                                      setJSONViewerModalTitle('Scene Instance Detail');
+                                      setViewingJSON(serverBundle?.sceneObjConfig);
+                                      setJSONViewerModalTitle('Scene Config Detail');
                                       setJSONViewerModalOpen(true);
                                     }}
                                   />
@@ -233,36 +255,38 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                           />
                         ),
                       },
-                      {
-                        key: 'agents',
-                        label: 'Scene Agents',
-                        children: (
-                          <Space>
-                            {webuiBundle.agentConfigs.map((agentConfig) => {
-                              const agentClassName = serverBundle.agents[agentConfig.profile.id]?.metadata.cls_name;
-                              if (!agentClassName) return false;
-                              const agentId = Object.entries(webuiBundle.scene.agents_metadata).findLast(([id, am]) => {
-                                return am.cls_name === agentClassName;
-                              })?.[0];
-                              if (!agentId) return false;
-                              return (
-                                <AgentCard
-                                  key={agentConfig.profile.id}
-                                  displayMode
-                                  role={'agent'}
-                                  agentsConfigFormilySchemas={webuiBundle.scene.agentsConfigFormilySchemas}
-                                  sceneAgentConfig={{ agent_id: agentId, agent_config_data: agentConfig }}
-                                  onEditButtonClick={() => {
-                                    setViewingJSON(serverBundle.agents[agentConfig.profile.id]);
-                                    setJSONViewerModalTitle('Agent Detail');
-                                    setJSONViewerModalOpen(true);
-                                  }}
-                                />
-                              );
-                            })}
-                          </Space>
-                        ),
-                      },
+                      ...Object.keys(roleAgentConfigMap)
+                        .filter((r) => roleAgentConfigMap[r].length > 0)
+                        .map((r) => {
+                          return {
+                            key: `${r}-agents`,
+                            label: `${r} agents`,
+                            children: (
+                              <Space>
+                                {roleAgentConfigMap[r].map((agentConfig) => {
+                                  const agentMetadata = webuiBundle.scene.agents_metadata[r].findLast((am) => {
+                                    return am.obj_for_import.obj === agentConfig.obj_for_import.obj;
+                                  });
+                                  if (!agentMetadata) return false;
+                                  return (
+                                    <AgentCard
+                                      key={agentConfig.config_data.profile.id}
+                                      displayMode
+                                      role={'agent'}
+                                      sceneAgentConfig={agentConfig}
+                                      sceneAgentMeta={agentMetadata}
+                                      onEditButtonClick={() => {
+                                        setViewingJSON(agentConfig.config_data);
+                                        setJSONViewerModalTitle('Agent Detail');
+                                        setJSONViewerModalOpen(true);
+                                      }}
+                                    />
+                                  );
+                                })}
+                              </Space>
+                            ),
+                          };
+                        }),
                     ]}
                   />
                 </CustomCollapseWrapper>
@@ -311,32 +335,32 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                           </div>
                         ),
                       },
-                      {
-                        key: 'metrics',
-                        label: 'Metrics',
-                        children: (
-                          <Descriptions
-                            items={[
-                              ...serverBundle.metrics.map((metric, index) => {
-                                return {
-                                  key: index,
-                                  label: metric.evaluator,
-                                  children: (
-                                    <Button
-                                      {...jsonCodeButtonCommonProps}
-                                      onClick={() => {
-                                        setViewingJSON(metric);
-                                        setJSONViewerModalTitle('Metric Detail');
-                                        setJSONViewerModalOpen(true);
-                                      }}
-                                    />
-                                  ),
-                                };
-                              }),
-                            ]}
-                          />
-                        ),
-                      },
+                      // {
+                      //   key: 'metrics',
+                      //   label: 'Metrics',
+                      //   children: (
+                      //     <Descriptions
+                      //       items={[
+                      //         ...serverBundle.metrics.map((metric, index) => {
+                      //           return {
+                      //             key: index,
+                      //             label: metric.evaluator,
+                      //             children: (
+                      //               <Button
+                      //                 {...jsonCodeButtonCommonProps}
+                      //                 onClick={() => {
+                      //                   setViewingJSON(metric);
+                      //                   setJSONViewerModalTitle('Metric Detail');
+                      //                   setJSONViewerModalOpen(true);
+                      //                 }}
+                      //               />
+                      //             ),
+                      //           };
+                      //         }),
+                      //       ]}
+                      //     />
+                      //   ),
+                      // },
                     ]}
                   />
                 </CustomCollapseWrapper>
@@ -347,7 +371,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                   padding: '12px 16px',
                 }}
               >
-                <Table<SceneLog>
+                <Table<SceneActionLog>
                   rowKey={'index'}
                   tableLayout={'fixed'}
                   bordered
@@ -357,8 +381,9 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                   columns={[
                     {
                       width: 80,
-                      title: 'Index',
-                      dataIndex: 'index',
+                      title: 'ID',
+                      dataIndex: 'id',
+                      ellipsis: true,
                     },
                     {
                       width: 180,
@@ -374,7 +399,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                       render: (_, record) => {
                         let color: string | undefined;
                         if (!record.response.sender.role?.is_static) {
-                          color = serverBundle?.agents[record.response.sender.id]?.config.chart_major_color;
+                          color = agentConfigMap[record.response.sender.id]?.config_data.chart_major_color;
                         }
                         return <SampleAgentComponent name={record.response.sender.name} color={color} />;
                       },
@@ -388,7 +413,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                             {record.response.receivers.map((r) => {
                               let color: string | undefined;
                               if (!r.role?.is_static) {
-                                color = serverBundle?.agents[r.id]?.config.chart_major_color;
+                                color = agentConfigMap[r.id]?.config_data.chart_major_color;
                               }
                               return <SampleAgentComponent key={r.id} name={r.name} color={color} />;
                             })}
@@ -397,8 +422,8 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                       },
                     },
                     {
-                      title: 'Narrator',
-                      dataIndex: 'narrator',
+                      title: 'Log Message',
+                      dataIndex: 'log_msg',
                     },
                     {
                       title: 'Response',
@@ -435,7 +460,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                       },
                     },
                   ]}
-                  dataSource={serverBundle?.logs || []}
+                  dataSource={actionLogs}
                   pagination={{
                     responsive: true,
                     showSizeChanger: true,

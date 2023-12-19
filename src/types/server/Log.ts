@@ -1,10 +1,7 @@
-import DynamicObject from '@/types/server/DynamicObject';
-
 export interface SceneLogRole {
   name: string;
   description: string;
   is_static: boolean;
-  agent_type?: DynamicObject;
 }
 
 export interface SceneLogProfile {
@@ -16,6 +13,7 @@ export interface SceneLogProfile {
 export interface SceneLogContent {
   type: SceneLogMediaType;
   display_text?: string;
+  text: string;
 }
 
 export interface SceneLogTextContent extends SceneLogContent {
@@ -47,12 +45,37 @@ export enum SceneLogMediaType {
   VIDEO = 'video',
 }
 
+export enum SceneLogType {
+  SYSTEM = 'system',
+  ACTION = 'action',
+}
+
 export default interface SceneLog {
-  index: number;
+  id: string;
   created_at: string;
+  log_type: SceneLogType;
+  log_msg: string;
+}
+
+export enum SceneSystemLogEvent {
+  SIMULATION_START = 'simulation_start',
+  SIMULATION_FINISHED = 'simulation_finished',
+  EVALUATION_FINISHED = 'evaluation_finished',
+  EVERYTHING_DONE = 'everything_done',
+}
+
+export interface SceneSystemLog extends SceneLog {
+  system_event: SceneSystemLogEvent;
+}
+
+export interface SceneActionLog extends SceneLog {
   references?: SceneLogMessage[];
   response: SceneLogMessage;
+
   ground_truth?: SceneLogContent;
-  eval_result?: Record<string, boolean | number | string>;
-  narrator?: string;
+
+  eval_records: any;
+  compare_records: any;
+  human_eval_records: any;
+  human_compare_records: any;
 }

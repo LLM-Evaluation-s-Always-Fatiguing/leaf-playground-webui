@@ -1,5 +1,5 @@
-import SceneLog from '@/types/server/Log';
+import { SceneActionLog } from "@/types/server/Log";
 
 export interface DefaultProcessingVisualizationComponentProps {
-  logs: SceneLog[];
+  logs: SceneActionLog[];
 }

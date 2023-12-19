@@ -1,7 +1,7 @@
 import { useTheme } from 'antd-style';
 import styled from '@emotion/styled';
-import SceneLog from '@/types/server/Log';
-import { Button, Space, Tabs } from 'antd';
+import SceneLog, { SceneActionLog } from '@/types/server/Log';
+import { Space, Tabs } from 'antd';
 import useGlobalStore from '@/stores/global';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ConsoleLogItem from '@/components/processing/common/ConsoleLogItem';
@@ -10,7 +10,7 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import { TruncatableParagraphEllipsisStatus } from '@/components/processing/common/TruncatableParagraph';
 import JSONViewModal from '@/components/common/JSONViewModal';
 import { BsFillArrowUpLeftCircleFill } from 'react-icons/bs';
-import SceneAgentConfig from "@/types/server/config/Agent";
+import SceneAgentConfig from '@/types/server/config/Agent';
 
 const Container = styled.div`
   width: 100%;
@@ -113,7 +113,7 @@ const LogsArea = styled.div`
 `;
 
 interface ProcessingConsoleProps {
-  logs: SceneLog[];
+  logs: SceneActionLog[];
   wsConnected: boolean;
 }
 
@@ -156,12 +156,12 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
           <div ref={registerChild as any} style={style}>
             <ConsoleLogItem
               log={log}
-              ellipsisStatus={logItemEllipsisCache[log.index] || TruncatableParagraphEllipsisStatus.WaitDetect}
+              ellipsisStatus={logItemEllipsisCache[index] || TruncatableParagraphEllipsisStatus.WaitDetect}
               onEllipsisStatusChange={(newStatus) => {
                 setLogItemEllipsisCache((prev) => {
                   return {
                     ...prev,
-                    [log.index]: newStatus,
+                    [index]: newStatus,
                   };
                 });
               }}
@@ -193,9 +193,9 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
 
   useEffect(() => {
     const onMouseUp = () => {
-      setTimeout(()=>{
+      setTimeout(() => {
         logsAreaMouseDownRef.current = false;
-      }, 400)
+      }, 400);
     };
     document.addEventListener('mouseup', onMouseUp);
     return () => {
@@ -203,12 +203,11 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
     };
   }, []);
 
-  const allAgents = Object.entries(globalStore.createSceneParams?.scene_obj_config.scene_config_data.roles_config || {}).reduce(
-    (total, [roleName, roleConfig]) => {
-      return [...total, ...(roleConfig.agents_config || [])];
-    },
-    [] as SceneAgentConfig[]
-  );
+  const allAgents = Object.entries(
+    globalStore.createSceneParams?.scene_obj_config.scene_config_data.roles_config || {}
+  ).reduce((total, [roleName, roleConfig]) => {
+    return [...total, ...(roleConfig.agents_config || [])];
+  }, [] as SceneAgentConfig[]);
 
   return (
     <Container>
@@ -259,25 +258,24 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
             label: 'All',
             key: '',
           },
-          ...(allAgents)
-            .map((a) => {
-              return {
-                label: (
-                  <Space>
-                    <div
-                      style={{
-                        width: '10px',
-                        height: '10px',
-                        borderRadius: '50%',
-                        background: a.config_data.chart_major_color,
-                      }}
-                    />
-                    {a.config_data.profile.name}
-                  </Space>
-                ),
-                key: a.config_data.profile.id,
-              };
-            }),
+          ...allAgents.map((a) => {
+            return {
+              label: (
+                <Space>
+                  <div
+                    style={{
+                      width: '10px',
+                      height: '10px',
+                      borderRadius: '50%',
+                      background: a.config_data.chart_major_color,
+                    }}
+                  />
+                  {a.config_data.profile.name}
+                </Space>
+              ),
+              key: a.config_data.profile.id,
+            };
+          }),
         ]}
       />
       <LogsArea
