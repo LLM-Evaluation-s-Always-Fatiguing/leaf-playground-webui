@@ -72,7 +72,7 @@ const sceneAPI = {
           evaluators_metadata: await Promise.all(
             origin.evaluators_metadata.map(async (serverEvaluatorMetadata) => {
               const evaluatorMetadataConfigSchemaTransformResult = await transferStandardJSONSchemaToFormilyJSONSchema(
-                origin.scene_metadata.config_schema
+                serverEvaluatorMetadata.config_schema
               );
               return {
                 ...serverEvaluatorMetadata,

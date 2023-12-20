@@ -2,7 +2,7 @@
 
 import styled from '@emotion/styled';
 import { Button, Card, Collapse, Flex, message, Space } from 'antd';
-import { Form } from '@formily/antd-v5';
+import { Form, Switch } from '@formily/antd-v5';
 import { createForm, onFormValuesChange, onFormValidateSuccess, onFormValidateFailed } from '@formily/core';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import SelectAgentModal from '@/components/agent/SelectAgentModal';
@@ -28,8 +28,10 @@ import { SceneActionConfig } from '@/types/server/config/Action';
 import { SceneMetricConfig } from '@/types/server/config/Metric';
 import { SceneRoleConfig } from '@/types/server/config/Role';
 import SceneRoleConfigCard from '@/components/homepage/SceneRoleConfigCard';
-import { WebUIRoleMetricConfig } from '@/types/webui/MetricConfig';
+import { getWebUIMetricsConfigFromCreateSceneParams, WebUIRoleMetricConfig } from '@/types/webui/MetricConfig';
 import { MetricEvaluatorObjConfig } from '@/types/server/config/Evaluator';
+import { useTheme } from 'antd-style';
+import EvaluatorCard from '@/components/evaluator/EvaluatorCard';
 
 const Container = styled.div`
   width: 100%;
@@ -141,8 +143,8 @@ const CollapseItemTitle = styled.div`
   width: 100%;
   display: flex;
   flex-direction: row;
-  justify-content: flex-start;
-  align-items: flex-start;
+  justify-content: space-between;
+  align-items: stretch;
 
   .info {
     display: flex;
@@ -161,6 +163,16 @@ const CollapseItemTitle = styled.div`
       font-weight: normal;
     }
   }
+
+  .extra {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    padding-right: 12px;
+    font-size: 14px;
+  }
 `;
 
 interface SceneConfigBoardProps {
@@ -168,21 +180,28 @@ interface SceneConfigBoardProps {
   taskHistory: WebUITaskBundleTaskInfo[];
 }
 
-function splitCreateSceneParamsToState(createSceneParams: CreateSceneParams): {
+function splitCreateSceneParamsToState(
+  scene: Scene,
+  createSceneParams: CreateSceneParams
+): {
   sceneFormValues: any;
   roleAgentConfigsMap: Record<string, SceneAgentConfig[]>;
+  webUIMetricsConfig: Record<string, WebUIRoleMetricConfig>;
 } {
   const roleAgentConfigsMap = getRoleAgentConfigsMapFromCreateSceneParams(createSceneParams);
+  const webUIMetricsConfig = getWebUIMetricsConfigFromCreateSceneParams(scene, createSceneParams);
   const sceneFormValues: Partial<SceneConfigData> = createSceneParams.scene_obj_config.scene_config_data;
   delete sceneFormValues.roles_config;
   return {
     sceneFormValues,
     roleAgentConfigsMap,
+    webUIMetricsConfig,
   };
 }
 
 const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
   const router = useRouter();
+  const theme = useTheme();
   const globalStore = useGlobalStore();
 
   const hasHistory = taskHistory.length > 0;
@@ -237,8 +256,33 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
     return checkIsAgentsConfigPass();
   }, [roleAgentConfigsMap]);
 
-  const [metricsConfig, setMetricsConfig] = useState<Record<string, WebUIRoleMetricConfig>>({});
-  const [evaluatorConfigs, setEvaluatorConfigs] = useState<MetricEvaluatorObjConfig[]>([]);
+  const [webUIMetricsConfig, setWebUIMetricsConfig] = useState<Record<string, WebUIRoleMetricConfig>>({});
+  const hasMetricEvaluators = (scene.evaluators_metadata || []).length > 0;
+  const [useMetricEvaluators, setUseMetricEvaluators] = useState<boolean>(false);
+  const [evaluatorConfigMap, setEvaluatorConfigMap] = useState<Record<string, MetricEvaluatorObjConfig>>({});
+  const [enabledEvaluatorNames, setEnabledEvaluatorNames] = useState<string[]>([]);
+  const [highlightMetrics, setHighlightMetrics] = useState<string[]>([]);
+  const { allMetrics, checkedMetrics } = useMemo(() => {
+    const allMetrics: string[] = [];
+    const checkedMetrics: string[] = [];
+    scene.scene_metadata.scene_definition.roles.forEach((roleMetadata) => {
+      roleMetadata.actions.forEach((action) => {
+        action.metrics?.forEach((metric) => {
+          const metricKey = `${roleMetadata.name}.${action.name}.${metric.name}`;
+          allMetrics.push(metricKey);
+          if (webUIMetricsConfig[roleMetadata.name]?.actions_config[action.name]?.metrics_config[metric.name]?.enable) {
+            checkedMetrics.push(metricKey);
+          }
+        });
+      });
+    });
+    return { allMetrics, checkedMetrics };
+  }, [scene, webUIMetricsConfig]);
+  const usefulEvaluators = useMemo(() => {
+    return scene.evaluators_metadata.filter((evaluatorMetadata) => {
+      return evaluatorMetadata.metrics.some((m) => checkedMetrics.includes(m));
+    });
+  }, [scene.evaluators_metadata, checkedMetrics]);
 
   useEffect(() => {
     const doFistFormValidate = async () => {
@@ -397,74 +441,163 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
                 />
               </CustomCollapseWrapper>
             </Card>
-            <Card
-              title={
-                <Flex align={'center'}>
-                  <div className={`validate-status-indicator valid`} />
-                  <div
-                    style={{
-                      marginLeft: 8,
-                      fontSize: 16,
-                    }}
-                  >
-                    Evaluation
-                  </div>
-                </Flex>
-              }
-              headStyle={{
-                padding: '0 15px',
-                fontSize: 16,
-              }}
-              bodyStyle={{
-                padding: 0,
-                overflow: 'hidden',
-              }}
-            >
-              <CustomCollapseWrapper>
-                <Collapse
-                  defaultActiveKey={['metrics', 'evaluator']}
-                  items={[
-                    {
-                      key: 'metrics',
-                      label: (
-                        <CollapseItemTitle>
-                          <div className="info">
-                            <div className="title">Metrics</div>
-                            <div className="desc">
-                              You can choose whether or not you want to evaluate that metric in this test
+            {allMetrics.length > 0 && (
+              <Card
+                title={
+                  <Flex align={'center'}>
+                    <div className={`validate-status-indicator valid`} />
+                    <div
+                      style={{
+                        marginLeft: 8,
+                        fontSize: 16,
+                      }}
+                    >
+                      Evaluation
+                    </div>
+                  </Flex>
+                }
+                headStyle={{
+                  padding: '0 15px',
+                  fontSize: 16,
+                }}
+                bodyStyle={{
+                  padding: 0,
+                  overflow: 'hidden',
+                }}
+              >
+                <CustomCollapseWrapper>
+                  <Collapse
+                    defaultActiveKey={['metrics', 'evaluator']}
+                    items={[
+                      {
+                        key: 'metrics',
+                        label: (
+                          <CollapseItemTitle>
+                            <div className="info">
+                              <div className="title">Metrics</div>
+                              <div className="desc">
+                                You can choose whether or not you want to evaluate that metric in this test
+                              </div>
                             </div>
-                          </div>
-                        </CollapseItemTitle>
-                      ),
-                      children: (
-                        <Flex>
-                          {scene.scene_metadata.scene_definition.roles
-                            .filter((r) => (r.actions || []).length > 0)
-                            .map((r, index) => {
-                              return (
-                                <SceneRoleConfigCard
-                                  key={index}
-                                  roleMetadata={r}
-                                  config={metricsConfig[r.name]}
-                                  onConfigChange={(newRoleConfig) => {
-                                    const newMetricsConfig = { ...metricsConfig };
-                                    newMetricsConfig[r.name] = newRoleConfig;
-                                    setMetricsConfig(newMetricsConfig);
+                            {hasMetricEvaluators && (
+                              <div className="extra" onClick={(e) => e.stopPropagation()}>
+                                <Space
+                                  size={4}
+                                  style={
+                                    checkedMetrics.length === 0
+                                      ? {
+                                          cursor: 'not-allowed',
+                                          color: theme.colorTextDisabled,
+                                        }
+                                      : {
+                                          cursor: 'pointer',
+                                        }
+                                  }
+                                  onClick={() => {
+                                    if (checkedMetrics.length > 0) {
+                                      setUseMetricEvaluators(!useMetricEvaluators);
+                                    }
                                   }}
-                                />
-                              );
-                            })}
-                        </Flex>
-                      ),
-                    },
-                    {
-                      key: 'evaluator',
-                      label: 'Evaluator',
-                    },
-                  ]}
-                />
-              </CustomCollapseWrapper>
-            </Card>
+                                >
+                                  <Switch
+                                    size="small"
+                                    disabled={checkedMetrics.length === 0}
+                                    checked={useMetricEvaluators && checkedMetrics.length > 0}
+                                    style={{
+                                      pointerEvents: 'none',
+                                    }}
+                                  />
+                                  Enable Evaluator
+                                </Space>
+                              </div>
+                            )}
+                          </CollapseItemTitle>
+                        ),
+                        children: (
+                          <Flex>
+                            {scene.scene_metadata.scene_definition.roles
+                              .filter((r) => (r.actions || []).length > 0)
+                              .map((r, index) => {
+                                return (
+                                  <SceneRoleConfigCard
+                                    key={index}
+                                    roleMetadata={r}
+                                    config={webUIMetricsConfig[r.name]}
+                                    highlightMetrics={highlightMetrics}
+                                    evaluatorHandledMetrics={usefulEvaluators
+                                      .filter((e) => enabledEvaluatorNames.includes(e.cls_name))
+                                      .map((e) => e.metrics)
+                                      .flat()}
+                                    onConfigChange={(newRoleConfig) => {
+                                      const newMetricsConfig = { ...webUIMetricsConfig };
+                                      newMetricsConfig[r.name] = newRoleConfig;
+                                      setWebUIMetricsConfig(newMetricsConfig);
+                                    }}
+                                  />
+                                );
+                              })}
+                          </Flex>
+                        ),
+                      },
+                      ...(useMetricEvaluators && checkedMetrics.length > 0
+                        ? [
+                            {
+                              key: 'evaluator',
+                              label: (
+                                <CollapseItemTitle>
+                                  <div className="info">
+                                    <div className="title">Evaluator</div>
+                                    <div className="desc">
+                                      You can enable more than one evaluator and the evaluation tasks will be performed
+                                      sequentially, only the last evaluation result will be retained for the metrics
+                                      that have been evaluated multiple times, and you can drag the evaluators to adjust
+                                      their order
+                                    </div>
+                                  </div>
+                                </CollapseItemTitle>
+                              ),
+                              children: (
+                                <Space wrap={true}>
+                                  {usefulEvaluators.map((evaluator, index) => {
+                                    const enabled = enabledEvaluatorNames.includes(evaluator.cls_name);
+                                    return (
+                                      <EvaluatorCard
+                                        key={index}
+                                        metadata={evaluator}
+                                        config={evaluatorConfigMap[evaluator.cls_name]}
+                                        enable={enabled}
+                                        onHover={() => {
+                                          setHighlightMetrics(evaluator.metrics);
+                                        }}
+                                        onHoverLeave={() => {
+                                          setHighlightMetrics([]);
+                                        }}
+                                        onEnable={(config) => {
+                                          setEvaluatorConfigMap((prev) => {
+                                            const newConfigMap = { ...prev };
+                                            newConfigMap[evaluator.cls_name] = config;
+                                            return newConfigMap;
+                                          });
+                                          setEnabledEvaluatorNames([...enabledEvaluatorNames, evaluator.cls_name]);
+                                        }}
+                                        onDisable={() => {
+                                          setEnabledEvaluatorNames(
+                                            enabledEvaluatorNames.filter((n) => n !== evaluator.cls_name)
+                                          );
+                                        }}
+                                      />
+                                    );
+                                  })}
+                                </Space>
+                              ),
+                            },
+                          ]
+                        : []),
+                    ]}
+                  />
+                </CustomCollapseWrapper>
+              </Card>
+            )}
           </Space>
         </Content>
         <Footer>
@@ -480,6 +613,10 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
               onClick={async () => {
                 await sceneForm.reset();
                 setRoleAgentConfigsMap({});
+                setWebUIMetricsConfig({});
+                setEvaluatorConfigMap({});
+                setEnabledEvaluatorNames([]);
+                setUseMetricEvaluators(false);
               }}
             >
               Reset
@@ -512,7 +649,9 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
                       const metricsConfig: Record<string, SceneMetricConfig> = {};
                       action.metrics?.forEach((metric) => {
                         metricsConfig[metric.name] = {
-                          enable: true,
+                          enable:
+                            webUIMetricsConfig[role.name]?.actions_config[action.name]?.metrics_config[metric.name]
+                              ?.enable || false,
                         };
                       });
                       actionsConfig[action.name] = {
@@ -524,6 +663,13 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
                       agents_config: roleAgentConfigsMap[role.name],
                     };
                   });
+                  const evaluators = useMetricEvaluators
+                    ? Object.keys(evaluatorConfigMap)
+                        .filter((evaluatorClsName) => enabledEvaluatorNames.includes(evaluatorClsName))
+                        .map((evaluatorClsName) => {
+                          return evaluatorConfigMap[evaluatorClsName];
+                        })
+                    : [];
                   const createSceneParams: CreateSceneParams = {
                     scene_obj_config: {
                       scene_obj: scene.scene_metadata.obj_for_import,
@@ -533,7 +679,7 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
                       },
                     },
                     metric_evaluator_objs_config: {
-                      evaluators: [],
+                      evaluators,
                     },
                   };
                   const { task_id, save_dir } = await ServerAPI.sceneTask.createSceneTask(createSceneParams);
@@ -568,13 +714,36 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
         scene={scene}
         tasks={taskHistory}
         onApplyHistoryTaskConfig={(createSceneParams) => {
-          const { sceneFormValues, roleAgentConfigsMap } = splitCreateSceneParamsToState(createSceneParams);
+          const { sceneFormValues, roleAgentConfigsMap, webUIMetricsConfig } = splitCreateSceneParamsToState(
+            scene,
+            createSceneParams
+          );
           sceneForm.setValues(sceneFormValues);
           try {
             sceneForm.validate();
           } catch {}
           setRoleAgentConfigsMap(roleAgentConfigsMap);
+          setWebUIMetricsConfig(webUIMetricsConfig);
           setTaskHistoryModalOpen(false);
+          if (createSceneParams.metric_evaluator_objs_config.evaluators.length > 0) {
+            setUseMetricEvaluators(true);
+            setEvaluatorConfigMap(
+              createSceneParams.metric_evaluator_objs_config.evaluators.reduce(
+                (total, evaluator) => {
+                  total[evaluator.evaluator_obj.obj] = evaluator;
+                  return total;
+                },
+                {} as Record<string, MetricEvaluatorObjConfig>
+              )
+            );
+            setEnabledEvaluatorNames(
+              createSceneParams.metric_evaluator_objs_config.evaluators.map((e) => e.evaluator_obj.obj)
+            );
+          } else {
+            setUseMetricEvaluators(false);
+            setEvaluatorConfigMap({});
+            setEnabledEvaluatorNames([]);
+          }
         }}
         onNeedClose={() => {
           setTaskHistoryModalOpen(false);

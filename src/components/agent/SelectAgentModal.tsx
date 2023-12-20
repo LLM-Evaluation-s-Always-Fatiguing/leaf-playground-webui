@@ -86,6 +86,18 @@ const SelectAgentModal: React.FC<SelectAgentModalProps> = ({
           >
             <Select options={selectableAgentOptions} />
           </Form.Item>
+          <Form.Item label={" "} colon={false} dependencies={['cls_name']}>
+            {() => {
+              const cls_name = formRef.current?.getFieldValue('cls_name');
+              const currentAgentMetadata = selectableAgentsMetadata.find((m) => m.cls_name === cls_name);
+              if (currentAgentMetadata) {
+                return <div>
+                  {currentAgentMetadata.description}
+                </div>
+              }
+              return false;
+            }}
+          </Form.Item>
         </Form>
       </Spin>
     </Modal>

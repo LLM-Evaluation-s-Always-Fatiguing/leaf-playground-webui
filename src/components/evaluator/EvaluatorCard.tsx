@@ -1,0 +1,239 @@
+import EvaluatorMetadata from '@/types/server/meta/Evaluator';
+import { Card, Tooltip } from 'antd';
+import styled from '@emotion/styled';
+import { PiDetectiveFill } from 'react-icons/pi';
+import { useTheme } from 'antd-style';
+import { MetricEvaluatorObjConfig } from '@/types/server/config/Evaluator';
+
+const Content = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+
+  .metadataArea {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 16px 12px 0 12px;
+
+    .avatar {
+      width: 60px;
+      height: 60px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      font-size: 28px;
+      background: ${(props) => props.theme.colorFillSecondary};
+      color: ${(props) => props.theme.colorFill};
+    }
+
+    .infoArea {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+      margin-left: 8px;
+      color: ${(props) => props.theme.colorTextDisabled};
+
+      .name {
+        font-size: 17px;
+        font-weight: 500;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+
+      .description {
+        margin-top: 0;
+        font-size: 14px;
+        line-height: 1.2;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+
+  .footer {
+    margin-top: 20px;
+    height: 40px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    position: relative;
+    background: ${(props) => props.theme.colorFillQuaternary};
+    padding: 0 16px;
+
+    .configStatus {
+      color: ${(props) => props.theme.colorTextDisabled};
+    }
+
+    .enableBG {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      height: 100%;
+      width: 40px;
+      opacity: 0.3;
+      z-index: 2;
+
+      :after {
+        content: '';
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        width: 0;
+        height: 0;
+        border-left: 40px solid transparent;
+        border-bottom: 40px solid ${(props) => props.theme.colorPrimary};
+      }
+    }
+  }
+`;
+
+interface EvaluatorCardProps {
+  enable: boolean;
+  metadata: EvaluatorMetadata;
+  config?: MetricEvaluatorObjConfig;
+  onEnable?: (config: MetricEvaluatorObjConfig) => void;
+  onDisable?: () => void;
+  onHover?: () => void;
+  onHoverLeave?: () => void;
+}
+
+const EvaluatorCard = (props: EvaluatorCardProps) => {
+  const theme = useTheme();
+  const noNeedConfig =
+    !props.metadata.config_schema.properties || Object.keys(props.metadata.config_schema.properties).length === 0;
+  const configured = !!props.config;
+
+  return (
+    <Card
+      hoverable
+      style={{
+        padding: 0,
+        overflow: 'hidden',
+      }}
+      bodyStyle={{
+        width: 320,
+        height: 136,
+        cursor: 'pointer',
+        padding: 0,
+        borderRadius: '8px',
+        ...(props.enable
+          ? {
+              border: `1px solid ${theme.colorPrimary}`,
+            }
+          : {}),
+      }}
+      onMouseEnter={() => {
+        props.onHover?.();
+      }}
+      onMouseLeave={() => {
+        props.onHoverLeave?.();
+      }}
+      onClick={() => {
+        if (props.enable) {
+          props.onDisable?.();
+        } else {
+          if (configured) {
+            props.onEnable?.(props.config!);
+          } else {
+            if (noNeedConfig) {
+              props.onEnable?.({
+                evaluator_obj: props.metadata.obj_for_import,
+                evaluator_config_data: {},
+              });
+            } else {
+              console.log(1);
+            }
+          }
+        }
+      }}
+    >
+      <Content>
+        <div className="metadataArea">
+          <div
+            className="avatar"
+            style={
+              props.enable
+                ? {
+                    color: theme.colorPrimary,
+                  }
+                : {}
+            }
+          >
+            <PiDetectiveFill size={'1em'} />
+          </div>
+          <div className="infoArea">
+            <div
+              className="name"
+              style={
+                props.enable
+                  ? {
+                      color: theme.colorText,
+                    }
+                  : {}
+              }
+            >
+              {props.metadata.cls_name}
+            </div>
+            <Tooltip title={props.metadata.description}>
+              <div
+                className="description"
+                style={
+                  props.enable
+                    ? {
+                        color: theme.colorTextSecondary,
+                      }
+                    : {}
+                }
+              >
+                {props.metadata.description}
+              </div>
+            </Tooltip>
+          </div>
+        </div>
+        <div className="footer">
+          <div
+            className="configStatus"
+            style={
+              props.enable
+                ? {
+                    color: theme.colorText,
+                  }
+                : {}
+            }
+          >
+            {noNeedConfig ? 'No manual config required.' : configured ? 'Configured' : 'Click to configure'}
+          </div>
+          <div
+            className="enableBG"
+            style={
+              props.enable
+                ? {
+                    opacity: 1,
+                  }
+                : {}
+            }
+          ></div>
+        </div>
+      </Content>
+    </Card>
+  );
+};
+
+export default EvaluatorCard;

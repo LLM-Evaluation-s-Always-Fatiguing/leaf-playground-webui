@@ -74,6 +74,7 @@ interface SceneRoleConfigCardProps {
   roleMetadata: SceneRoleDefinition;
   config?: WebUIRoleMetricConfig;
   evaluatorHandledMetrics?: string[];
+  highlightMetrics: string[];
   onConfigChange: (newActionConfig: WebUIRoleMetricConfig) => void;
 }
 
@@ -83,21 +84,27 @@ const SceneRoleConfigCard = (props: SceneRoleConfigCardProps) => {
     return generateColorShades(theme.colorPrimary);
   }, [theme.colorPrimary]);
 
-  const { metrics, checkedMetrics } = useMemo(() => {
-    const metrics: string[] = [];
+  const { allMetrics, checkedMetrics } = useMemo(() => {
+    const allMetrics: string[] = [];
     const checkedMetrics: string[] = [];
     props.roleMetadata.actions.forEach((action) => {
       action.metrics?.forEach((metric) => {
         const metricKey = `${props.roleMetadata.name}.${action.name}.${metric.name}`;
-        metrics.push(metricKey);
+        allMetrics.push(metricKey);
         if (props.config?.actions_config[action.name]?.metrics_config[metric.name]?.enable) {
           checkedMetrics.push(metricKey);
         }
       });
     });
-    return { metrics, checkedMetrics };
+    return { allMetrics, checkedMetrics };
   }, [props.roleMetadata, props.config]);
-  const allMetricsChecked = metrics.length === checkedMetrics.length;
+  const allMetricsChecked = allMetrics.length === checkedMetrics.length;
+
+  const highlighted = useMemo(() => {
+    return props.highlightMetrics.some((metric) => {
+      return allMetrics.includes(metric);
+    });
+  }, [props.highlightMetrics, allMetrics]);
 
   return (
     <CustomCollapseWrapper>
@@ -109,6 +116,11 @@ const SceneRoleConfigCard = (props: SceneRoleConfigCardProps) => {
           ...(checkedMetrics.length > 0
             ? {
                 border: `1px solid ${allMetricsChecked ? primaryColorShades[5] : primaryColorShades[2]}`,
+              }
+            : {}),
+          ...(highlighted
+            ? {
+                border: `1px solid ${primaryColorShades[3]}`,
               }
             : {}),
         }}
@@ -169,9 +181,11 @@ const SceneRoleConfigCard = (props: SceneRoleConfigCardProps) => {
                 {props.roleMetadata.actions.map((action) => {
                   return (
                     <SceneActionConfigCard
+                      roleName={props.roleMetadata.name}
                       actionDefinition={action}
                       config={props.config ? props.config.actions_config[action.name] : undefined}
                       evaluatorHandledMetrics={props.evaluatorHandledMetrics}
+                      highlightMetrics={props.highlightMetrics}
                       onConfigChange={(newActionConfig) => {
                         const newConfig: WebUIRoleMetricConfig = { actions_config: {}, ...props.config };
                         newConfig.actions_config[action.name] = newActionConfig;
