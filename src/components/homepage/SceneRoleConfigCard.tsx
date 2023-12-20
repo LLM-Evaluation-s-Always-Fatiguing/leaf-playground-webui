@@ -178,9 +178,10 @@ const SceneRoleConfigCard = (props: SceneRoleConfigCardProps) => {
                   width: '100%',
                 }}
               >
-                {props.roleMetadata.actions.map((action) => {
+                {props.roleMetadata.actions.map((action, index) => {
                   return (
                     <SceneActionConfigCard
+                      key={index}
                       roleName={props.roleMetadata.name}
                       actionDefinition={action}
                       config={props.config ? props.config.actions_config[action.name] : undefined}
