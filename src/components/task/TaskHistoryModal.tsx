@@ -69,6 +69,13 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
             dataIndex: 'time',
           },
           {
+            title: 'Finished',
+            dataIndex: 'finished',
+            render: (finished) => {
+              return finished ? 'Yes' : 'No';
+            },
+          },
+          {
             title: 'Operation',
             render: (_, record) => {
               const buttonProps: ButtonProps = {
@@ -100,10 +107,14 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
                   <Button
                     {...buttonProps}
                     onClick={() => {
-                      window.open(`/result/${record.id}?bundlePath=${encodeURIComponent(record.bundlePath)}`, '_blank');
+                      if (record.finished) {
+                        window.open(`/result/${record.id}?bundlePath=${encodeURIComponent(record.bundlePath)}`, '_blank');
+                      } else {
+                        window.open(`/processing/${record.id}?bundlePath=${encodeURIComponent(record.bundlePath)}`, '_blank');
+                      }
                     }}
                   >
-                    Result
+                    {record.finished ? 'Result' : 'Check'}
                   </Button>
                 </Space>
               );

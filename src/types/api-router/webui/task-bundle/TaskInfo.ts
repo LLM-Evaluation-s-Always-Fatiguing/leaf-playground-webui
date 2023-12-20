@@ -4,4 +4,5 @@ export default interface WebUITaskBundleTaskInfo {
   bundlePath: string;
   agentsName: string[];
   time: string;
+  finished: boolean;
 }

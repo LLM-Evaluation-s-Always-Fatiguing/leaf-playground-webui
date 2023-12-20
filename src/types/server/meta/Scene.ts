@@ -2,71 +2,72 @@ import SampleJSONSchema from '@/types/SampleJSONSchema';
 import FormilyJSONSchema from '@/types/FormilyJSONSchema';
 import DynamicObject from '@/types/server/DynamicObject';
 import SceneAgentMetadata, { ServerSceneAgentMetadata } from '@/types/server/meta/Agent';
+import EvaluatorMetadata, { ServerEvaluatorMetadata } from '@/types/server/meta/Evaluator';
 
-export interface ServerSceneEnvVarDefinition {
+export interface SceneEnvVarDefinition {
   name: string;
   description: string;
   current_value: any;
 }
 
-export interface ServerActionSignatureParameterDefinition {
+export interface SceneActionSignatureParameterDefinition {
   name: string;
   annotation?: any;
 }
 
-export interface ServerActionSignatureDefinition {
+export interface SceneActionSignatureDefinition {
   name: string;
   description: string;
   annotation?: any;
-  signature: ServerActionSignatureParameterDefinition;
+  signature: SceneActionSignatureParameterDefinition;
 }
 
-export enum ServerMetricRecordValueDType {
+export enum SceneMetricRecordValueDType {
   SCALAR = 'scalar',
   VECTOR = 'vector',
   NESTED_SCALAR = 'nested_scalar',
   NESTED_VECTOR = 'nested_vector',
 }
 
-export enum ServerMetricRecordDisplayType {
+export enum SceneMetricRecordDisplayType {
   FiveStarsRate = 'FiveStarsRate',
   NumberInput = 'NumberInput',
   BooleanRadio = 'BooleanRadio',
 }
 
-export interface ServerMetricDefinition {
+export interface SceneMetricDefinition {
   name: string;
   description: string;
-  record_value_dtype: ServerMetricRecordValueDType;
-  record_display_type?: ServerMetricRecordDisplayType;
+  record_value_dtype: SceneMetricRecordValueDType;
+  record_display_type?: SceneMetricRecordDisplayType;
   expect_resp_msg_type: string;
   is_comparison: boolean;
 }
 
-export interface ServerSceneActionDefinition {
+export interface SceneActionDefinition {
   name: string;
   description: string;
-  signature: ServerActionSignatureDefinition;
-  metrics?: ServerMetricDefinition[];
+  signature: SceneActionSignatureDefinition;
+  metrics?: SceneMetricDefinition[];
 }
 
-export interface ServerSceneRoleDefinition {
+export interface SceneRoleDefinition {
   name: string;
   description: string;
-  actions: ServerSceneActionDefinition[];
+  actions: SceneActionDefinition[];
   num_agents_range: [number, number];
   is_static: boolean;
 }
 
-export interface ServerSceneDefinition {
+export interface SceneDefinition {
   name: string;
   description: string;
-  env_vars: ServerSceneEnvVarDefinition[];
-  roles: ServerSceneRoleDefinition[];
+  env_vars: SceneEnvVarDefinition[];
+  roles: SceneRoleDefinition[];
 }
 
 export interface ServerSceneMetadata {
-  scene_definition: ServerSceneDefinition;
+  scene_definition: SceneDefinition;
   config_schema: SampleJSONSchema;
   obj_for_import: DynamicObject;
 }
@@ -78,10 +79,11 @@ export interface SceneMetadata extends ServerSceneMetadata {
 export interface ServerScene {
   scene_metadata: ServerSceneMetadata;
   agents_metadata: Record<string, ServerSceneAgentMetadata[]>;
-  evaluators_metadata: any;
+  evaluators_metadata: ServerEvaluatorMetadata[];
 }
 
 export default interface Scene extends ServerScene {
   scene_metadata: SceneMetadata;
   agents_metadata: Record<string, SceneAgentMetadata[]>;
+  evaluators_metadata: EvaluatorMetadata[];
 }

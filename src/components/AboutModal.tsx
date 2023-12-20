@@ -3,7 +3,7 @@
 import React, { CSSProperties, useEffect, useState } from 'react';
 import { Descriptions, message, Modal, Space, Button, Spin, ButtonProps } from 'antd';
 import ServerAPI from '@/services/server';
-import ServerInfo from '@/types/server/ServerInfo';
+import ServerInfo from '@/types/server/meta/ServerInfo';
 import { AiOutlineFolderOpen } from 'react-icons/ai';
 import LocalAPI from '@/services/local';
 

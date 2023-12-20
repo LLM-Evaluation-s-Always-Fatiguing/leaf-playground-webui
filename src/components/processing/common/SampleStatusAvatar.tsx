@@ -1,10 +1,8 @@
 import styled from '@emotion/styled';
-import React, { PropsWithChildren } from 'react';
+import React from 'react';
 import SampleAvatar, { SampleAvatarProps } from '@/components/processing/common/SampleAvatar';
 import { FaCheckCircle } from 'react-icons/fa';
-import { Spin } from 'antd';
 import { useTheme } from 'antd-style';
-import propsToClassKey from '@mui/system/propsToClassKey';
 
 const Container = styled.div`
   width: 40px;

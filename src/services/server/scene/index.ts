@@ -69,7 +69,18 @@ const sceneAPI = {
             },
             {} as Record<string, SceneAgentMetadata[]>
           ),
-          evaluators_metadata: origin.evaluators_metadata,
+          evaluators_metadata: await Promise.all(
+            origin.evaluators_metadata.map(async (serverEvaluatorMetadata) => {
+              const evaluatorMetadataConfigSchemaTransformResult = await transferStandardJSONSchemaToFormilyJSONSchema(
+                origin.scene_metadata.config_schema
+              );
+              return {
+                ...serverEvaluatorMetadata,
+                config_schema: evaluatorMetadataConfigSchemaTransformResult.derefSchema,
+                configSchema: evaluatorMetadataConfigSchemaTransformResult.formilySchema,
+              };
+            })
+          ),
         } as Scene;
       })
     );

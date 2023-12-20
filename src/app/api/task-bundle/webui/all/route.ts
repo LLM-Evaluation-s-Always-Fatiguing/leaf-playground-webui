@@ -38,7 +38,15 @@ export async function GET(req: NextRequest) {
           )
         ) {
           const taskData = await fs.readFile(taskFilePath, { encoding: 'utf8' });
-          tasks.push(JSON.parse(taskData));
+          const logsFilePath = path.join(bundlesPath, dir, 'logs.jsonl');
+          const taskFinished = await fs.stat(logsFilePath).then(
+            () => true,
+            () => false
+          );
+          tasks.push({
+            ...JSON.parse(taskData),
+            finished: taskFinished,
+          });
         }
       }
     }

@@ -1,5 +1,5 @@
-import { MetricConfig } from '@/types/server/config/MetricConfig';
+import { SceneMetricConfig } from '@/types/server/config/Metric';
 
-export interface ActionConfig {
-  metrics_config: Record<string, MetricConfig>;
+export interface SceneActionConfig {
+  metrics_config: Record<string, SceneMetricConfig>;
 }

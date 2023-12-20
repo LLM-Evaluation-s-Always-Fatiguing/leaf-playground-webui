@@ -22,10 +22,14 @@ import LocalAPI from '@/services/local';
 import LoadingOverlay from '@/components/common/LoadingOverlay';
 import Scene from '@/types/server/meta/Scene';
 import SceneAgentMetadata from '@/types/server/meta/Agent';
-import { CreateSceneParams, getRoleAgentConfigsMapFromCreateSceneParams } from "@/types/server/CreateSceneParams";
-import { SceneConfigData, SceneRoleConfig } from "@/types/server/config/Scene";
-import { ActionConfig } from '@/types/server/config/Action';
-import { MetricConfig } from '@/types/server/config/MetricConfig';
+import { CreateSceneParams, getRoleAgentConfigsMapFromCreateSceneParams } from '@/types/server/CreateSceneParams';
+import { SceneConfigData } from '@/types/server/config/Scene';
+import { SceneActionConfig } from '@/types/server/config/Action';
+import { SceneMetricConfig } from '@/types/server/config/Metric';
+import { SceneRoleConfig } from '@/types/server/config/Role';
+import SceneRoleConfigCard from '@/components/homepage/SceneRoleConfigCard';
+import { WebUIRoleMetricConfig } from '@/types/webui/MetricConfig';
+import { MetricEvaluatorObjConfig } from '@/types/server/config/Evaluator';
 
 const Container = styled.div`
   width: 100%;
@@ -133,6 +137,32 @@ const CustomCollapseWrapper = styled.div`
   }
 `;
 
+const CollapseItemTitle = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+
+  .info {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+
+    .title {
+      font-size: 15px;
+      line-height: 22px;
+      font-weight: 500;
+    }
+
+    .desc {
+      font-size: 13px !important;
+      font-weight: normal;
+    }
+  }
+`;
+
 interface SceneConfigBoardProps {
   scene: Scene;
   taskHistory: WebUITaskBundleTaskInfo[];
@@ -142,13 +172,13 @@ function splitCreateSceneParamsToState(createSceneParams: CreateSceneParams): {
   sceneFormValues: any;
   roleAgentConfigsMap: Record<string, SceneAgentConfig[]>;
 } {
-  const roleAgentConfigsMap = getRoleAgentConfigsMapFromCreateSceneParams(createSceneParams)
-  const  sceneFormValues: Partial<SceneConfigData> = createSceneParams.scene_obj_config.scene_config_data;
+  const roleAgentConfigsMap = getRoleAgentConfigsMapFromCreateSceneParams(createSceneParams);
+  const sceneFormValues: Partial<SceneConfigData> = createSceneParams.scene_obj_config.scene_config_data;
   delete sceneFormValues.roles_config;
-  return  {
+  return {
     sceneFormValues,
     roleAgentConfigsMap,
-  }
+  };
 }
 
 const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
@@ -187,6 +217,28 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
     agent: SceneAgentConfig;
   }>();
   const [createOrUpdateAgentModalOpen, setCreateOrUpdateAgentModalOpen] = useState(false);
+  const checkIsAgentsConfigPass = (showErrorMessage = false) => {
+    const noStaticRoles = scene.scene_metadata.scene_definition.roles.filter((r) => !r.is_static);
+    for (let i = 0; i < noStaticRoles.length; i++) {
+      const role = noStaticRoles[i];
+      const roleAgentConfigs = roleAgentConfigsMap[role.name] || [];
+      if (role.num_agents_range[0] > 0 && roleAgentConfigs.length < role.num_agents_range[0]) {
+        if (showErrorMessage) {
+          message.error(
+            `At least ${role.num_agents_range[0]} ${role.name} agent${role.num_agents_range[0] > 1 ? 's' : ''}`
+          );
+        }
+        return false;
+      }
+    }
+    return true;
+  };
+  const agentsConfigValid = useMemo(() => {
+    return checkIsAgentsConfigPass();
+  }, [roleAgentConfigsMap]);
+
+  const [metricsConfig, setMetricsConfig] = useState<Record<string, WebUIRoleMetricConfig>>({});
+  const [evaluatorConfigs, setEvaluatorConfigs] = useState<MetricEvaluatorObjConfig[]>([]);
 
   useEffect(() => {
     const doFistFormValidate = async () => {
@@ -214,6 +266,7 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
                   <div
                     style={{
                       marginLeft: 8,
+                      fontSize: 16,
                     }}
                   >
                     Scene Parameters
@@ -231,7 +284,7 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
               <CustomCollapseWrapper>
                 <Form form={sceneForm} labelCol={5} wrapperCol={16}>
                   <Collapse
-                    defaultActiveKey={(scene.scene_metadata.configSchema.required as string[]) || []}
+                    // defaultActiveKey={(scene.scene_metadata.configSchema.required as string[]) || []}
                     items={Object.entries(scene.scene_metadata.configSchema.properties || {})
                       .filter(([_, property]) => property.type)
                       .map(([key, property], index) => {
@@ -239,6 +292,7 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
                         return {
                           key: key,
                           label: property.title || key,
+                          forceRender: true,
                           children: (
                             <FormilyDefaultSchemaField
                               name={key}
@@ -257,7 +311,22 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
               </CustomCollapseWrapper>
             </Card>
             <Card
-              title={'Agent List'}
+              title={
+                <Flex align={'center'}>
+                  <div className={`validate-status-indicator ${agentsConfigValid ? 'valid' : ''}`} />
+                  <div
+                    style={{
+                      marginLeft: 8,
+                      fontSize: 16,
+                    }}
+                  >
+                    Agent List
+                  </div>
+                </Flex>
+              }
+              headStyle={{
+                padding: '0 15px',
+              }}
               bodyStyle={{
                 padding: 0,
                 overflow: 'hidden',
@@ -265,7 +334,7 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
             >
               <CustomCollapseWrapper>
                 <Collapse
-                  defaultActiveKey={scene.scene_metadata.scene_definition.roles.map((r) => r.name)}
+                  // defaultActiveKey={scene.scene_metadata.scene_definition.roles.map((r) => r.name)}
                   items={scene.scene_metadata.scene_definition.roles
                     .filter((r) => !r.is_static)
                     .map((role, index) => {
@@ -328,6 +397,74 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
                 />
               </CustomCollapseWrapper>
             </Card>
+            <Card
+              title={
+                <Flex align={'center'}>
+                  <div className={`validate-status-indicator valid`} />
+                  <div
+                    style={{
+                      marginLeft: 8,
+                      fontSize: 16,
+                    }}
+                  >
+                    Evaluation
+                  </div>
+                </Flex>
+              }
+              headStyle={{
+                padding: '0 15px',
+                fontSize: 16,
+              }}
+              bodyStyle={{
+                padding: 0,
+                overflow: 'hidden',
+              }}
+            >
+              <CustomCollapseWrapper>
+                <Collapse
+                  defaultActiveKey={['metrics', 'evaluator']}
+                  items={[
+                    {
+                      key: 'metrics',
+                      label: (
+                        <CollapseItemTitle>
+                          <div className="info">
+                            <div className="title">Metrics</div>
+                            <div className="desc">
+                              You can choose whether or not you want to evaluate that metric in this test
+                            </div>
+                          </div>
+                        </CollapseItemTitle>
+                      ),
+                      children: (
+                        <Flex>
+                          {scene.scene_metadata.scene_definition.roles
+                            .filter((r) => (r.actions || []).length > 0)
+                            .map((r, index) => {
+                              return (
+                                <SceneRoleConfigCard
+                                  key={index}
+                                  roleMetadata={r}
+                                  config={metricsConfig[r.name]}
+                                  onConfigChange={(newRoleConfig) => {
+                                    const newMetricsConfig = { ...metricsConfig };
+                                    newMetricsConfig[r.name] = newRoleConfig;
+                                    setMetricsConfig(newMetricsConfig);
+                                  }}
+                                />
+                              );
+                            })}
+                        </Flex>
+                      ),
+                    },
+                    {
+                      key: 'evaluator',
+                      label: 'Evaluator',
+                    },
+                  ]}
+                />
+              </CustomCollapseWrapper>
+            </Card>
           </Space>
         </Content>
         <Footer>
@@ -362,27 +499,17 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
                 setCreatingScene(true);
                 try {
                   await sceneForm.validate();
-                  const noStaticRoles = scene.scene_metadata.scene_definition.roles.filter((r) => !r.is_static);
-                  for (let i = 0; i < noStaticRoles.length; i++) {
-                    const role = noStaticRoles[i];
-                    const roleAgentConfigs = roleAgentConfigsMap[role.name] || [];
-                    if (role.num_agents_range[0] > 0 && roleAgentConfigs.length < role.num_agents_range[0]) {
-                      message.error(
-                        `At least ${role.num_agents_range[0]} ${role.name} agent${
-                          role.num_agents_range[0] > 1 ? 's' : ''
-                        }`
-                      );
-                      setCreatingScene(false);
-                      creatingSceneRef.current = false;
-                      return;
-                    }
+                  const agentsConfigValid = checkIsAgentsConfigPass(true);
+                  if (!agentsConfigValid) {
+                    setCreatingScene(false);
+                    creatingSceneRef.current = false;
                   }
                   const sceneConfig = merge({}, DefaultSceneInfoConfig, sceneForm.values);
                   const roleConfig: Record<string, SceneRoleConfig> = {};
                   scene.scene_metadata.scene_definition.roles.forEach((role) => {
-                    const actionsConfig: Record<string, ActionConfig> = {};
+                    const actionsConfig: Record<string, SceneActionConfig> = {};
                     role.actions.forEach((action) => {
-                      const metricsConfig: Record<string, MetricConfig> = {};
+                      const metricsConfig: Record<string, SceneMetricConfig> = {};
                       action.metrics?.forEach((metric) => {
                         metricsConfig[metric.name] = {
                           enable: true,
@@ -441,7 +568,7 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
         scene={scene}
         tasks={taskHistory}
         onApplyHistoryTaskConfig={(createSceneParams) => {
-          const {sceneFormValues, roleAgentConfigsMap} = splitCreateSceneParamsToState(createSceneParams)
+          const { sceneFormValues, roleAgentConfigsMap } = splitCreateSceneParamsToState(createSceneParams);
           sceneForm.setValues(sceneFormValues);
           try {
             sceneForm.validate();

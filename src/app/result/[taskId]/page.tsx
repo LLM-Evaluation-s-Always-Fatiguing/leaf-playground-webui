@@ -5,7 +5,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import LocalAPI from '@/services/local';
 import styled from '@emotion/styled';
 import { Button, ButtonProps, Card, Collapse, Descriptions, Space, Table } from 'antd';
-import SceneLog, { SceneActionLog, SceneLogType } from '@/types/server/Log';
+import { SceneActionLog, SceneLogType } from '@/types/server/Log';
 import dayjs from 'dayjs';
 import JSONViewModal from '@/components/common/JSONViewModal';
 import { useTheme } from 'antd-style';
@@ -316,7 +316,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                               gap: 10,
                             }}
                           >
-                            {(serverBundle?.charts || []).map((chart: ServerTaskBundleChart, index: number) => {
+                            {([]).map((chart: ServerTaskBundleChart, index: number) => {
                               return (
                                 <NormalNoBoxShadowCard
                                   key={chart.name + index}
@@ -350,7 +350,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                       //                 {...jsonCodeButtonCommonProps}
                       //                 onClick={() => {
                       //                   setViewingJSON(metric);
-                      //                   setJSONViewerModalTitle('Metric Detail');
+                      //                   setJSONViewerModalTitle('SceneMetricConfig Detail');
                       //                   setJSONViewerModalOpen(true);
                       //                 }}
                       //               />
