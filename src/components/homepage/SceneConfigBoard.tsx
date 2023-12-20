@@ -524,10 +524,14 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
                                     roleMetadata={r}
                                     config={webUIMetricsConfig[r.name]}
                                     highlightMetrics={highlightMetrics}
-                                    evaluatorHandledMetrics={usefulEvaluators
-                                      .filter((e) => enabledEvaluatorNames.includes(e.cls_name))
-                                      .map((e) => e.metrics)
-                                      .flat()}
+                                    evaluatorHandledMetrics={
+                                      useMetricEvaluators
+                                        ? usefulEvaluators
+                                            .filter((e) => enabledEvaluatorNames.includes(e.cls_name))
+                                            .map((e) => e.metrics)
+                                            .flat()
+                                        : []
+                                    }
                                     onConfigChange={(newRoleConfig) => {
                                       const newMetricsConfig = { ...webUIMetricsConfig };
                                       newMetricsConfig[r.name] = newRoleConfig;

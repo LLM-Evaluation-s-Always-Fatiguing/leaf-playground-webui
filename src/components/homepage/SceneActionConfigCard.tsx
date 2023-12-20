@@ -45,7 +45,7 @@ const GroupTitle = styled.div`
 `;
 
 const MetricItem = styled.div<{ secondaryPrimaryColor: string }>`
-  min-width: 120px;
+  min-width: 50%;
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
@@ -200,6 +200,7 @@ const SceneActionConfigCard = (props: SceneActionConfigCardProps) => {
           const metricKey = `${props.roleName}.${props.actionDefinition.name}.${metric.name}`;
           const highlighted = props.highlightMetrics.includes(metricKey);
           const evaluatorHandled = props.evaluatorHandledMetrics?.includes(metricKey) || highlighted;
+          const enabled = props.config?.metrics_config[metric.name]?.enable || false
           return (
             <Popover
               key={index}
@@ -219,7 +220,7 @@ const SceneActionConfigCard = (props: SceneActionConfigCardProps) => {
               <MetricItem secondaryPrimaryColor={primaryColorShades[4]}>
                 <div className={`${highlighted ? 'highlight' : ''} ${evaluatorHandled ? 'handled' : ''}`}>
                   <Checkbox
-                    checked={props.config?.metrics_config[metric.name]?.enable || false}
+                    checked={enabled}
                     onChange={(e) => {
                       const checked = e.target.checked;
                       const newConfig: WebUIActionMetricConfig = { metrics_config: {}, ...props.config };
@@ -232,7 +233,7 @@ const SceneActionConfigCard = (props: SceneActionConfigCardProps) => {
                     {`${metric.name} (${metric.is_comparison ? 'Comparison Metric' : 'Metric'})`}
                   </Checkbox>
                 </div>
-                {evaluatorHandled && (
+                {enabled && evaluatorHandled && (
                   <PiDetectiveFill
                     size={'14px'}
                     style={{
