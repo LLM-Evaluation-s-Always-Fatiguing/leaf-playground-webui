@@ -276,6 +276,9 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
         });
       });
     });
+    if (checkedMetrics.length === 0) {
+      setEnabledEvaluatorNames([]);
+    }
     return { allMetrics, checkedMetrics };
   }, [scene, webUIMetricsConfig]);
   const usefulEvaluators = useMemo(() => {
@@ -547,6 +550,7 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
                         ? [
                             {
                               key: 'evaluator',
+
                               label: (
                                 <CollapseItemTitle>
                                   <div className="info">

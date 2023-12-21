@@ -1,9 +1,9 @@
 import EvaluatorMetadata from '@/types/server/meta/Evaluator';
 import { Card, Tooltip } from 'antd';
 import styled from '@emotion/styled';
-import { PiDetectiveFill } from 'react-icons/pi';
 import { useTheme } from 'antd-style';
 import { MetricEvaluatorObjConfig } from '@/types/server/config/Evaluator';
+import { FluentBotSparkle20Filled } from "@/components/evaluator/EvaluatorAvatar";
 
 const Content = styled.div`
   width: 100%;
@@ -126,6 +126,7 @@ const EvaluatorCard = (props: EvaluatorCardProps) => {
       style={{
         padding: 0,
         overflow: 'hidden',
+        border: 'none'
       }}
       bodyStyle={{
         width: 320,
@@ -176,7 +177,7 @@ const EvaluatorCard = (props: EvaluatorCardProps) => {
                 : {}
             }
           >
-            <PiDetectiveFill size={'1em'} />
+            <FluentBotSparkle20Filled />
           </div>
           <div className="infoArea">
             <div

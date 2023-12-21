@@ -7,6 +7,20 @@ import { WebUIActionMetricConfig } from '@/types/webui/MetricConfig';
 import { generateColorShades } from '@/utils/color/generate-color-shades';
 import { useMemo } from 'react';
 import { PiDetectiveFill } from 'react-icons/pi';
+import { FluentSparkle20Filled } from '@/components/homepage/EvaluatorMark';
+
+const Container = styled.div`
+  margin: 6px;
+  max-width: calc(100% / 3 - 12px);
+  min-width: 320px;
+  @media only screen and (max-width: 1340px) {
+    max-width: calc(100% / 2 - 12px);
+  }
+
+  @media only screen and (max-width: 1000px) {
+    max-width: calc(100% - 12px);
+  }
+`;
 
 const GroupTitle = styled.div`
   padding: 5px 0;
@@ -45,7 +59,8 @@ const GroupTitle = styled.div`
 `;
 
 const MetricItem = styled.div<{ secondaryPrimaryColor: string }>`
-  min-width: 50%;
+  min-width: calc(50% - 12px);
+  margin-right: 12px;
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
@@ -141,112 +156,112 @@ const SceneActionConfigCard = (props: SceneActionConfigCardProps) => {
   }, [props.highlightMetrics, allMetrics]);
 
   return (
-    <Card
-      size={'small'}
-      style={{
-        maxWidth: '25%',
-        minWidth: '320px',
-        ...(checkedMetricsCount > 0
-          ? {
-              border: `1px solid ${allMetricsChecked ? primaryColorShades[5] : primaryColorShades[2]}`,
-            }
-          : {}),
-        ...(highlighted
-          ? {
-              border: `1px solid ${primaryColorShades[3]}`,
-            }
-          : {}),
-      }}
-      title={
-        <GroupTitle>
-          <div
-            className="checkboxArea"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (allMetricsChecked) {
-                const newConfig: WebUIActionMetricConfig = {
-                  metrics_config: {},
-                };
-                props.onConfigChange(newConfig);
-              } else {
-                const newConfig: WebUIActionMetricConfig = {
-                  metrics_config: {},
-                };
-                props.actionDefinition.metrics?.forEach((metric) => {
-                  newConfig.metrics_config[metric.name] = {
-                    enable: true,
+    <Container>
+      <Card
+        size={'small'}
+        style={{
+          width: '100%',
+          ...(checkedMetricsCount > 0
+            ? {
+                border: `1px solid ${allMetricsChecked ? primaryColorShades[5] : primaryColorShades[2]}`,
+              }
+            : {}),
+          ...(highlighted
+            ? {
+                border: `1px solid ${primaryColorShades[3]}`,
+              }
+            : {}),
+        }}
+        title={
+          <GroupTitle>
+            <div
+              className="checkboxArea"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (allMetricsChecked) {
+                  const newConfig: WebUIActionMetricConfig = {
+                    metrics_config: {},
                   };
-                });
-                props.onConfigChange(newConfig);
-              }
-            }}
-          >
-            <Checkbox
-              checked={allMetricsChecked}
-              style={{
-                pointerEvents: 'none',
+                  props.onConfigChange(newConfig);
+                } else {
+                  const newConfig: WebUIActionMetricConfig = {
+                    metrics_config: {},
+                  };
+                  props.actionDefinition.metrics?.forEach((metric) => {
+                    newConfig.metrics_config[metric.name] = {
+                      enable: true,
+                    };
+                  });
+                  props.onConfigChange(newConfig);
+                }
               }}
-            />
-          </div>
-          <div className="info">
-            <div className="title">{props.actionDefinition.name} Action</div>
-            <div className="desc">{props.actionDefinition.description}</div>
-          </div>
-        </GroupTitle>
-      }
-    >
-      <Flex justify={'flex-start'} align={'flex-start'} wrap={'wrap'}>
-        {(props.actionDefinition.metrics || []).map((metric, index) => {
-          const metricKey = `${props.roleName}.${props.actionDefinition.name}.${metric.name}`;
-          const highlighted = props.highlightMetrics.includes(metricKey);
-          const evaluatorHandled = props.evaluatorHandledMetrics?.includes(metricKey) || highlighted;
-          const enabled = props.config?.metrics_config[metric.name]?.enable || false
-          return (
-            <Popover
-              key={index}
-              title={`${metric.name} (${metric.is_comparison ? 'Comparison Metric' : 'Metric'})`}
-              content={
-                <MetricTipContent>
-                  <div className="description">{metric.description}</div>
-                  {!metric.is_comparison && metric.record_display_type && (
-                    <div className="componentWrapper">
-                      Display Component:{'   '}
-                      {getMetricDisplayValueExample(metric.record_display_type)}
-                    </div>
-                  )}
-                </MetricTipContent>
-              }
             >
-              <MetricItem secondaryPrimaryColor={primaryColorShades[4]}>
-                <div className={`${highlighted ? 'highlight' : ''} ${evaluatorHandled ? 'handled' : ''}`}>
-                  <Checkbox
-                    checked={enabled}
-                    onChange={(e) => {
-                      const checked = e.target.checked;
-                      const newConfig: WebUIActionMetricConfig = { metrics_config: {}, ...props.config };
-                      newConfig.metrics_config[metric.name] = {
-                        enable: checked,
-                      };
-                      props.onConfigChange(newConfig);
-                    }}
-                  >
-                    {`${metric.name} (${metric.is_comparison ? 'Comparison Metric' : 'Metric'})`}
-                  </Checkbox>
-                </div>
-                {enabled && evaluatorHandled && (
-                  <PiDetectiveFill
-                    size={'14px'}
-                    style={{
-                      color: theme.colorPrimary,
-                    }}
-                  />
-                )}
-              </MetricItem>
-            </Popover>
-          );
-        })}
-      </Flex>
-    </Card>
+              <Checkbox
+                checked={allMetricsChecked}
+                style={{
+                  pointerEvents: 'none',
+                }}
+              />
+            </div>
+            <div className="info">
+              <div className="title">{props.actionDefinition.name} Action</div>
+              <div className="desc">{props.actionDefinition.description}</div>
+            </div>
+          </GroupTitle>
+        }
+      >
+        <Flex justify={'flex-start'} align={'flex-start'} wrap={'wrap'}>
+          {(props.actionDefinition.metrics || []).map((metric, index) => {
+            const metricKey = `${props.roleName}.${props.actionDefinition.name}.${metric.name}`;
+            const highlighted = props.highlightMetrics.includes(metricKey);
+            const evaluatorHandled = props.evaluatorHandledMetrics?.includes(metricKey) || highlighted;
+            const enabled = props.config?.metrics_config[metric.name]?.enable || false;
+            return (
+              <Popover
+                key={index}
+                title={`${metric.name} (${metric.is_comparison ? 'Comparison Metric' : 'Metric'})`}
+                content={
+                  <MetricTipContent>
+                    <div className="description">{metric.description}</div>
+                    {!metric.is_comparison && metric.record_display_type && (
+                      <div className="componentWrapper">
+                        Display Component:{'   '}
+                        {getMetricDisplayValueExample(metric.record_display_type)}
+                      </div>
+                    )}
+                  </MetricTipContent>
+                }
+              >
+                <MetricItem secondaryPrimaryColor={primaryColorShades[4]}>
+                  <div className={`${highlighted ? 'highlight' : ''} ${enabled && evaluatorHandled ? 'handled' : ''}`}>
+                    <Checkbox
+                      checked={enabled}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        const newConfig: WebUIActionMetricConfig = { metrics_config: {}, ...props.config };
+                        newConfig.metrics_config[metric.name] = {
+                          enable: checked,
+                        };
+                        props.onConfigChange(newConfig);
+                      }}
+                    >
+                      {`${metric.name} (${metric.is_comparison ? 'Comparison Metric' : 'Metric'})`}
+                    </Checkbox>
+                  </div>
+                  {((enabled && evaluatorHandled) || highlighted) && (
+                    <FluentSparkle20Filled
+                      style={{
+                        color: theme.colorPrimary,
+                      }}
+                    />
+                  )}
+                </MetricItem>
+              </Popover>
+            );
+          })}
+        </Flex>
+      </Card>
+    </Container>
   );
 };
 

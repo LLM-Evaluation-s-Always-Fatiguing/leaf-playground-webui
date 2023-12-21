@@ -3,7 +3,7 @@ import { Card, Checkbox, Collapse, Flex } from 'antd';
 import styled from '@emotion/styled';
 import SceneActionConfigCard from '@/components/homepage/SceneActionConfigCard';
 import { WebUIRoleMetricConfig } from '@/types/webui/MetricConfig';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { generateColorShades } from '@/utils/color/generate-color-shades';
 import { useTheme } from 'antd-style';
 
@@ -49,13 +49,16 @@ const GroupTitle = styled.div`
   .checkboxArea {
     padding-right: 10px;
     align-self: stretch;
+    cursor: pointer;
   }
 
   .info {
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
+    cursor: pointer;
 
     .title {
       font-size: 14px;
@@ -84,6 +87,8 @@ const SceneRoleConfigCard = (props: SceneRoleConfigCardProps) => {
     return generateColorShades(theme.colorPrimary);
   }, [theme.colorPrimary]);
 
+  const [collapsed, setCollapsed] = useState<boolean>(false);
+
   const { allMetrics, checkedMetrics } = useMemo(() => {
     const allMetrics: string[] = [];
     const checkedMetrics: string[] = [];
@@ -109,7 +114,11 @@ const SceneRoleConfigCard = (props: SceneRoleConfigCardProps) => {
   return (
     <CustomCollapseWrapper>
       <Collapse
-        defaultActiveKey={['main']}
+        activeKey={collapsed ? undefined : 'main'}
+        onChange={()=>{
+          setCollapsed(!collapsed);
+        }}
+        collapsible={'icon'}
         size={'small'}
         style={{
           width: '100%',
@@ -163,7 +172,9 @@ const SceneRoleConfigCard = (props: SceneRoleConfigCardProps) => {
                     }}
                   />
                 </div>
-                <div className="info">
+                <div className="info" onClick={()=>{
+                  setCollapsed(!collapsed);
+                }}>
                   <div className={'title'}>{props.roleMetadata.name} Role</div>
                   <div className="desc">{props.roleMetadata.description}</div>
                 </div>
