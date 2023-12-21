@@ -17,6 +17,7 @@ import BuddhaLogo from '@/components/processing/specialized/buddha/BuddhaLogo';
 import { MdPerson3 } from 'react-icons/md';
 import LoadingOverlay from '@/components/common/LoadingOverlay';
 import { WebsocketMessage, WebsocketMessageOperation } from '@/types/server/WebsocketMessage';
+import scene from '@/services/server/scene';
 
 const PageContainer = styled.div`
   width: 100%;
@@ -174,7 +175,6 @@ const ProcessingPage = ({
       globalStore.updatePageTitle(globalStore.currentScene?.scene_metadata.scene_definition.name || '');
 
       setLoadingTip('Connecting to server...');
-      console.log(serverUrl)
       if (!wsRef.current) {
         wsRef.current = new WebSocket(`ws://${serverUrl.replace(/^(http:\/\/|https:\/\/)/, '')}/ws`);
 
@@ -296,12 +296,16 @@ const ProcessingPage = ({
         <VisualizationComponent logs={logs} />
       </VisualizationArea>
       <ConsoleArea>
-        <ProcessingConsole
-          wsConnected={wsConnected}
-          simulationFinished={simulationFinished}
-          evaluationFinished={evaluationFinished}
-          logs={logs}
-        />
+        {globalStore.currentScene && globalStore.createSceneParams && (
+          <ProcessingConsole
+            wsConnected={wsConnected}
+            simulationFinished={simulationFinished}
+            evaluationFinished={evaluationFinished}
+            scene={globalStore.currentScene}
+            createSceneParams={globalStore.createSceneParams}
+            logs={logs}
+          />
+        )}
         {controlBarDisplay && (
           <div className="controlBar">
             {allFinished && (

@@ -1,3 +1,5 @@
+import { SceneMetricRecordDisplayType } from "@/types/server/meta/Scene";
+
 export interface SceneLogRole {
   name: string;
   description: string;
@@ -68,14 +70,29 @@ export interface SceneSystemLog extends SceneLog {
   system_event: SceneSystemLogEvent;
 }
 
+export interface SceneLogMetricRecord {
+  value: string;
+  evaluator: string;
+  display_type: SceneMetricRecordDisplayType;
+  reason?: string;
+  is_comparison: boolean;
+  target_agent: string;
+}
+
+export interface SceneLogHumanMetricRecord extends SceneLogMetricRecord {
+  evaluator: 'human';
+}
+
 export interface SceneActionLog extends SceneLog {
   references?: SceneLogMessage[];
   response: SceneLogMessage;
 
   ground_truth?: SceneLogContent;
 
-  eval_records: any;
+  action_belonged_chain?: string;
+
+  eval_records?: Record<string, SceneLogMetricRecord[]>;
   compare_records: any;
-  human_eval_records: any;
+  human_eval_records?: Record<string, SceneLogHumanMetricRecord[]>;
   human_compare_records: any;
 }

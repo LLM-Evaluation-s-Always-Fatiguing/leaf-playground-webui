@@ -22,6 +22,7 @@ const HeaderLogoArea = styled.div`
   justify-content: flex-start;
   align-items: center;
   cursor: pointer;
+  user-select: none;
 
   .title {
     margin-left: 12px;
@@ -32,6 +33,7 @@ const HeaderLogoArea = styled.div`
 const HeaderTitleArea = styled.div`
   font-size: 24px;
   font-weight: 600;
+  user-select: none;
 `;
 
 const HeaderActionsArea = styled.div`

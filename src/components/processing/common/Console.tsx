@@ -11,6 +11,11 @@ import { TruncatableParagraphEllipsisStatus } from '@/components/processing/comm
 import JSONViewModal from '@/components/common/JSONViewModal';
 import { BsFillArrowUpLeftCircleFill } from 'react-icons/bs';
 import SceneAgentConfig from '@/types/server/config/Agent';
+import { EvaluationModeIcon } from '@/components/processing/common/icons/EvaluationModeIcon';
+import Scene, { SceneMetricDefinition } from '@/types/server/meta/Scene';
+import { CreateSceneParams } from '@/types/server/CreateSceneParams';
+import LogMetricDetailModal from '@/components/metric/LogMetricDetailModal';
+import { SceneMetricConfig } from '@/types/server/config/Metric';
 
 const Container = styled.div`
   width: 100%;
@@ -58,7 +63,9 @@ const Header = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
-    align-items: center;
+    align-items: stretch;
+    position: relative;
+    top: 15px;
 
     .actionButton {
       display: flex;
@@ -78,22 +85,32 @@ const Header = styled.div`
         flex-direction: row;
         justify-content: center;
         align-items: center;
-        font-size: 18px;
+        font-size: 22px;
         color: ${(props) => props.theme.colorTextQuaternary};
       }
 
-      .icon.selected {
-        color: ${(props) => props.theme.colorPrimary};
-      }
-
       .title {
+        margin-top: 2px;
         font-size: 13px;
         line-height: 1;
         font-weight: 500;
+        white-space: pre;
+        text-align: center;
+        color: ${(props) => props.theme.colorTextDisabled};
       }
 
       :hover {
         background-color: ${(props) => props.theme.colorBgTextHover};
+      }
+    }
+
+    .actionButton.selected {
+      .icon {
+        color: ${(props) => props.theme.colorPrimary};
+      }
+
+      .title {
+        color: ${(props) => props.theme.colorText};
       }
     }
 
@@ -116,7 +133,10 @@ interface ProcessingConsoleProps {
   wsConnected: boolean;
   simulationFinished: boolean;
   evaluationFinished: boolean;
+  scene: Scene;
+  createSceneParams: CreateSceneParams;
   logs: SceneActionLog[];
+  onLogUpdated: (log: SceneActionLog) => void;
 }
 
 const ProcessingConsole = (props: ProcessingConsoleProps) => {
@@ -133,8 +153,15 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
 
   const [activeKey, setActiveKey] = React.useState<string>('');
   const [autoPlay, setAutoPlay] = useState(true);
+  const [evaluationMode, setEvaluationMode] = useState(false);
   const [operatingLog, setOperatingLog] = useState<SceneLog>();
   const [logDetailModalOpen, setLogDetailModalOpen] = useState(false);
+  const [logMetricDetailModalOpen, setLogMetricDetailModalOpen] = useState(false);
+  const [logMetricDetailModalData, setLogMetricDetailModalData] = useState<{
+    log: SceneActionLog;
+    metrics: SceneMetricDefinition[];
+    metricsConfig: Record<string, SceneMetricConfig>;
+  }>();
 
   const displayLogs = useMemo(() => {
     if (!activeKey) {
@@ -150,14 +177,42 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
   >({});
 
   const logItemRenderer = ({ key, index, style, parent }: any) => {
+    if (index >= displayLogs.length) {
+      return (
+        <CellMeasurer key={key} cache={logListMeasurerCache} parent={parent} columnIndex={0} rowIndex={index}>
+          {({ registerChild }) => (
+            <div ref={registerChild as any} style={style}>
+              <div
+                style={{
+                  width: '100%',
+                  height: '30px',
+                  flexShrink: 0,
+                }}
+              />
+            </div>
+          )}
+        </CellMeasurer>
+      );
+    }
     const log = displayLogs[index];
-
+    const [logRoleName, logActionName] = log.action_belonged_chain ? log.action_belonged_chain.split('.') : [];
+    const metrics =
+      props.scene.scene_metadata.scene_definition.roles
+        .find((r) => r.name === logRoleName)
+        ?.actions.find((a) => a.name === logActionName)?.metrics || [];
+    const metricsConfig =
+      props.createSceneParams.scene_obj_config.scene_config_data.roles_config[logRoleName]?.actions_config[
+        logActionName
+      ]?.metrics_config || {};
     return (
       <CellMeasurer key={key} cache={logListMeasurerCache} parent={parent} columnIndex={0} rowIndex={index}>
         {({ measure, registerChild }) => (
           <div ref={registerChild as any} style={style}>
             <ConsoleLogItem
               log={log}
+              evaluationMode={evaluationMode}
+              metrics={metrics}
+              metricsConfig={metricsConfig}
               ellipsisStatus={logItemEllipsisCache[index] || TruncatableParagraphEllipsisStatus.WaitDetect}
               onEllipsisStatusChange={(newStatus) => {
                 setLogItemEllipsisCache((prev) => {
@@ -177,6 +232,14 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
               onOpenJSONDetail={(log) => {
                 setOperatingLog(log);
                 setLogDetailModalOpen(true);
+              }}
+              onOpenMetricDetail={(log, metrics, metricsConfig) => {
+                setLogMetricDetailModalData({
+                  log,
+                  metrics,
+                  metricsConfig,
+                });
+                setLogMetricDetailModalOpen(true);
               }}
             />
           </div>
@@ -237,15 +300,26 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
         </div>
         <div className="actionsArea">
           <div
-            className="actionButton"
+            className={`actionButton  ${autoPlay ? 'selected' : ''}`}
             onClick={() => {
               setAutoPlay(!autoPlay);
             }}
           >
-            <div className={`icon ${autoPlay ? 'selected' : ''}`}>
+            <div className="icon">
               <BsFillArrowUpLeftCircleFill size={'1em'} />
             </div>
             <div className="title">Now</div>
+          </div>
+          <div
+            className={`actionButton ${evaluationMode ? 'selected' : ''}`}
+            onClick={() => {
+              setEvaluationMode(!evaluationMode);
+            }}
+          >
+            <div className="icon">
+              <EvaluationModeIcon />
+            </div>
+            <div className="title">{'Evaluation\nMode'}</div>
           </div>
         </div>
       </Header>
@@ -298,7 +372,7 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
                 padding: '12px 0',
               }}
               deferredMeasurementCache={logListMeasurerCache}
-              rowCount={displayLogs.length}
+              rowCount={displayLogs.length + 1}
               rowHeight={logListMeasurerCache.rowHeight}
               rowRenderer={logItemRenderer}
               overscanRowCount={5}
@@ -317,6 +391,24 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
         jsonObject={operatingLog}
         onNeedClose={() => {
           setLogDetailModalOpen(false);
+        }}
+      />
+      <LogMetricDetailModal
+        open={logMetricDetailModalOpen}
+        editable={true}
+        log={logMetricDetailModalData?.log}
+        metrics={logMetricDetailModalData?.metrics}
+        metricsConfig={logMetricDetailModalData?.metricsConfig}
+        onNeedClose={() => {
+          setLogMetricDetailModalOpen(false);
+          setLogMetricDetailModalData(undefined);
+        }}
+        onLogUpdated={(log) => {
+          props.onLogUpdated(log);
+        }}
+        onOpenJSONDetail={(log) => {
+          setOperatingLog(log);
+          setLogDetailModalOpen(true);
         }}
       />
     </Container>

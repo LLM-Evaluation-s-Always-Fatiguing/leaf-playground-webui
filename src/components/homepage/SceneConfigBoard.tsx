@@ -333,7 +333,7 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
               <CustomCollapseWrapper>
                 <Form form={sceneForm} labelCol={5} wrapperCol={16}>
                   <Collapse
-                    // defaultActiveKey={(scene.scene_metadata.configSchema.required as string[]) || []}
+                    defaultActiveKey={(scene.scene_metadata.configSchema.required as string[]) || []}
                     items={Object.entries(scene.scene_metadata.configSchema.properties || {})
                       .filter(([_, property]) => property.type)
                       .map(([key, property], index) => {
@@ -383,7 +383,7 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
             >
               <CustomCollapseWrapper>
                 <Collapse
-                  // defaultActiveKey={scene.scene_metadata.scene_definition.roles.map((r) => r.name)}
+                  defaultActiveKey={scene.scene_metadata.scene_definition.roles.map((r) => r.name)}
                   items={scene.scene_metadata.scene_definition.roles
                     .filter((r) => !r.is_static)
                     .map((role, index) => {

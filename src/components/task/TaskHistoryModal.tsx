@@ -7,6 +7,7 @@ import Scene from '@/types/server/meta/Scene';
 import LocalAPI from '@/services/local';
 import { useTheme } from 'antd-style';
 import { CreateSceneParams } from '@/types/server/CreateSceneParams';
+import LoadingOverlay from '@/components/common/LoadingOverlay';
 
 interface TaskHistoryModalProps {
   open: boolean;
@@ -25,7 +26,11 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
 }) => {
   const theme = useTheme();
 
-  const resetState = () => {};
+  const [loading, setLoading] = React.useState(false);
+
+  const resetState = () => {
+    setLoading(false);
+  };
 
   useEffect(() => {
     if (open) {
@@ -42,6 +47,7 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
         body: {
           padding: '30px 0 10px 0',
           overflow: 'hidden auto',
+          position: 'relative',
         },
       }}
       footer={null}
@@ -50,6 +56,7 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
       }}
       title={`${scene.scene_metadata.scene_definition.name} Task History`}
     >
+      <LoadingOverlay spinning={loading} tip={'Operating...'} />
       <Table
         columns={[
           {
@@ -90,6 +97,7 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
                   <Button
                     {...buttonProps}
                     onClick={async () => {
+                      setLoading(true);
                       const taskDetail = await LocalAPI.taskBundle.webui.get(record.bundlePath);
                       onApplyHistoryTaskConfig(taskDetail.createSceneParams);
                     }}
