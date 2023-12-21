@@ -9,7 +9,11 @@ import FormilyDefaultSchemaField from '@/components/formily/FormilyDefaultSchema
 import { getRandomAgentColor } from '@/utils/color';
 import CustomScrollableAntdModal from '@/components/basic/CustomScrollableAntdModal';
 import SceneAgentMetadata from '@/types/server/meta/Agent';
-import {v4 as uuidV4} from 'uuid';
+import { customAlphabet } from 'nanoid';
+import dayjs from 'dayjs';
+
+export const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+const nanoid = customAlphabet(alphabet, 8);
 
 interface CreateOrUpdateAgentModalProps {
   open: boolean;
@@ -39,12 +43,15 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
     setModalLoading(false);
     const newForm = createForm({
       validateFirst: true,
-      initialValues: sceneAgentConfig?.config_data || {
-        profile: {
-          id: uuidV4()
-        },
-        chart_major_color: getRandomAgentColor(otherAgentColors),
-      } as any,
+      initialValues:
+        sceneAgentConfig?.config_data ||
+        ({
+          profile: {
+            // id: `agnt_${dayjs().format('YYMMDDHHmmssSSS')}_${nanoid()}`,
+            id: `agnt_${nanoid()}`,
+          },
+          chart_major_color: getRandomAgentColor(otherAgentColors),
+        } as any),
     });
     setForm(newForm);
   };
