@@ -1,7 +1,7 @@
 import request from '@/services/server/request';
 
-import { transferStandardJSONSchemaToFormilyJSONSchema } from '@/utils/json-schema';
-import Scene, { ServerScene } from '@/types/server/meta/Scene';
+import {transferStandardJSONSchemaToFormilyJSONSchema} from '@/utils/json-schema';
+import Scene, {ServerScene} from '@/types/server/meta/Scene';
 import SceneAgentMetadata from '@/types/server/meta/Agent';
 
 async function asyncReduce<T, U>(
@@ -49,12 +49,12 @@ const sceneAPI = {
                   if (agentMetadataConfigSchemaTransformResult?.formilySchema.properties?.chart_major_color) {
                     (agentMetadataConfigSchemaTransformResult?.formilySchema.properties.chart_major_color)[
                       'x-component'
-                    ] = 'ColorPicker';
+                      ] = 'ColorPicker';
                   }
                   if (agentMetadataConfigSchemaTransformResult?.formilySchema.properties?.profile?.properties?.id) {
                     (agentMetadataConfigSchemaTransformResult?.formilySchema.properties.profile?.properties.id)[
                       'x-component-props'
-                    ] = {
+                      ] = {
                       disabled: true,
                     };
                   }
@@ -70,7 +70,7 @@ const sceneAPI = {
             {} as Record<string, SceneAgentMetadata[]>
           ),
           evaluators_metadata: await Promise.all(
-            origin.evaluators_metadata.map(async (serverEvaluatorMetadata) => {
+            (origin.evaluators_metadata || []).map(async (serverEvaluatorMetadata) => {
               const evaluatorMetadataConfigSchemaTransformResult = await transferStandardJSONSchemaToFormilyJSONSchema(
                 serverEvaluatorMetadata.config_schema
               );

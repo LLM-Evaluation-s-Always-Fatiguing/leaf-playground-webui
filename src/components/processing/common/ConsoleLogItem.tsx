@@ -211,7 +211,7 @@ const ConsoleLogItem = ({
               const valueStr = record?.value !== undefined ? record.value.toString() : '-';
               const recordReason = record?.reason;
               return (
-                <div className={'metric'}>
+                <div key={index} className="metric">
                   <div className="label">{metric.name}:</div>
                   <div className="value">{valueStr}</div>
                   {recordReason && (

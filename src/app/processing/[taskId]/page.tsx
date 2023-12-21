@@ -298,6 +298,7 @@ const ProcessingPage = ({
       <ConsoleArea>
         {globalStore.currentScene && globalStore.createSceneParams && (
           <ProcessingConsole
+            onLogUpdated={(log) => {  }}
             wsConnected={wsConnected}
             simulationFinished={simulationFinished}
             evaluationFinished={evaluationFinished}
