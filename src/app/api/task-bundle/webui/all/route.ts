@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
       return dayjs(b.time).unix() - dayjs(a.time).unix();
     });
 
-    return new Response(JSON.stringify(groupBy(tasks, (task) => task.uuid)), {
+    return new Response(JSON.stringify(groupBy(tasks, (task) => task.sceneMd5)), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });

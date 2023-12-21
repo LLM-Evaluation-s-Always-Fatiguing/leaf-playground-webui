@@ -108,9 +108,17 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
                     {...buttonProps}
                     onClick={() => {
                       if (record.finished) {
-                        window.open(`/result/${record.id}?bundlePath=${encodeURIComponent(record.bundlePath)}`, '_blank');
+                        window.open(
+                          `/result/${record.id}?bundlePath=${encodeURIComponent(record.bundlePath)}`,
+                          '_blank'
+                        );
                       } else {
-                        window.open(`/processing/${record.id}?bundlePath=${encodeURIComponent(record.bundlePath)}`, '_blank');
+                        window.open(
+                          `/processing/${record.id}?serverUrl=${encodeURIComponent(
+                            record.serverUrl
+                          )}&bundlePath=${encodeURIComponent(record.bundlePath)}`,
+                          '_blank'
+                        );
                       }
                     }}
                   >

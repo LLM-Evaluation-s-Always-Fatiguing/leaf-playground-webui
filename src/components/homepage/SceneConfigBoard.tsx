@@ -32,6 +32,7 @@ import { getWebUIMetricsConfigFromCreateSceneParams, WebUIRoleMetricConfig } fro
 import { MetricEvaluatorObjConfig } from '@/types/server/config/Evaluator';
 import { useTheme } from 'antd-style';
 import EvaluatorCard from '@/components/evaluator/EvaluatorCard';
+import ServerInfo from '@/types/server/meta/ServerInfo';
 
 const Container = styled.div`
   width: 100%;
@@ -178,6 +179,7 @@ const CollapseItemTitle = styled.div`
 interface SceneConfigBoardProps {
   scene: Scene;
   taskHistory: WebUITaskBundleTaskInfo[];
+  serverInfo: ServerInfo;
 }
 
 function splitCreateSceneParamsToState(
@@ -199,7 +201,7 @@ function splitCreateSceneParamsToState(
   };
 }
 
-const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
+const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardProps) => {
   const router = useRouter();
   const theme = useTheme();
   const globalStore = useGlobalStore();
@@ -213,6 +215,16 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
   const [sceneFormValid, setSceneFormValid] = useState(false);
   const sceneForm = useMemo(() => {
     return createForm({
+      initialValues: {
+        dataset_config: {
+          path: 'AsakusaRinne/gaokao_bench',
+          name: '2010-2022_History_MCQs',
+          split: 'dev',
+          question_column: 'question',
+          golden_answer_column: 'answer',
+          num_questions: 3,
+        },
+      },
       effects() {
         onFormValuesChange((form) => {
           form.validate();
@@ -689,11 +701,18 @@ const SceneConfigBoard = ({ scene, taskHistory }: SceneConfigBoardProps) => {
                     metric_evaluator_objs_config: {
                       evaluators,
                     },
+                    work_dir: scene.work_dir,
                   };
-                  const { task_id, save_dir } = await ServerAPI.sceneTask.createSceneTask(createSceneParams);
-                  await LocalAPI.taskBundle.webui.save(save_dir, task_id, scene, createSceneParams);
+                  const { id: task_id, host, port } = await ServerAPI.sceneTask.createSceneTask(createSceneParams);
+                  const save_dir = `${serverInfo.paths.result_dir}/${task_id}`;
+                  const serverUrl = `${host}:${port}`;
+                  await LocalAPI.taskBundle.webui.save(save_dir, task_id, serverUrl, scene, createSceneParams);
                   globalStore.updateInfoAfterSceneTaskCreated(save_dir, task_id, scene, createSceneParams);
-                  router.push(`/processing/${task_id}?bundlePath=${encodeURIComponent(save_dir)}`);
+                  router.push(
+                    `/processing/${task_id}?serverUrl=${encodeURIComponent(serverUrl)}&bundlePath=${encodeURIComponent(
+                      save_dir
+                    )}`
+                  );
                 } catch (e) {
                   console.error(e);
                   message.error('Create scene task failed.');

@@ -82,7 +82,7 @@ export default function HomePage(props: HomePageProps) {
 
   const loadTaskHistory = async () => {
     try {
-      const taskHistory = await LocalAPI.taskBundle.webui.getAll(props.serverInfo.paths.save_root);
+      const taskHistory = await LocalAPI.taskBundle.webui.getAll(props.serverInfo.paths.result_dir);
       setTaskHistory(taskHistory);
     } catch (e) {
       console.error(e);
@@ -120,6 +120,7 @@ export default function HomePage(props: HomePageProps) {
           <SceneConfigBoard
             key={selectedScene.scene_metadata.scene_definition.name}
             scene={selectedScene}
+            serverInfo={props.serverInfo}
             taskHistory={
               taskHistory[
                 md5(

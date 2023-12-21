@@ -59,17 +59,19 @@ export async function POST(req: NextRequest) {
     const {
       bundlePath,
       taskId,
+      serverUrl,
       scene,
       createSceneParams,
     }: {
       bundlePath: string;
       taskId: string;
+      serverUrl: string;
       scene: Scene;
       createSceneParams: CreateSceneParams;
     } = await req.json();
 
     if (!bundlePath || !taskId || !scene || !createSceneParams) {
-      return new Response(JSON.stringify({ error: 'bundlePath, taskId, scene and createSceneParams are required.' }), {
+      return new Response(JSON.stringify({ error: 'bundlePath, taskId, serverUrl, scene and createSceneParams are required.' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -96,8 +98,9 @@ export async function POST(req: NextRequest) {
         taskInfoPath,
         JSON.stringify({
           id: taskId,
-          uuid: md5(`${scene.scene_metadata.obj_for_import.obj}+${scene.scene_metadata.obj_for_import.module}`).toString(),
-          bundlePath: bundlePath,
+          sceneMd5: md5(`${scene.scene_metadata.obj_for_import.obj}+${scene.scene_metadata.obj_for_import.module}`).toString(),
+          serverUrl,
+          bundlePath,
           agentsName,
           time: dayjs().format('YYYY-MM-DD HH:mm:ss'),
         })

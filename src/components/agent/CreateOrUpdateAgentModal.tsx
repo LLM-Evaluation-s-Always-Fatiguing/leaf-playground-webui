@@ -10,7 +10,6 @@ import { getRandomAgentColor } from '@/utils/color';
 import CustomScrollableAntdModal from '@/components/basic/CustomScrollableAntdModal';
 import SceneAgentMetadata from '@/types/server/meta/Agent';
 import { customAlphabet } from 'nanoid';
-import dayjs from 'dayjs';
 
 export const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 const nanoid = customAlphabet(alphabet, 8);
@@ -47,8 +46,7 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
         sceneAgentConfig?.config_data ||
         ({
           profile: {
-            // id: `agnt_${dayjs().format('YYMMDDHHmmssSSS')}_${nanoid()}`,
-            id: `agnt_${nanoid()}`,
+            id: `agent_${nanoid()}`,
           },
           chart_major_color: getRandomAgentColor(otherAgentColors),
         } as any),

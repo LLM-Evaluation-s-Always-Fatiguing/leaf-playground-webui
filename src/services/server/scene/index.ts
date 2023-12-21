@@ -81,6 +81,7 @@ const sceneAPI = {
               };
             })
           ),
+          work_dir: origin.work_dir
         } as Scene;
       })
     );

@@ -77,18 +77,18 @@ const AboutModal: React.FC<AboutModalProps> = ({ open, onNeedClose }) => {
           items={[
             {
               key: '1',
-              label: 'Server Root Path',
+              label: 'Server Zoo Root Path',
               span: 24,
               labelStyle,
               children: (
                 <Space>
-                  {serverInfo?.paths.root}
+                  {serverInfo?.paths.zoo_dir}
                   <Button
                     {...openDictButtonProps}
                     icon={<AiOutlineFolderOpen size={'1.2em'} />}
                     onClick={() => {
-                      if (serverInfo?.paths.root) {
-                        LocalAPI.dict.open(serverInfo.paths.root);
+                      if (serverInfo?.paths.zoo_dir) {
+                        LocalAPI.dict.open(serverInfo.paths.zoo_dir);
                       }
                     }}
                   />
@@ -97,38 +97,18 @@ const AboutModal: React.FC<AboutModalProps> = ({ open, onNeedClose }) => {
             },
             {
               key: '2',
-              label: 'Server Zoo Root Path',
-              span: 24,
-              labelStyle,
-              children: (
-                <Space>
-                  {serverInfo?.paths.zoo_root}
-                  <Button
-                    {...openDictButtonProps}
-                    icon={<AiOutlineFolderOpen size={'1.2em'} />}
-                    onClick={() => {
-                      if (serverInfo?.paths.zoo_root) {
-                        LocalAPI.dict.open(serverInfo.paths.zoo_root);
-                      }
-                    }}
-                  />
-                </Space>
-              ),
-            },
-            {
-              key: '3',
               label: 'Server Save Root Path',
               span: 24,
               labelStyle,
               children: (
                 <Space>
-                  {serverInfo?.paths.save_root}
+                  {serverInfo?.paths.result_dir}
                   <Button
                     {...openDictButtonProps}
                     icon={<AiOutlineFolderOpen size={'1.2em'} />}
                     onClick={() => {
-                      if (serverInfo?.paths.save_root) {
-                        LocalAPI.dict.open(serverInfo.paths.save_root);
+                      if (serverInfo?.paths.result_dir) {
+                        LocalAPI.dict.open(serverInfo.paths.result_dir);
                       }
                     }}
                   />

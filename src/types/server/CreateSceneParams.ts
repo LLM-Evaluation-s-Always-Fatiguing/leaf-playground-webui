@@ -5,6 +5,7 @@ import SceneAgentConfig from "@/types/server/config/Agent";
 export interface CreateSceneParams {
   scene_obj_config: SceneObjConfig;
   metric_evaluator_objs_config: MetricEvaluatorObjsConfig;
+  work_dir: string;
 }
 
 export function getRoleAgentConfigsMapFromCreateSceneParams(createSceneParams: CreateSceneParams) {

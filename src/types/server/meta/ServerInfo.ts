@@ -1,7 +1,6 @@
 export default interface ServerInfo {
   paths: {
-    root: string;
-    zoo_root: string;
-    save_root: string;
+    zoo_dir: string;
+    result_dir: string;
   };
 }

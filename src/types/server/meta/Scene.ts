@@ -80,6 +80,7 @@ export interface ServerScene {
   scene_metadata: ServerSceneMetadata;
   agents_metadata: Record<string, ServerSceneAgentMetadata[]>;
   evaluators_metadata: ServerEvaluatorMetadata[];
+  work_dir: string;
 }
 
 export default interface Scene extends ServerScene {

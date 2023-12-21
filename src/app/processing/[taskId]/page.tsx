@@ -89,6 +89,7 @@ const ProcessingPage = ({
   const taskId = params.taskId;
   const router = useRouter();
   const searchParams = useSearchParams();
+  const serverUrl = searchParams.get('serverUrl') as string;
   const bundlePath = searchParams.get('bundlePath');
 
   const globalStore = useGlobalStore();
@@ -113,6 +114,22 @@ const ProcessingPage = ({
       const taskStatusResp = await ServerAPI.sceneTask.getStatus(taskId);
       switch (taskStatusResp.status) {
         case SceneTaskStatus.PENDING:
+          let wait = true;
+          let finalStatus: SceneTaskStatus = taskStatusResp.status;
+          while (wait) {
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+            const taskStatusResp = await ServerAPI.sceneTask.getStatus(taskId);
+            finalStatus = taskStatusResp.status;
+            if (taskStatusResp.status !== SceneTaskStatus.PENDING) {
+              wait = false;
+            }
+          }
+          if (finalStatus === SceneTaskStatus.INTERRUPTED || finalStatus === SceneTaskStatus.FAILED) {
+            setLoadingTip('Task failed!');
+            message.error('Task failed!');
+            return false;
+          }
+          return true;
         case SceneTaskStatus.RUNNING:
         case SceneTaskStatus.PAUSED:
         case SceneTaskStatus.FINISHED:
@@ -127,7 +144,6 @@ const ProcessingPage = ({
           } else {
             return true;
           }
-          break;
         case SceneTaskStatus.INTERRUPTED:
         case SceneTaskStatus.FAILED:
           setLoadingTip('Task failed!');
@@ -145,23 +161,22 @@ const ProcessingPage = ({
 
   useEffect(() => {
     const prepare = async () => {
-      if (!taskId || !bundlePath) {
+      if (!taskId || !bundlePath || !serverUrl) {
         message.error('TaskID BundlePath is not valid!');
         router.replace('/');
         return;
       }
-      if (!globalStore.createSceneParams) {
-        const pass = await checkTaskStatus();
-        if (!pass) {
-          return;
-        }
+      const pass = await checkTaskStatus();
+      if (!pass) {
+        return;
       }
 
       globalStore.updatePageTitle(globalStore.currentScene?.scene_metadata.scene_definition.name || '');
 
       setLoadingTip('Connecting to server...');
+      console.log(serverUrl)
       if (!wsRef.current) {
-        wsRef.current = new WebSocket(`ws://127.0.0.1:8000/task/ws/${taskId}`);
+        wsRef.current = new WebSocket(`ws://${serverUrl.replace(/^(http:\/\/|https:\/\/)/, '')}/ws`);
 
         wsRef.current.onopen = function () {
           wsOpenRef.current = true;
@@ -295,7 +310,7 @@ const ProcessingPage = ({
                 onClick={async () => {
                   setLoadingTip('Saving task result...');
                   setLoading(true);
-                  await ServerAPI.sceneTask.save(taskId);
+                  await ServerAPI.sceneTask.save(serverUrl, taskId);
                   goToResult();
                 }}
               >

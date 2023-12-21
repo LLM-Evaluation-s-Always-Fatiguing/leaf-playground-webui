@@ -22,6 +22,7 @@ const taskBundleLocalAPI = {
     async save(
       bundlePath: string,
       taskId: string,
+      serverUrl: string,
       scene: Scene,
       createSceneParams: CreateSceneParams
     ): Promise<DirectoryItem[]> {
@@ -29,6 +30,7 @@ const taskBundleLocalAPI = {
         await request.post(`${prefix}/webui`, {
           bundlePath,
           taskId,
+          serverUrl,
           scene,
           createSceneParams
         })
