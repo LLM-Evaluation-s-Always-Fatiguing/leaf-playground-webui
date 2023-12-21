@@ -11,8 +11,7 @@ import CustomScrollableAntdModal from '@/components/basic/CustomScrollableAntdMo
 import SceneAgentMetadata from '@/types/server/meta/Agent';
 import { customAlphabet } from 'nanoid';
 
-export const alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-const nanoid = customAlphabet(alphabet, 8);
+const nanoid = () => Math.random().toString(16).substring(2, 10);
 
 interface CreateOrUpdateAgentModalProps {
   open: boolean;

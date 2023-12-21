@@ -29,7 +29,7 @@ export function getWebUIMetricsConfigFromCreateSceneParams(scene: Scene, createS
             webUIMetricsConfig[role.name].actions_config[action.name].metrics_config[metric.name] = {
               enable:
                 createSceneParams.scene_obj_config.scene_config_data.roles_config[role.name].actions_config[action.name]
-                  .metrics_config[metric.name].enable,
+                  .metrics_config?.[metric.name].enable || false,
             };
           });
         }
