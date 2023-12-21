@@ -102,7 +102,10 @@ const ProcessingPage = ({
   const [wsConnected, setWSConnected] = useState(false);
   const [logs, setLogs] = useState<SceneActionLog[]>([]);
 
-  const [finished, setFinished] = useState(false);
+  const [simulationFinished, setSimulationFinished] = useState(false);
+  const [evaluationFinished, setEvaluationFinished] = useState(false);
+  const allFinished = simulationFinished && evaluationFinished;
+  const controlBarDisplay = allFinished;
 
   const checkTaskStatus = async () => {
     try {
@@ -116,7 +119,8 @@ const ProcessingPage = ({
           const webuiBundle = await LocalAPI.taskBundle.webui.get(bundlePath!);
           globalStore.updateInfoFromWebUITaskBundle(webuiBundle);
           if (taskStatusResp.status === SceneTaskStatus.FINISHED) {
-            setFinished(true);
+            setSimulationFinished(true);
+            setEvaluationFinished(true);
             message.success('Task finished!');
             setLoading(false);
             return true;
@@ -183,12 +187,17 @@ const ProcessingPage = ({
                   const systemLog = log as SceneSystemLog;
                   switch (systemLog.system_event) {
                     case SceneSystemLogEvent.SIMULATION_START:
+                      break;
                     case SceneSystemLogEvent.SIMULATION_FINISHED:
+                      setSimulationFinished(true);
+                      break;
                     case SceneSystemLogEvent.EVALUATION_FINISHED:
+                      setEvaluationFinished(true);
                       break;
                     case SceneSystemLogEvent.EVERYTHING_DONE:
                       message.success('Task Finished!');
-                      setFinished(true);
+                      setSimulationFinished(true);
+                      setEvaluationFinished(true);
                       wsRef.current?.close();
                       break;
                   }
@@ -198,6 +207,23 @@ const ProcessingPage = ({
               }
               break;
             case WebsocketMessageOperation.UPDATE:
+              switch (log.log_type) {
+                case SceneLogType.ACTION:
+                  const actionLog = log as SceneActionLog;
+                  setLogs((prev) => {
+                    const oldIndex = prev.findIndex((oldLog) => oldLog.id === actionLog.id);
+                    const newLogs = [...prev];
+                    if (oldIndex >= 0) {
+                      newLogs[oldIndex] = actionLog;
+                    }
+                    return newLogs;
+                  });
+                  break;
+                case SceneLogType.SYSTEM:
+                  break;
+                default:
+                  break;
+              }
               break;
           }
         };
@@ -255,15 +281,20 @@ const ProcessingPage = ({
         <VisualizationComponent logs={logs} />
       </VisualizationArea>
       <ConsoleArea>
-        <ProcessingConsole wsConnected={wsConnected} logs={logs} />
-        {finished && (
+        <ProcessingConsole
+          wsConnected={wsConnected}
+          simulationFinished={simulationFinished}
+          evaluationFinished={evaluationFinished}
+          logs={logs}
+        />
+        {controlBarDisplay && (
           <div className="controlBar">
-            {finished && (
+            {allFinished && (
               <Button
                 type="primary"
                 onClick={async () => {
                   setLoadingTip('Saving task result...');
-                  setLoading(true)
+                  setLoading(true);
                   await ServerAPI.sceneTask.save(taskId);
                   goToResult();
                 }}

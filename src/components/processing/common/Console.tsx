@@ -113,8 +113,10 @@ const LogsArea = styled.div`
 `;
 
 interface ProcessingConsoleProps {
-  logs: SceneActionLog[];
   wsConnected: boolean;
+  simulationFinished: boolean;
+  evaluationFinished: boolean;
+  logs: SceneActionLog[];
 }
 
 const ProcessingConsole = (props: ProcessingConsoleProps) => {
