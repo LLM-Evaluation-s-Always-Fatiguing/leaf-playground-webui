@@ -665,7 +665,7 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
                         };
                       });
                       actionsConfig[action.name] = {
-                        metrics_config: metricsConfig,
+                        metrics_config: Object.keys(metricsConfig).length > 0 ? metricsConfig : null,
                       };
                     });
                     roleConfig[role.name] = {
