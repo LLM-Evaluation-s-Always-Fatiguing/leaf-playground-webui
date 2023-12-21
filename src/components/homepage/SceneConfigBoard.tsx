@@ -215,16 +215,6 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
   const [sceneFormValid, setSceneFormValid] = useState(false);
   const sceneForm = useMemo(() => {
     return createForm({
-      initialValues: {
-        dataset_config: {
-          path: 'AsakusaRinne/gaokao_bench',
-          name: '2010-2022_History_MCQs',
-          split: 'dev',
-          question_column: 'question',
-          golden_answer_column: 'answer',
-          num_questions: 3,
-        },
-      },
       effects() {
         onFormValuesChange((form) => {
           form.validate();
@@ -704,7 +694,7 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
                     work_dir: scene.work_dir,
                   };
                   const { id: task_id, host, port } = await ServerAPI.sceneTask.createSceneTask(createSceneParams);
-                  const save_dir = `${serverInfo.paths.result_dir}/${task_id}`;
+                  const save_dir = await LocalAPI.path.join(serverInfo.paths.result_dir, task_id);
                   const serverUrl = `${host}:${port}`;
                   await LocalAPI.taskBundle.webui.save(save_dir, task_id, serverUrl, scene, createSceneParams);
                   globalStore.updateInfoAfterSceneTaskCreated(save_dir, task_id, scene, createSceneParams);

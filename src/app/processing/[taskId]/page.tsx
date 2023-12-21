@@ -310,7 +310,7 @@ const ProcessingPage = ({
                 onClick={async () => {
                   setLoadingTip('Saving task result...');
                   setLoading(true);
-                  await ServerAPI.sceneTask.save(serverUrl, taskId);
+                  await ServerAPI.sceneTask.save(serverUrl);
                   goToResult();
                 }}
               >
