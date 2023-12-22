@@ -18,6 +18,10 @@ import { MdPerson3 } from 'react-icons/md';
 import LoadingOverlay from '@/components/common/LoadingOverlay';
 import { WebsocketMessage, WebsocketMessageOperation } from '@/types/server/WebsocketMessage';
 import scene from '@/services/server/scene';
+import { SceneMetricDefinition } from '@/types/server/meta/Scene';
+import { SceneMetricConfig } from '@/types/server/config/Metric';
+import LogMetricDetailModal from '@/components/metric/LogMetricDetailModal';
+import JSONViewModal from '@/components/common/JSONViewModal';
 
 const PageContainer = styled.div`
   width: 100%;
@@ -108,6 +112,15 @@ const ProcessingPage = ({
   const [evaluationFinished, setEvaluationFinished] = useState(false);
   const allFinished = simulationFinished && evaluationFinished;
   const controlBarDisplay = allFinished;
+
+  const [operatingLog, setOperatingLog] = useState<SceneLog>();
+  const [logDetailModalOpen, setLogDetailModalOpen] = useState(false);
+  const [logMetricDetailModalOpen, setLogMetricDetailModalOpen] = useState(false);
+  const [logMetricDetailModalData, setLogMetricDetailModalData] = useState<{
+    log: SceneActionLog;
+    metrics: SceneMetricDefinition[];
+    metricsConfig: Record<string, SceneMetricConfig>;
+  }>();
 
   const checkTaskStatus = async () => {
     try {
@@ -233,6 +246,15 @@ const ProcessingPage = ({
                     }
                     return newLogs;
                   });
+                  setLogMetricDetailModalData((prev)=>{
+                    if(prev && prev.log.id === actionLog.id){
+                      return {
+                       ...prev,
+                        log: actionLog
+                      }
+                    }
+                    return prev;
+                  })
                   break;
                 case SceneLogType.SYSTEM:
                   break;
@@ -298,13 +320,24 @@ const ProcessingPage = ({
       <ConsoleArea>
         {globalStore.currentScene && globalStore.createSceneParams && (
           <ProcessingConsole
-            onLogUpdated={(log) => {  }}
             wsConnected={wsConnected}
             simulationFinished={simulationFinished}
             evaluationFinished={evaluationFinished}
             scene={globalStore.currentScene}
             createSceneParams={globalStore.createSceneParams}
             logs={logs}
+            onOpenJSONDetail={(log) => {
+              setOperatingLog(log);
+              setLogDetailModalOpen(true);
+            }}
+            onOpenMetricDetail={(log, metrics, metricsConfig) => {
+              setLogMetricDetailModalData({
+                log,
+                metrics,
+                metricsConfig,
+              });
+              setLogMetricDetailModalOpen(true);
+            }}
           />
         )}
         {controlBarDisplay && (
@@ -326,6 +359,30 @@ const ProcessingPage = ({
         )}
       </ConsoleArea>
       <LoadingOverlay spinning={loading} tip={loadingTip} />
+      <JSONViewModal
+        title={'Log Detail'}
+        open={logDetailModalOpen}
+        jsonObject={operatingLog}
+        onNeedClose={() => {
+          setLogDetailModalOpen(false);
+        }}
+      />
+      <LogMetricDetailModal
+        open={logMetricDetailModalOpen}
+        editable={true}
+        log={logMetricDetailModalData?.log}
+        metrics={logMetricDetailModalData?.metrics}
+        metricsConfig={logMetricDetailModalData?.metricsConfig}
+        onNeedClose={() => {
+          setLogMetricDetailModalOpen(false);
+          setLogMetricDetailModalData(undefined);
+        }}
+        onLogUpdated={(log) => {}}
+        onOpenJSONDetail={(log) => {
+          setOperatingLog(log);
+          setLogDetailModalOpen(true);
+        }}
+      />
     </PageContainer>
   );
 };

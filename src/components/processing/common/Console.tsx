@@ -1,6 +1,6 @@
 import { useTheme } from 'antd-style';
 import styled from '@emotion/styled';
-import SceneLog, { SceneActionLog } from '@/types/server/Log';
+import { SceneActionLog } from '@/types/server/Log';
 import { Space, Tabs } from 'antd';
 import useGlobalStore from '@/stores/global';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -8,13 +8,11 @@ import ConsoleLogItem from '@/components/processing/common/ConsoleLogItem';
 import { List, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { TruncatableParagraphEllipsisStatus } from '@/components/processing/common/TruncatableParagraph';
-import JSONViewModal from '@/components/common/JSONViewModal';
 import { BsFillArrowUpLeftCircleFill } from 'react-icons/bs';
 import SceneAgentConfig from '@/types/server/config/Agent';
 import { EvaluationModeIcon } from '@/components/processing/common/icons/EvaluationModeIcon';
 import Scene, { SceneMetricDefinition } from '@/types/server/meta/Scene';
 import { CreateSceneParams } from '@/types/server/CreateSceneParams';
-import LogMetricDetailModal from '@/components/metric/LogMetricDetailModal';
 import { SceneMetricConfig } from '@/types/server/config/Metric';
 
 const Container = styled.div`
@@ -136,7 +134,12 @@ interface ProcessingConsoleProps {
   scene: Scene;
   createSceneParams: CreateSceneParams;
   logs: SceneActionLog[];
-  onLogUpdated: (log: SceneActionLog) => void;
+  onOpenJSONDetail: (log: SceneActionLog) => void;
+  onOpenMetricDetail: (
+    log: SceneActionLog,
+    metrics: SceneMetricDefinition[],
+    metricsConfig: Record<string, SceneMetricConfig>
+  ) => void;
 }
 
 const ProcessingConsole = (props: ProcessingConsoleProps) => {
@@ -154,14 +157,6 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
   const [activeKey, setActiveKey] = React.useState<string>('');
   const [autoPlay, setAutoPlay] = useState(true);
   const [evaluationMode, setEvaluationMode] = useState(false);
-  const [operatingLog, setOperatingLog] = useState<SceneLog>();
-  const [logDetailModalOpen, setLogDetailModalOpen] = useState(false);
-  const [logMetricDetailModalOpen, setLogMetricDetailModalOpen] = useState(false);
-  const [logMetricDetailModalData, setLogMetricDetailModalData] = useState<{
-    log: SceneActionLog;
-    metrics: SceneMetricDefinition[];
-    metricsConfig: Record<string, SceneMetricConfig>;
-  }>();
 
   const displayLogs = useMemo(() => {
     if (!activeKey) {
@@ -230,16 +225,10 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
                 }, 0);
               }}
               onOpenJSONDetail={(log) => {
-                setOperatingLog(log);
-                setLogDetailModalOpen(true);
+                props.onOpenJSONDetail(log);
               }}
               onOpenMetricDetail={(log, metrics, metricsConfig) => {
-                setLogMetricDetailModalData({
-                  log,
-                  metrics,
-                  metricsConfig,
-                });
-                setLogMetricDetailModalOpen(true);
+                props.onOpenMetricDetail(log, metrics, metricsConfig);
               }}
             />
           </div>
@@ -385,32 +374,6 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
           )}
         </AutoSizer>
       </LogsArea>
-      <JSONViewModal
-        title={'Log Detail'}
-        open={logDetailModalOpen}
-        jsonObject={operatingLog}
-        onNeedClose={() => {
-          setLogDetailModalOpen(false);
-        }}
-      />
-      <LogMetricDetailModal
-        open={logMetricDetailModalOpen}
-        editable={true}
-        log={logMetricDetailModalData?.log}
-        metrics={logMetricDetailModalData?.metrics}
-        metricsConfig={logMetricDetailModalData?.metricsConfig}
-        onNeedClose={() => {
-          setLogMetricDetailModalOpen(false);
-          setLogMetricDetailModalData(undefined);
-        }}
-        onLogUpdated={(log) => {
-          props.onLogUpdated(log);
-        }}
-        onOpenJSONDetail={(log) => {
-          setOperatingLog(log);
-          setLogDetailModalOpen(true);
-        }}
-      />
     </Container>
   );
 };

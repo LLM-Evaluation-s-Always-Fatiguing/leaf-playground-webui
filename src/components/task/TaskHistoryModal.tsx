@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { Button, ButtonProps, Flex, Modal, Popover, Space, Table, Tooltip, Tree, TreeDataNode } from "antd";
+import { Button, ButtonProps, Flex, Modal, Popover, Space, Table, Tooltip, Tree, TreeDataNode } from 'antd';
 import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskInfo';
 import Scene from '@/types/server/meta/Scene';
 import LocalAPI from '@/services/local';
 import { useTheme } from 'antd-style';
 import { CreateSceneParams } from '@/types/server/CreateSceneParams';
 import LoadingOverlay from '@/components/common/LoadingOverlay';
-import { AiOutlineInfoCircle } from "react-icons/ai";
+import { AiOutlineInfoCircle } from 'react-icons/ai';
 
 interface TaskHistoryModalProps {
   open: boolean;
@@ -73,7 +73,7 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
             title: 'Agents',
             dataIndex: 'roleAgentsMap',
             render: (_, record) => {
-              if (!record.roleAgentsMap) return  '-';
+              if (!record.roleAgentsMap) return '-';
               const treeData: TreeDataNode[] = [];
               Object.entries(record.roleAgentsMap).forEach(([roleName, agentNames]) => {
                 treeData.push({
@@ -85,7 +85,7 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
                   })),
                 });
               });
-              return <Tree defaultExpandAll showLine treeData={treeData}/>;
+              return <Tree defaultExpandAll showLine treeData={treeData} />;
             },
           },
           {
@@ -94,8 +94,19 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
             render: (_, record) => {
               if (!record.enableMetricsName) return '-';
               return (
-                <Popover title={'Enabled Metrics'} content={record.enableMetricsName.join('\n')}>
-                  <Flex align={"center"} gap={3}>
+                <Popover
+                  title={'Enabled Metrics'}
+                  content={
+                    <div
+                      style={{
+                        whiteSpace: 'pre',
+                      }}
+                    >
+                      {record.enableMetricsName.join('\n')}
+                    </div>
+                  }
+                >
+                  <Flex align={'center'} gap={3}>
                     {`${record.enableMetricsName?.length || 0} metric${
                       (record.enableMetricsName?.length || 0) > 1 ? 's' : ''
                     }`}
@@ -111,8 +122,19 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
             render: (_, record) => {
               if (!record.enableEvaluatorsName) return '-';
               return (
-                <Popover title={'Enabled Evaluators'} content={record.enableEvaluatorsName.join('\n')}>
-                  <Flex align={"center"} gap={3}>
+                <Popover
+                  title={'Enabled Evaluators'}
+                  content={
+                    <div
+                      style={{
+                        whiteSpace: 'pre',
+                      }}
+                    >
+                      {record.enableEvaluatorsName.join('\n')}
+                    </div>
+                  }
+                >
+                  <Flex align={'center'} gap={3}>
                     {`${record.enableEvaluatorsName.length || 0} evaluator${
                       (record.enableEvaluatorsName?.length || 0) > 1 ? 's' : ''
                     }`}
@@ -193,5 +215,4 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
     </Modal>
   );
 };
-
 export default TaskHistoryModal;

@@ -8,6 +8,7 @@ import { Button, InputNumber, Rate, Tabs } from 'antd';
 import { TbCodeDots } from 'react-icons/tb';
 import { getSceneLogMessageDisplayContent } from '@/utils/scene-log';
 import { Radio } from '@formily/antd-v5';
+import Markdown from '@/components/markdown/Markdown';
 
 const Container = styled.div`
   display: flex;
@@ -22,7 +23,7 @@ const Container = styled.div`
 `;
 
 const ReferencesArea = styled.div`
-  height: 45%;
+  height: 35%;
   border-bottom: 1px solid ${(props) => props.theme.colorSplit};
   display: flex;
   flex-direction: column;
@@ -64,7 +65,7 @@ const ReferencesArea = styled.div`
 `;
 
 const ResponseArea = styled.div`
-  height: 25%;
+  height: 35%;
   border-bottom: 1px solid ${(props) => props.theme.colorSplit};
   display: flex;
   flex-direction: column;
@@ -192,7 +193,14 @@ function getMetricDisplayValueExample(displayType: SceneMetricRecordDisplayType,
         />
       );
     case SceneMetricRecordDisplayType.NumberInput:
-      return <InputNumber value={value} />;
+      return (
+        <InputNumber
+          value={value}
+          style={{
+            width: '140px',
+          }}
+        />
+      );
     case SceneMetricRecordDisplayType.FiveStarsRate:
       return <Rate value={value} />;
   }
@@ -219,7 +227,7 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
   return (
     <CustomFullFillAntdModal
       open={props.open}
-      width={'max(960px, 65vw)'}
+      width={'max(1280px, 80vw)'}
       destroyOnClose
       centered
       footer={null}
@@ -249,7 +257,9 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
                   <div className={'head'}>
                     <div>{props.log?.log_msg}</div>
                   </div>
-                  <div className={'body'}>{getSceneLogMessageDisplayContent(reference)}</div>
+                  <div className={'body'}>
+                    <Markdown content={getSceneLogMessageDisplayContent(reference)} />
+                  </div>
                 </ContentItem>
               );
             })}
@@ -281,7 +291,11 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
                   }}
                 />
               </div>
-              {props.log && <div className={'body'}>{getSceneLogMessageDisplayContent(props.log.response)}</div>}
+              {props.log && (
+                <div className={'body'}>
+                  <Markdown content={getSceneLogMessageDisplayContent(props.log.response)} />
+                </div>
+              )}
             </ContentItem>
           </div>
         </ResponseArea>

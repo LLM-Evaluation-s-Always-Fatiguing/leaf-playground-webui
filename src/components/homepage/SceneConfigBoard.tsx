@@ -33,6 +33,8 @@ import { MetricEvaluatorObjConfig } from '@/types/server/config/Evaluator';
 import { useTheme } from 'antd-style';
 import EvaluatorCard from '@/components/evaluator/EvaluatorCard';
 import ServerInfo from '@/types/server/meta/ServerInfo';
+import EvaluatorMetadata from '@/types/server/meta/Evaluator';
+import EvaluatorConfigModal from '@/components/evaluator/EvaluatorConfigModal';
 
 const Container = styled.div`
   width: 100%;
@@ -288,6 +290,11 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
       return evaluatorMetadata.metrics.some((m) => checkedMetrics.includes(m));
     });
   }, [scene.evaluators_metadata, checkedMetrics]);
+  const [evaluatorConfigModalOpen, setEvaluatorConfigModalOpen] = useState(false);
+  const [evaluatorConfigModalData, setEvaluatorConfigModalData] = useState<{
+    metadata: EvaluatorMetadata;
+    config?: MetricEvaluatorObjConfig;
+  }>();
 
   useEffect(() => {
     const doFistFormValidate = async () => {
@@ -582,18 +589,32 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
                                         onHoverLeave={() => {
                                           setHighlightMetrics([]);
                                         }}
-                                        onEnable={(config) => {
-                                          setEvaluatorConfigMap((prev) => {
-                                            const newConfigMap = { ...prev };
-                                            newConfigMap[evaluator.cls_name] = config;
-                                            return newConfigMap;
-                                          });
-                                          setEnabledEvaluatorNames([...enabledEvaluatorNames, evaluator.cls_name]);
+                                        onEnable={(metadata, config) => {
+                                          if (config) {
+                                            setEvaluatorConfigMap((prev) => {
+                                              const newConfigMap = { ...prev };
+                                              newConfigMap[evaluator.cls_name] = config;
+                                              return newConfigMap;
+                                            });
+                                            setEnabledEvaluatorNames([...enabledEvaluatorNames, evaluator.cls_name]);
+                                          } else {
+                                            setEvaluatorConfigModalData({
+                                              metadata: metadata,
+                                            });
+                                            setEvaluatorConfigModalOpen(true);
+                                          }
                                         }}
                                         onDisable={() => {
                                           setEnabledEvaluatorNames(
                                             enabledEvaluatorNames.filter((n) => n !== evaluator.cls_name)
                                           );
+                                        }}
+                                        onEditConfig={(metadata, config) => {
+                                          setEvaluatorConfigModalData({
+                                            metadata: metadata,
+                                            config: config,
+                                          });
+                                          setEvaluatorConfigModalOpen(true);
                                         }}
                                       />
                                     );
@@ -814,6 +835,28 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
           setOperatingAgentMetadata(undefined);
           setOperatingAgent(undefined);
           setCreateOrUpdateAgentModalOpen(false);
+        }}
+      />
+      <EvaluatorConfigModal
+        open={evaluatorConfigModalOpen}
+        metadata={evaluatorConfigModalData?.metadata}
+        config={evaluatorConfigModalData?.config}
+        onSubmit={(metadata, config) => {
+          setEvaluatorConfigMap((prev) => {
+            return {
+              ...prev,
+              [metadata.cls_name]: config,
+            };
+          });
+          setEnabledEvaluatorNames((prev) => {
+            return Array.from(new Set([...prev, metadata.cls_name]));
+          });
+          setEvaluatorConfigModalOpen(false);
+          setEvaluatorConfigModalData(undefined);
+        }}
+        onNeedClose={() => {
+          setEvaluatorConfigModalOpen(false);
+          setEvaluatorConfigModalData(undefined);
         }}
       />
     </>

@@ -253,6 +253,7 @@ const SceneActionConfigCard = (props: SceneActionConfigCardProps) => {
                     <FluentSparkle20Filled
                       style={{
                         color: theme.colorPrimary,
+                        fontSize: '14px',
                       }}
                     />
                   )}

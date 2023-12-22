@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-// import copy from 'copy-to-clipboard';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import MarkdownStylesProvider from '@/components/markdown/MarkdownStylesProvider';
@@ -9,9 +8,6 @@ import remarkMath from 'remark-math';
 import remarkBreaks from 'remark-breaks';
 import 'katex/dist/katex.min.css';
 import rehypeKatex from 'rehype-katex';
-// import RehypeHighlight from 'rehype-highlight';
-// import mermaid from 'mermaid';
-// import { message } from 'antd';
 
 function _MarkDownContent(props: { content: string }) {
   return (

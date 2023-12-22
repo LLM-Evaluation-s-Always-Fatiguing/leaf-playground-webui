@@ -2,30 +2,25 @@
 
 import React, { useEffect, useState } from 'react';
 import { Spin } from 'antd';
-import SceneAgentConfig from '@/types/server/config/Agent';
 import { Form } from '@formily/antd-v5';
 import { createForm } from '@formily/core';
 import FormilyDefaultSchemaField from '@/components/formily/FormilyDefaultSchemaField';
-import { getRandomAgentColor } from '@/utils/color';
 import CustomScrollableAntdModal from '@/components/basic/CustomScrollableAntdModal';
-import SceneAgentMetadata from '@/types/server/meta/Agent';
+import EvaluatorMetadata from '@/types/server/meta/Evaluator';
+import { MetricEvaluatorObjConfig } from '@/types/server/config/Evaluator';
 
-const nanoid = () => Math.random().toString(16).substring(2, 10);
-
-interface CreateOrUpdateAgentModalProps {
+interface EvaluatorConfigModalProps {
   open: boolean;
-  sceneAgentConfig?: SceneAgentConfig;
-  operatingAgentMetadata?: SceneAgentMetadata;
-  otherAgentColors: string[];
-  onSubmit: (sceneAgent: SceneAgentConfig) => void;
+  metadata?: EvaluatorMetadata;
+  config?: MetricEvaluatorObjConfig;
+  onSubmit: (metadata: EvaluatorMetadata, config: MetricEvaluatorObjConfig) => void;
   onNeedClose: () => void;
 }
 
-const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
+const EvaluatorConfigModal: React.FC<EvaluatorConfigModalProps> = ({
   open,
-  sceneAgentConfig,
-  operatingAgentMetadata,
-  otherAgentColors,
+  metadata,
+  config,
   onSubmit,
   onNeedClose,
 }) => {
@@ -40,14 +35,7 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
     setModalLoading(false);
     const newForm = createForm({
       validateFirst: true,
-      initialValues:
-        sceneAgentConfig?.config_data ||
-        ({
-          profile: {
-            id: `agent_${nanoid()}`,
-          },
-          chart_major_color: getRandomAgentColor(otherAgentColors),
-        } as any),
+      initialValues: config?.evaluator_config_data,
     });
     setForm(newForm);
   };
@@ -59,12 +47,12 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
   }, [open]);
 
   const onConfirm = async () => {
-    if (!operatingAgentMetadata) return;
+    if (!metadata) return;
     try {
       await form.validate();
-      onSubmit({
-        obj_for_import: operatingAgentMetadata?.obj_for_import,
-        config_data: form.values,
+      onSubmit(metadata, {
+        evaluator_obj: metadata?.obj_for_import,
+        evaluator_config_data: form.values,
       });
     } catch (e) {
       console.error(e);
@@ -73,7 +61,7 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
 
   return (
     <CustomScrollableAntdModal
-      title={`${sceneAgentConfig ? 'Edit' : 'Create'} Agent （${operatingAgentMetadata?.cls_name}）`}
+      title={`${metadata?.cls_name} Config`}
       open={open}
       width={640}
       destroyOnClose
@@ -84,7 +72,7 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
           overflow: 'hidden auto',
         },
       }}
-      okText={sceneAgentConfig ? 'Save' : 'Create'}
+      okText={'Save'}
       onOk={() => {
         onConfirm();
       }}
@@ -94,11 +82,11 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
     >
       <Spin spinning={modalLoading}>
         <Form form={form} labelCol={6}>
-          <FormilyDefaultSchemaField schema={operatingAgentMetadata?.configSchema} />
+          <FormilyDefaultSchemaField schema={metadata?.configSchema} />
         </Form>
       </Spin>
     </CustomScrollableAntdModal>
   );
 };
 
-export default CreateOrUpdateAgentModal;
+export default EvaluatorConfigModal;

@@ -3,7 +3,9 @@ import { Card, Tooltip } from 'antd';
 import styled from '@emotion/styled';
 import { useTheme } from 'antd-style';
 import { MetricEvaluatorObjConfig } from '@/types/server/config/Evaluator';
-import { FluentBotSparkle20Filled } from "@/components/evaluator/EvaluatorAvatar";
+import { FluentBotSparkle20Filled } from '@/components/evaluator/EvaluatorAvatar';
+import { FluentSparkle20Filled } from '@/components/homepage/EvaluatorMark';
+import { MdOutlineSettings } from 'react-icons/md';
 
 const Content = styled.div`
   width: 100%;
@@ -78,7 +80,22 @@ const Content = styled.div`
     padding: 0 16px;
 
     .configStatus {
+      height: 100%;
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 6px;
       color: ${(props) => props.theme.colorTextDisabled};
+
+      :hover {
+        font-weight: 500;
+        color: ${(props) => props.theme.colorPrimary} !important;
+      }
+    }
+
+    .configStatus.enabled {
+      color: ${(props) => props.theme.colorText};
     }
 
     .enableBG {
@@ -101,6 +118,15 @@ const Content = styled.div`
         border-bottom: 40px solid ${(props) => props.theme.colorPrimary};
       }
     }
+
+    .enableDecoration {
+      position: absolute;
+      right: 0;
+      bottom: -6px;
+      font-size: 21px;
+      color: white;
+      z-index: 3;
+    }
   }
 `;
 
@@ -108,8 +134,9 @@ interface EvaluatorCardProps {
   enable: boolean;
   metadata: EvaluatorMetadata;
   config?: MetricEvaluatorObjConfig;
-  onEnable?: (config: MetricEvaluatorObjConfig) => void;
+  onEnable?: (metadata: EvaluatorMetadata, config?: MetricEvaluatorObjConfig) => void;
   onDisable?: () => void;
+  onEditConfig?: (metadata: EvaluatorMetadata, config: MetricEvaluatorObjConfig) => void;
   onHover?: () => void;
   onHoverLeave?: () => void;
 }
@@ -126,7 +153,7 @@ const EvaluatorCard = (props: EvaluatorCardProps) => {
       style={{
         padding: 0,
         overflow: 'hidden',
-        border: 'none'
+        border: 'none',
       }}
       bodyStyle={{
         width: 320,
@@ -151,15 +178,15 @@ const EvaluatorCard = (props: EvaluatorCardProps) => {
           props.onDisable?.();
         } else {
           if (configured) {
-            props.onEnable?.(props.config!);
+            props.onEnable?.(props.metadata, props.config!);
           } else {
             if (noNeedConfig) {
-              props.onEnable?.({
+              props.onEnable?.(props.metadata, {
                 evaluator_obj: props.metadata.obj_for_import,
                 evaluator_config_data: {},
               });
             } else {
-              console.log(1);
+              props.onEnable?.(props.metadata);
             }
           }
         }
@@ -210,27 +237,37 @@ const EvaluatorCard = (props: EvaluatorCardProps) => {
         </div>
         <div className="footer">
           <div
-            className="configStatus"
+            className={`configStatus ${props.enable ? 'enabled' : ''}`}
             style={
-              props.enable
-                ? {
-                    color: theme.colorText,
+              !noNeedConfig && configured
+                ? {}
+                : {
+                    pointerEvents: 'none',
                   }
-                : {}
             }
+            onClick={(e) => {
+              e.stopPropagation();
+              props.onEditConfig?.(props.metadata, props.config!);
+            }}
           >
             {noNeedConfig ? 'No manual config required.' : configured ? 'Configured' : 'Click to configure'}
+            {!noNeedConfig && configured && <MdOutlineSettings />}
           </div>
-          <div
-            className="enableBG"
-            style={
-              props.enable
-                ? {
-                    opacity: 1,
-                  }
-                : {}
-            }
-          ></div>
+          <div className="enableDecoration">
+            <FluentSparkle20Filled />
+          </div>
+          {props.enable && (
+            <div
+              className="enableBG"
+              style={
+                props.enable
+                  ? {
+                      opacity: 1,
+                    }
+                  : {}
+              }
+            ></div>
+          )}
         </div>
       </Content>
     </Card>
