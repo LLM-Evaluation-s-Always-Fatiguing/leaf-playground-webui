@@ -257,9 +257,7 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
                   <div className={'head'}>
                     <div>{props.log?.log_msg}</div>
                   </div>
-                  <div className={'body'}>
-                    <Markdown content={getSceneLogMessageDisplayContent(reference)} />
-                  </div>
+                  <div className={'body'}>{getSceneLogMessageDisplayContent(reference, true)}</div>
                 </ContentItem>
               );
             })}
@@ -291,11 +289,7 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
                   }}
                 />
               </div>
-              {props.log && (
-                <div className={'body'}>
-                  <Markdown content={getSceneLogMessageDisplayContent(props.log.response)} />
-                </div>
-              )}
+              {props.log && <div className={'body'}>{getSceneLogMessageDisplayContent(props.log.response, true)}</div>}
             </ContentItem>
           </div>
         </ResponseArea>

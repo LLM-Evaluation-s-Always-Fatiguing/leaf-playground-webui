@@ -6,7 +6,6 @@ import { Radio } from '@formily/antd-v5';
 import { WebUIActionMetricConfig } from '@/types/webui/MetricConfig';
 import { generateColorShades } from '@/utils/color/generate-color-shades';
 import { useMemo } from 'react';
-import { PiDetectiveFill } from 'react-icons/pi';
 import { FluentSparkle20Filled } from '@/components/homepage/EvaluatorMark';
 
 const Container = styled.div`
@@ -55,7 +54,7 @@ const GroupTitle = styled.div`
     .desc {
       font-size: 12px !important;
       font-weight: normal;
-      white-space: pre-line;
+      white-space: pre-wrap;
     }
   }
 `;

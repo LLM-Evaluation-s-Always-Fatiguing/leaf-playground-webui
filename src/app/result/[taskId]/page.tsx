@@ -129,8 +129,8 @@ const SampleAgentComponent = ({ name, color }: { name: string; color?: string | 
       )}
       <div
         style={{
-          whiteSpace: 'pre-line',
-          wordBreak: 'break-all',
+          whiteSpace: 'pre-wrap',
+          wordBreak: 'break-word',
           lineHeight: 1,
           fontSize: 14,
           ...(color ? { textIndent: '14px' } : {}),

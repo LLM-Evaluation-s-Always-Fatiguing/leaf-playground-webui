@@ -85,9 +85,6 @@ const Container = styled.div`
       }
 
       .body {
-        display: flex;
-        flex-direction: column;
-        white-space: pre-line;
         padding: 16px 12px;
         border-radius: 0 0 6px 6px;
         background: ${(props) => (props.theme.isDarkMode ? 'rgba(255,255,255,0.08)' : 'white')};
@@ -123,11 +120,6 @@ const Container = styled.div`
       }
 
       .body {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        white-space: pre-line;
-        word-break: break-all;
         padding: 16px 12px;
         border-radius: 0 0 6px 6px;
         background: ${(props) => (props.theme.isDarkMode ? 'rgba(255,255,255,0.08)' : 'white')};
@@ -283,7 +275,7 @@ const SampleQAVisualization = (props: SampleQAVisualizationProps) => {
               </SampleAvatar>
               <div className="card">
                 <div className="header">{log.log_msg}</div>
-                <div className="body">{getSceneLogMessageDisplayContent(log.response)}</div>
+                <div className="body">{getSceneLogMessageDisplayContent(log.response, true)}</div>
               </div>
             </div>
           );

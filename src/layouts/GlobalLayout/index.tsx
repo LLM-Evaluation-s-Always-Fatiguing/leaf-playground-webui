@@ -20,9 +20,9 @@ import en_US from 'antd/locale/en_US';
 import useDisplayConfig from '@/managers/DisplayConfigManager/useDisplayConfig';
 import useGlobalStore from '@/stores/global';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { setValidateLanguage } from '@formily/core'
+import { setValidateLanguage } from '@formily/core';
 
-setValidateLanguage('en-US')
+setValidateLanguage('en-US');
 setupStyled({ ThemeContext });
 
 const { Content } = Layout;
@@ -41,7 +41,7 @@ const GlobalLayoutContent = ({ children }: PropsWithChildren) => {
 
   useEffect(() => {
     window.document.getElementsByTagName('html')[0].setAttribute('data-theme', theme.appearance);
-  }, [theme]);
+  }, [theme.appearance]);
 
   return <Content className={styles.content}>{children}</Content>;
 };
