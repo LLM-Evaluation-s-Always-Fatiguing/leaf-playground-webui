@@ -108,6 +108,7 @@ export default function HomePage(props: HomePageProps) {
                 selected={selectedSceneIndex === index}
                 onClick={() => {
                   setSelectedSceneIndex(index);
+                  setStarted(false);
                 }}
               />
             );

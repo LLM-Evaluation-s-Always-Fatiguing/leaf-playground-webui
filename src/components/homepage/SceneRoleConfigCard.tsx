@@ -45,6 +45,7 @@ const GroupTitle = styled.div`
   flex-direction: row;
   justify-content: flex-start;
   align-items: flex-start;
+  user-select: none;
 
   .checkboxArea {
     padding-right: 10px;
@@ -111,6 +112,30 @@ const SceneRoleConfigCard = (props: SceneRoleConfigCardProps) => {
     });
   }, [props.highlightMetrics, allMetrics]);
 
+  const onCheckAllTrigger = () => {
+    if (allMetricsChecked) {
+      const newConfig = {
+        actions_config: {},
+      };
+      props.onConfigChange(newConfig);
+    } else {
+      const newConfig: WebUIRoleMetricConfig = {
+        actions_config: {},
+      };
+      props.roleMetadata.actions.forEach((action) => {
+        newConfig.actions_config[action.name] = {
+          metrics_config: {},
+        };
+        action.metrics?.forEach((metric) => {
+          newConfig.actions_config[action.name].metrics_config[metric.name] = {
+            enable: true,
+          };
+        });
+      });
+      props.onConfigChange(newConfig);
+    }
+  }
+
   return (
     <CustomCollapseWrapper>
       <Collapse
@@ -142,27 +167,7 @@ const SceneRoleConfigCard = (props: SceneRoleConfigCardProps) => {
                   className="checkboxArea"
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (allMetricsChecked) {
-                      const newConfig = {
-                        actions_config: {},
-                      };
-                      props.onConfigChange(newConfig);
-                    } else {
-                      const newConfig: WebUIRoleMetricConfig = {
-                        actions_config: {},
-                      };
-                      props.roleMetadata.actions.forEach((action) => {
-                        newConfig.actions_config[action.name] = {
-                          metrics_config: {},
-                        };
-                        action.metrics?.forEach((metric) => {
-                          newConfig.actions_config[action.name].metrics_config[metric.name] = {
-                            enable: true,
-                          };
-                        });
-                      });
-                      props.onConfigChange(newConfig);
-                    }
+                    onCheckAllTrigger();
                   }}
                 >
                   <Checkbox
@@ -173,7 +178,7 @@ const SceneRoleConfigCard = (props: SceneRoleConfigCardProps) => {
                   />
                 </div>
                 <div className="info" onClick={()=>{
-                  setCollapsed(!collapsed);
+                  onCheckAllTrigger();
                 }}>
                   <div className={'title'}>{props.roleMetadata.name} Role</div>
                   <div className="desc">{props.roleMetadata.description}</div>

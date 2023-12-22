@@ -30,6 +30,8 @@ const GroupTitle = styled.div`
   justify-content: flex-start;
   align-items: flex-start;
   overflow: hidden;
+  cursor: pointer;
+  user-select: none;
 
   .checkboxArea {
     flex-shrink: 0;
@@ -173,29 +175,28 @@ const SceneActionConfigCard = (props: SceneActionConfigCardProps) => {
             : {}),
         }}
         title={
-          <GroupTitle>
-            <div
-              className="checkboxArea"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (allMetricsChecked) {
-                  const newConfig: WebUIActionMetricConfig = {
-                    metrics_config: {},
+          <GroupTitle
+            onClick={(e) => {
+              e.stopPropagation();
+              if (allMetricsChecked) {
+                const newConfig: WebUIActionMetricConfig = {
+                  metrics_config: {},
+                };
+                props.onConfigChange(newConfig);
+              } else {
+                const newConfig: WebUIActionMetricConfig = {
+                  metrics_config: {},
+                };
+                props.actionDefinition.metrics?.forEach((metric) => {
+                  newConfig.metrics_config[metric.name] = {
+                    enable: true,
                   };
-                  props.onConfigChange(newConfig);
-                } else {
-                  const newConfig: WebUIActionMetricConfig = {
-                    metrics_config: {},
-                  };
-                  props.actionDefinition.metrics?.forEach((metric) => {
-                    newConfig.metrics_config[metric.name] = {
-                      enable: true,
-                    };
-                  });
-                  props.onConfigChange(newConfig);
-                }
-              }}
-            >
+                });
+                props.onConfigChange(newConfig);
+              }
+            }}
+          >
+            <div className="checkboxArea">
               <Checkbox
                 checked={allMetricsChecked}
                 style={{

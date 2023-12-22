@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import Scene from '@/types/server/meta/Scene';
 import { CreateSceneParams } from '@/types/server/CreateSceneParams';
 import md5 from 'crypto-js/md5';
+import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskInfo';
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -71,10 +72,13 @@ export async function POST(req: NextRequest) {
     } = await req.json();
 
     if (!bundlePath || !taskId || !scene || !createSceneParams) {
-      return new Response(JSON.stringify({ error: 'bundlePath, taskId, serverUrl, scene and createSceneParams are required.' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({ error: 'bundlePath, taskId, serverUrl, scene and createSceneParams are required.' }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     const baseFullPath = path.resolve(bundlePath, '.webui');
@@ -84,11 +88,28 @@ export async function POST(req: NextRequest) {
     const configFilePath = path.join(baseFullPath, 'config.json');
     const taskInfoPath = path.join(baseFullPath, 'task.json');
 
-    const agentsName = Object.entries(createSceneParams.scene_obj_config.scene_config_data.roles_config).reduce(
-      (total, [roleName, roleConfig]) => {
-        return [...total, ...(roleConfig.agents_config || []).map((c) => c.config_data.profile.name)];
-      },
-      [] as string[]
+    const roleAgentsMap: Record<string, string[]> = {};
+    Object.entries(createSceneParams.scene_obj_config.scene_config_data.roles_config).forEach(
+      ([roleName, roleConfig]) => {
+        if (roleConfig.agents_config && roleConfig.agents_config.length) {
+          roleAgentsMap[roleName] = (roleConfig.agents_config || []).map((c) => c.config_data.profile.name);
+        }
+      }
+    );
+    const enableMetricsName: string[] = [];
+    Object.entries(createSceneParams.scene_obj_config.scene_config_data.roles_config).forEach(
+      ([roleName, roleConfig]) => {
+        Object.entries(roleConfig.actions_config).forEach(([actionName, actionConfig]) => {
+          Object.entries(actionConfig.metrics_config || {}).forEach(([metricName, metricConfig]) => {
+            if (metricConfig.enable) {
+              enableMetricsName.push(`${roleName}.${actionName}.${metricName}`);
+            }
+          });
+        });
+      }
+    );
+    const enableEvaluatorsName = createSceneParams.metric_evaluator_objs_config.evaluators.map(
+      (e) => e.evaluator_obj.obj
     );
 
     await Promise.all([
@@ -98,12 +119,16 @@ export async function POST(req: NextRequest) {
         taskInfoPath,
         JSON.stringify({
           id: taskId,
-          sceneMd5: md5(`${scene.scene_metadata.obj_for_import.obj}+${scene.scene_metadata.obj_for_import.module}`).toString(),
+          sceneMd5: md5(
+            `${scene.scene_metadata.obj_for_import.obj}+${scene.scene_metadata.obj_for_import.module}`
+          ).toString(),
           serverUrl,
           bundlePath,
-          agentsName,
+          roleAgentsMap,
+          enableMetricsName,
+          enableEvaluatorsName,
           time: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-        })
+        } as WebUITaskBundleTaskInfo)
       ),
     ]);
 

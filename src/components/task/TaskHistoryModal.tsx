@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { Button, ButtonProps, Modal, Space, Table } from 'antd';
+import { Button, ButtonProps, Flex, Modal, Popover, Space, Table, Tooltip, Tree, TreeDataNode } from "antd";
 import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskInfo';
 import Scene from '@/types/server/meta/Scene';
 import LocalAPI from '@/services/local';
 import { useTheme } from 'antd-style';
 import { CreateSceneParams } from '@/types/server/CreateSceneParams';
 import LoadingOverlay from '@/components/common/LoadingOverlay';
+import { AiOutlineInfoCircle } from "react-icons/ai";
 
 interface TaskHistoryModalProps {
   open: boolean;
@@ -41,7 +42,7 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
   return (
     <Modal
       open={open}
-      width={1080}
+      width={'max(1024px, 80vw)'}
       destroyOnClose
       styles={{
         body: {
@@ -58,17 +59,67 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
     >
       <LoadingOverlay spinning={loading} tip={'Operating...'} />
       <Table
+        scroll={{
+          y: '65vh',
+        }}
         columns={[
           {
+            width: 260,
             title: 'Task ID',
             dataIndex: 'id',
             ellipsis: true,
           },
           {
             title: 'Agents',
-            dataIndex: 'agentsName',
+            dataIndex: 'roleAgentsMap',
             render: (_, record) => {
-              return `[${record.agentsName.join(', ')}]`;
+              if (!record.roleAgentsMap) return  '-';
+              const treeData: TreeDataNode[] = [];
+              Object.entries(record.roleAgentsMap).forEach(([roleName, agentNames]) => {
+                treeData.push({
+                  key: roleName,
+                  title: `${roleName} agents`,
+                  children: agentNames.map((agentName) => ({
+                    key: agentName,
+                    title: agentName,
+                  })),
+                });
+              });
+              return <Tree defaultExpandAll showLine treeData={treeData}/>;
+            },
+          },
+          {
+            title: 'Enable Metrics',
+            dataIndex: 'enableMetricsName',
+            render: (_, record) => {
+              if (!record.enableMetricsName) return '-';
+              return (
+                <Popover title={'Enabled Metrics'} content={record.enableMetricsName.join('\n')}>
+                  <Flex align={"center"} gap={3}>
+                    {`${record.enableMetricsName?.length || 0} metric${
+                      (record.enableMetricsName?.length || 0) > 1 ? 's' : ''
+                    }`}
+                    <AiOutlineInfoCircle />
+                  </Flex>
+                </Popover>
+              );
+            },
+          },
+          {
+            title: 'Enable Evaluators',
+            dataIndex: 'enableEvaluatorsName',
+            render: (_, record) => {
+              if (!record.enableEvaluatorsName) return '-';
+              return (
+                <Popover title={'Enabled Evaluators'} content={record.enableEvaluatorsName.join('\n')}>
+                  <Flex align={"center"} gap={3}>
+                    {`${record.enableEvaluatorsName.length || 0} evaluator${
+                      (record.enableEvaluatorsName?.length || 0) > 1 ? 's' : ''
+                    }`}
+                    <AiOutlineInfoCircle />
+                  </Flex>
+                </Popover>
+              );
             },
           },
           {

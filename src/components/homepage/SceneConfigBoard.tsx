@@ -650,6 +650,7 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
                   if (!agentsConfigValid) {
                     setCreatingScene(false);
                     creatingSceneRef.current = false;
+                    return;
                   }
                   const sceneConfig = merge({}, DefaultSceneInfoConfig, sceneForm.values);
                   const roleConfig: Record<string, SceneRoleConfig> = {};
