@@ -6,8 +6,10 @@ import { Radio } from '@formily/antd-v5';
 import { WebUIActionMetricConfig } from '@/types/webui/MetricConfig';
 import { generateColorShades } from '@/utils/color/generate-color-shades';
 import { useMemo } from 'react';
-import { FluentSparkle20Filled } from '@/components/homepage/icons/EvaluatorMark';
+import { EvaluatorMark } from '@/components/homepage/icons/EvaluatorMark';
 import { AiOutlineQuestionCircle } from 'react-icons/ai';
+import { MetricIcon } from '@/components/homepage/icons/MetricIcon';
+import { CompareMetricIcon } from '@/components/homepage/icons/CompareMetricIcon';
 
 const Container = styled.div`
   margin: 6px;
@@ -247,7 +249,10 @@ const SceneActionConfigCard = (props: SceneActionConfigCardProps) => {
                       props.onConfigChange(newConfig);
                     }}
                   >
-                    {`${metric.name} (${metric.is_comparison ? 'Comparison Metric' : 'Metric'})`}
+                    <Flex align={'center'}>
+                      {metric.is_comparison ? <CompareMetricIcon /> : <MetricIcon />}
+                      {`${metric.name}`}
+                    </Flex>
                   </Checkbox>
                 </div>
                 <Popover
@@ -273,7 +278,7 @@ const SceneActionConfigCard = (props: SceneActionConfigCardProps) => {
                   </div>
                 </Popover>
                 {((enabled && evaluatorHandled) || highlighted) && (
-                  <FluentSparkle20Filled
+                  <EvaluatorMark
                     style={{
                       color: theme.colorPrimary,
                       fontSize: '14px',

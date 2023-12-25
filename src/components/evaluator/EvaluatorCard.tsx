@@ -4,7 +4,7 @@ import styled from '@emotion/styled';
 import { useTheme } from 'antd-style';
 import { MetricEvaluatorObjConfig } from '@/types/server/config/Evaluator';
 import { FluentBotSparkle20Filled } from '@/components/evaluator/EvaluatorAvatar';
-import { FluentSparkle20Filled } from '@/components/homepage/icons/EvaluatorMark';
+import { EvaluatorMark } from '@/components/homepage/icons/EvaluatorMark';
 import { MdOutlineSettings } from 'react-icons/md';
 
 const Content = styled.div`
@@ -254,7 +254,7 @@ const EvaluatorCard = (props: EvaluatorCardProps) => {
             {!noNeedConfig && configured && <MdOutlineSettings />}
           </div>
           <div className="enableDecoration">
-            <FluentSparkle20Filled />
+            <EvaluatorMark />
           </div>
           {props.enable && (
             <div

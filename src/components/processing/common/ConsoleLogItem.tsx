@@ -9,8 +9,9 @@ import TruncatableParagraph, {
 import { getSceneLogMessageDisplayContent } from '@/utils/scene-log';
 import { SceneMetricDefinition } from '@/types/server/meta/Scene';
 import { SceneMetricConfig } from '@/types/server/config/Metric';
-import { MetricReasonIcon } from '@/components/processing/common/icons/MetricReasonIcon';
+import { HumanMetricMark } from '@/components/processing/common/icons/HumanMetricMark';
 import { MdEditNote } from 'react-icons/md';
+import { EvaluatorMark } from '@/components/homepage/icons/EvaluatorMark';
 
 const Container = styled.div`
   margin: 9px 16px;
@@ -214,13 +215,9 @@ const ConsoleLogItem = ({
                 <div key={index} className="metric">
                   <div className="label">{metric.name}:</div>
                   <div className="value">{valueStr}</div>
-                  {recordReason && (
-                    <Tooltip title={recordReason}>
-                      <div className={'reason'}>
-                        <MetricReasonIcon />
-                      </div>
-                    </Tooltip>
-                  )}
+                  <Tooltip title={recordReason}>
+                    <div className={'reason'}>{humanRecord ? <HumanMetricMark /> : <EvaluatorMark />}</div>
+                  </Tooltip>
                 </div>
               );
             })}

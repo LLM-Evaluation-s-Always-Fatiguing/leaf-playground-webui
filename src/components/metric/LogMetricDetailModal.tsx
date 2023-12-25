@@ -545,6 +545,7 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
                       <Collapse
                         defaultActiveKey={['human', 'evaluators']}
                         size={'small'}
+                        collapsible={'icon'}
                         ghost
                         items={[
                           {
@@ -637,7 +638,7 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
                                         props.log?.human_eval_records?.[
                                           `${props.log?.action_belonged_chain}.${metric.name}`
                                         ]?.reason ||
-                                        '-'}
+                                        ''}
                                     </Paragraph>
                                   </div>
                                 </div>

@@ -1,6 +1,6 @@
 import { CSSProperties } from 'react';
 
-export function FluentSparkle20Filled(props: { style?: CSSProperties }) {
+export function EvaluatorMark(props: { style?: CSSProperties }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" {...props}>
       <path
