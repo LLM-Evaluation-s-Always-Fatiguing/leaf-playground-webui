@@ -76,10 +76,18 @@ export interface SceneMetadata extends ServerSceneMetadata {
   configSchema: FormilyJSONSchema;
 }
 
+export interface SceneChartMetadata {
+  cls_name: string;
+  obj_for_import: DynamicObject;
+  chart_name: string;
+  supported_metric_names: string[];
+}
+
 export interface ServerScene {
   scene_metadata: ServerSceneMetadata;
   agents_metadata: Record<string, ServerSceneAgentMetadata[]>;
   evaluators_metadata: ServerEvaluatorMetadata[];
+  charts_metadata?: SceneChartMetadata[];
   work_dir: string;
 }
 

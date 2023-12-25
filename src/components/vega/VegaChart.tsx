@@ -1,6 +1,7 @@
+'use client';
+
 import React, { useEffect, useRef } from 'react';
-import ServerTaskBundleChart from '@/types/api-router/server/task-bundle/Chart';
-import embed from 'vega-embed';
+import embed, { VisualizationSpec } from 'vega-embed';
 import { View } from 'vega';
 import styled from '@emotion/styled';
 import { useTheme } from 'antd-style';
@@ -17,7 +18,7 @@ const Container = styled.div`
 `;
 
 interface VegaChartProps {
-  chart: ServerTaskBundleChart;
+  vSpec: VisualizationSpec;
 }
 
 const VegaChart: React.FunctionComponent<VegaChartProps> = (props) => {
@@ -29,7 +30,7 @@ const VegaChart: React.FunctionComponent<VegaChartProps> = (props) => {
 
   const embedChart = () => {
     if (chartDomRef.current) {
-      embed(chartDomRef.current, props.chart.vegaSpec, {
+      embed(chartDomRef.current, props.vSpec, {
         theme: theme.appearance === 'dark' ? 'dark' : undefined,
         config: {
           autosize: {
@@ -49,7 +50,7 @@ const VegaChart: React.FunctionComponent<VegaChartProps> = (props) => {
 
   useEffect(() => {
     embedChart();
-  }, [props.chart.vegaSpec, theme.appearance]);
+  }, [props.vSpec, theme.appearance]);
 
   useEffect(() => {
     return () => {

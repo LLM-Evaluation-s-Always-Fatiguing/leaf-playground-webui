@@ -226,7 +226,6 @@ const ProcessingPage = ({
                       message.success('Task Finished!');
                       setSimulationFinished(true);
                       setEvaluationFinished(true);
-                      wsRef.current?.close();
                       break;
                   }
                   break;
@@ -348,6 +347,8 @@ const ProcessingPage = ({
                 onClick={async () => {
                   setLoadingTip('Saving task result...');
                   setLoading(true);
+                  wsRef.current?.send("disconnect");
+                  wsRef.current?.close();
                   await ServerAPI.sceneTask.save(serverUrl);
                   goToResult();
                 }}

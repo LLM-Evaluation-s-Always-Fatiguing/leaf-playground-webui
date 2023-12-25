@@ -4,7 +4,7 @@ import { SceneMetricDefinition, SceneMetricRecordDisplayType } from '@/types/ser
 import { SceneMetricConfig } from '@/types/server/config/Metric';
 import { SceneActionLog, SceneLogHumanMetricRecord } from '@/types/server/Log';
 import styled from '@emotion/styled';
-import { Button, Collapse, Flex, InputNumber, message, Rate, Space, Tabs, Typography } from 'antd';
+import { Button, Collapse, Flex, InputNumber, message, Rate, Tabs, Typography } from 'antd';
 import { TbCodeDots } from 'react-icons/tb';
 import { getSceneLogGroundTruthDisplayContent, getSceneLogMessageDisplayContent } from '@/utils/scene-log';
 import { Radio } from '@formily/antd-v5';
@@ -559,10 +559,11 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
                                     {metric.record_display_type
                                       ? getMetricDisplayComponent(
                                           metric.record_display_type,
-                                          newHumanMetrics[metric.name]?.value ||
-                                            props.log?.human_eval_records?.[
-                                              `${props.log?.action_belonged_chain}.${metric.name}`
-                                            ]?.value,
+                                          newHumanMetrics[metric.name]?.value !== undefined
+                                            ? newHumanMetrics[metric.name]?.value
+                                            : props.log?.human_eval_records?.[
+                                                `${props.log?.action_belonged_chain}.${metric.name}`
+                                              ]?.value,
                                           (newValue) => {
                                             setNewHumanMetrics((prev) => {
                                               if (!props.log) return prev;

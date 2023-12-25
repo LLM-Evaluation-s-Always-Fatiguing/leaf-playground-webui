@@ -81,6 +81,7 @@ const sceneAPI = {
               };
             })
           ),
+          charts_metadata: origin.charts_metadata,
           work_dir: origin.work_dir
         } as Scene;
       })

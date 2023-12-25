@@ -16,16 +16,22 @@ export async function GET(req: NextRequest) {
 
   try {
     const sceneConfigFilePath = baseFullPath + '/scene_config.json';
+    const chatsFilePath = baseFullPath + '/charts.json';
+    const metricsFilePath = baseFullPath + '/metrics.json';
     const logsFilePath = baseFullPath + '/logs.jsonl';
 
-    const [sceneObjConfig, logs] = await Promise.all([
+    const [sceneObjConfig, charts, metrics, logs] = await Promise.all([
       fs.readFile(sceneConfigFilePath, { encoding: 'utf-8' }),
+      fs.readFile(chatsFilePath, { encoding: 'utf-8' }),
+      fs.readFile(metricsFilePath, { encoding: 'utf-8' }),
       fs.readFile(logsFilePath, { encoding: 'utf-8' }),
     ]);
 
     return new Response(
       JSON.stringify({
         sceneObjConfig: JSON.parse(sceneObjConfig),
+        charts: JSON.parse(charts),
+        metrics: JSON.parse(metrics),
         logs: parseJSONL(logs),
       }),
       {

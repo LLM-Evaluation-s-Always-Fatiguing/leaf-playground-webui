@@ -15,7 +15,6 @@ import { getSceneLogMessageDisplayContent } from '@/utils/scene-log';
 import LoadingOverlay from '@/components/common/LoadingOverlay';
 import { TbCodeDots } from 'react-icons/tb';
 import AgentCard from '@/components/agent/AgentCard';
-import ServerTaskBundleChart from '@/types/api-router/server/task-bundle/Chart';
 import VegaChart from '@/components/vega/VegaChart';
 import { getRoleAgentConfigsMapFromCreateSceneParams } from '@/types/server/CreateSceneParams';
 import flatten from 'lodash/flatten';
@@ -314,10 +313,10 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                               gap: 10,
                             }}
                           >
-                            {[].map((chart: ServerTaskBundleChart, index: number) => {
+                            {Object.entries(serverBundle.charts).map(([chartName, chartSpec], index: number) => {
                               return (
                                 <NormalNoBoxShadowCard
-                                  key={chart.name + index}
+                                  key={chartName + index}
                                   bodyStyle={{
                                     width: '100%',
                                     height: '100%',
@@ -326,7 +325,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                                   bordered={false}
                                   hoverable
                                 >
-                                  <VegaChart chart={chart} />
+                                  <VegaChart vSpec={chartSpec} />
                                 </NormalNoBoxShadowCard>
                               );
                             })}
@@ -370,7 +369,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                 }}
               >
                 <Table<SceneActionLog>
-                  rowKey={'index'}
+                  rowKey={'id'}
                   tableLayout={'fixed'}
                   bordered
                   style={{

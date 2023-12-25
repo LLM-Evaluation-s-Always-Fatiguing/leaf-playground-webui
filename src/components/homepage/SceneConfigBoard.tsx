@@ -35,6 +35,7 @@ import EvaluatorCard from '@/components/evaluator/EvaluatorCard';
 import ServerInfo from '@/types/server/meta/ServerInfo';
 import EvaluatorMetadata from '@/types/server/meta/Evaluator';
 import EvaluatorConfigModal from '@/components/evaluator/EvaluatorConfigModal';
+import DynamicObject from '@/types/server/DynamicObject';
 
 const Container = styled.div`
   width: 100%;
@@ -204,6 +205,8 @@ function splitCreateSceneParamsToState(
 }
 
 const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardProps) => {
+  console.log(scene);
+
   const router = useRouter();
   const theme = useTheme();
   const globalStore = useGlobalStore();
@@ -675,6 +678,7 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
                   }
                   const sceneConfig = merge({}, DefaultSceneInfoConfig, sceneForm.values);
                   const roleConfig: Record<string, SceneRoleConfig> = {};
+                  const enabledMetrics: string[] = [];
                   scene.scene_metadata.scene_definition.roles.forEach((role) => {
                     const actionsConfig: Record<string, SceneActionConfig> = {};
                     role.actions.forEach((action) => {
@@ -685,6 +689,7 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
                             webUIMetricsConfig[role.name]?.actions_config[action.name]?.metrics_config[metric.name]
                               ?.enable || false,
                         };
+                        enabledMetrics.push(`${role.name}.${action.name}.${metric.name}`);
                       });
                       actionsConfig[action.name] = {
                         metrics_config: Object.keys(metricsConfig).length > 0 ? metricsConfig : null,
@@ -702,6 +707,13 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
                           return evaluatorConfigMap[evaluatorClsName];
                         })
                     : [];
+                  const charts: DynamicObject[] = [];
+                  scene.charts_metadata?.forEach((chartMetadata) => {
+                    if (chartMetadata.supported_metric_names.some((m) => enabledMetrics.includes(m))) {
+                      charts.push(chartMetadata.obj_for_import);
+                    }
+                  });
+
                   const createSceneParams: CreateSceneParams = {
                     scene_obj_config: {
                       scene_obj: scene.scene_metadata.obj_for_import,
@@ -712,6 +724,9 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
                     },
                     metric_evaluator_objs_config: {
                       evaluators,
+                    },
+                    reporter_obj_config: {
+                      charts: charts,
                     },
                     work_dir: scene.work_dir,
                   };

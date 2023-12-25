@@ -215,9 +215,11 @@ const ConsoleLogItem = ({
                 <div key={index} className="metric">
                   <div className="label">{metric.name}:</div>
                   <div className="value">{valueStr}</div>
-                  <Tooltip title={recordReason}>
-                    <div className={'reason'}>{humanRecord ? <HumanMetricMark /> : <EvaluatorMark />}</div>
-                  </Tooltip>
+                  {(!!record) &&
+                    <Tooltip title={recordReason}>
+                      <div className={'reason'}>{humanRecord ? <HumanMetricMark /> : <EvaluatorMark />}</div>
+                    </Tooltip>
+                  }
                 </div>
               );
             })}
