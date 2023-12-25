@@ -180,8 +180,6 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
     setLoading(true);
     const serverBundle = await LocalAPI.taskBundle.server.get(bundlePath);
     const webuiBundle = await LocalAPI.taskBundle.webui.get(bundlePath);
-    console.log(serverBundle);
-    console.log(webuiBundle);
     setServerBundle(serverBundle);
     setWebUIBundle(webuiBundle);
     setLoading(false);
@@ -217,7 +215,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
               >
                 <CustomCollapseWrapper>
                   <Collapse
-                    defaultActiveKey={['basic', ...(Object.keys(roleAgentConfigMap).map(rn=>`${rn}-agents`))]}
+                    defaultActiveKey={['basic', ...Object.keys(roleAgentConfigMap).map((rn) => `${rn}-agents`)]}
                     items={[
                       {
                         key: 'basic',
@@ -316,7 +314,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                               gap: 10,
                             }}
                           >
-                            {([]).map((chart: ServerTaskBundleChart, index: number) => {
+                            {[].map((chart: ServerTaskBundleChart, index: number) => {
                               return (
                                 <NormalNoBoxShadowCard
                                   key={chart.name + index}

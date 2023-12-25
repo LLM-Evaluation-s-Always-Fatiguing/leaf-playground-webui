@@ -71,7 +71,7 @@ export interface SceneSystemLog extends SceneLog {
 }
 
 export interface SceneLogMetricRecord {
-  value: string;
+  value: any;
   evaluator: string;
   display_type: SceneMetricRecordDisplayType;
   reason?: string;
@@ -94,5 +94,5 @@ export interface SceneActionLog extends SceneLog {
   eval_records?: Record<string, SceneLogMetricRecord[]>;
   compare_records: any;
   human_eval_records?: Record<string, SceneLogHumanMetricRecord[]>;
-  human_compare_records: any;
+  human_compare_records: Record<string, SceneLogHumanMetricRecord[]>;
 }

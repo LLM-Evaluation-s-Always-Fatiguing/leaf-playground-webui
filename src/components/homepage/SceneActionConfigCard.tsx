@@ -7,6 +7,7 @@ import { WebUIActionMetricConfig } from '@/types/webui/MetricConfig';
 import { generateColorShades } from '@/utils/color/generate-color-shades';
 import { useMemo } from 'react';
 import { FluentSparkle20Filled } from '@/components/homepage/EvaluatorMark';
+import { AiOutlineQuestionCircle } from 'react-icons/ai';
 
 const Container = styled.div`
   margin: 6px;
@@ -80,6 +81,22 @@ const MetricItem = styled.div<{ secondaryPrimaryColor: string }>`
       color: ${(props) => props.theme.colorPrimary} !important;
     }
   }
+
+  .question {
+    margin-right: 6px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .question.highlight {
+    color: ${(props) => props.theme.colorPrimary};
+  }
+
+  .question.handled {
+    color: ${(props) => props.theme.colorPrimary};
+  }
 `;
 
 const MetricTipContent = styled.div`
@@ -94,6 +111,7 @@ const MetricTipContent = styled.div`
   .componentWrapper {
     margin-top: 6px;
     white-space: pre;
+    pointer-events: none !important;
   }
 `;
 
@@ -102,17 +120,16 @@ function getMetricDisplayValueExample(displayType: SceneMetricRecordDisplayType)
     case SceneMetricRecordDisplayType.BooleanRadio:
       return (
         <Radio.Group
-          disabled
           options={[
-            { label: 'False', value: false },
             { label: 'True', value: true },
+            { label: 'False', value: false },
           ]}
         />
       );
     case SceneMetricRecordDisplayType.NumberInput:
-      return <InputNumber value={0} disabled />;
+      return <InputNumber value={0} style={{ width: '140px' }} />;
     case SceneMetricRecordDisplayType.FiveStarsRate:
-      return <Rate disabled />;
+      return <Rate />;
   }
 }
 
@@ -217,47 +234,53 @@ const SceneActionConfigCard = (props: SceneActionConfigCardProps) => {
             const evaluatorHandled = props.evaluatorHandledMetrics?.includes(metricKey) || highlighted;
             const enabled = props.config?.metrics_config[metric.name]?.enable || false;
             return (
-              <Popover
-                key={index}
-                title={`${metric.name} (${metric.is_comparison ? 'Comparison Metric' : 'Metric'})`}
-                content={
-                  <MetricTipContent>
-                    <div className="description">{metric.description}</div>
-                    {!metric.is_comparison && metric.record_display_type && (
-                      <div className="componentWrapper">
-                        Display Component:{'   '}
-                        {getMetricDisplayValueExample(metric.record_display_type)}
-                      </div>
-                    )}
-                  </MetricTipContent>
-                }
-              >
-                <MetricItem secondaryPrimaryColor={primaryColorShades[4]}>
-                  <div className={`${highlighted ? 'highlight' : ''} ${enabled && evaluatorHandled ? 'handled' : ''}`}>
-                    <Checkbox
-                      checked={enabled}
-                      onChange={(e) => {
-                        const checked = e.target.checked;
-                        const newConfig: WebUIActionMetricConfig = { metrics_config: {}, ...props.config };
-                        newConfig.metrics_config[metric.name] = {
-                          enable: checked,
-                        };
-                        props.onConfigChange(newConfig);
-                      }}
-                    >
-                      {`${metric.name} (${metric.is_comparison ? 'Comparison Metric' : 'Metric'})`}
-                    </Checkbox>
+              <MetricItem key={index} secondaryPrimaryColor={primaryColorShades[4]}>
+                <div className={`${highlighted ? 'highlight' : ''} ${enabled && evaluatorHandled ? 'handled' : ''}`}>
+                  <Checkbox
+                    checked={enabled}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      const newConfig: WebUIActionMetricConfig = { metrics_config: {}, ...props.config };
+                      newConfig.metrics_config[metric.name] = {
+                        enable: checked,
+                      };
+                      props.onConfigChange(newConfig);
+                    }}
+                  >
+                    {`${metric.name} (${metric.is_comparison ? 'Comparison Metric' : 'Metric'})`}
+                  </Checkbox>
+                </div>
+                <Popover
+                  title={`${metric.name} (${metric.is_comparison ? 'Comparison Metric' : 'Metric'})`}
+                  content={
+                    <MetricTipContent>
+                      <div className="description">{metric.description}</div>
+                      {!metric.is_comparison && metric.record_display_type && (
+                        <div className="componentWrapper">
+                          Display Component:{'   '}
+                          {getMetricDisplayValueExample(metric.record_display_type)}
+                        </div>
+                      )}
+                    </MetricTipContent>
+                  }
+                >
+                  <div
+                    className={`question ${highlighted ? 'highlight' : ''} ${
+                      enabled && evaluatorHandled ? 'handled' : ''
+                    }`}
+                  >
+                    <AiOutlineQuestionCircle />
                   </div>
-                  {((enabled && evaluatorHandled) || highlighted) && (
-                    <FluentSparkle20Filled
-                      style={{
-                        color: theme.colorPrimary,
-                        fontSize: '14px',
-                      }}
-                    />
-                  )}
-                </MetricItem>
-              </Popover>
+                </Popover>
+                {((enabled && evaluatorHandled) || highlighted) && (
+                  <FluentSparkle20Filled
+                    style={{
+                      color: theme.colorPrimary,
+                      fontSize: '14px',
+                    }}
+                  />
+                )}
+              </MetricItem>
             );
           })}
         </Flex>

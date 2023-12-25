@@ -114,7 +114,8 @@ const ProcessingPage = ({
   const controlBarDisplay = allFinished;
 
   const [operatingLog, setOperatingLog] = useState<SceneLog>();
-  const [logDetailModalOpen, setLogDetailModalOpen] = useState(false);
+  const [jsonViewModalData, setJSONViewModalData] = useState<any>();
+  const [jsonViewModalOpen, setJSONViewModalOpen] = useState(false);
   const [logMetricDetailModalOpen, setLogMetricDetailModalOpen] = useState(false);
   const [logMetricDetailModalData, setLogMetricDetailModalData] = useState<{
     log: SceneActionLog;
@@ -239,22 +240,22 @@ const ProcessingPage = ({
                 case SceneLogType.ACTION:
                   const actionLog = log as SceneActionLog;
                   setLogs((prev) => {
-                    const oldIndex = prev.findIndex((oldLog) => oldLog.id === actionLog.id);
-                    const newLogs = [...prev];
-                    if (oldIndex >= 0) {
-                      newLogs[oldIndex] = actionLog;
-                    }
-                    return newLogs;
-                  });
-                  setLogMetricDetailModalData((prev)=>{
-                    if(prev && prev.log.id === actionLog.id){
-                      return {
-                       ...prev,
-                        log: actionLog
+                    return prev.map((oldLog) => {
+                      if (oldLog.id === actionLog.id) {
+                        return actionLog;
                       }
+                      return oldLog;
+                    });
+                  });
+                  setLogMetricDetailModalData((prev) => {
+                    if (prev && prev.log.id === actionLog.id) {
+                      return {
+                        ...prev,
+                        log: actionLog,
+                      };
                     }
                     return prev;
-                  })
+                  });
                   break;
                 case SceneLogType.SYSTEM:
                   break;
@@ -328,7 +329,7 @@ const ProcessingPage = ({
             logs={logs}
             onOpenJSONDetail={(log) => {
               setOperatingLog(log);
-              setLogDetailModalOpen(true);
+              setJSONViewModalOpen(true);
             }}
             onOpenMetricDetail={(log, metrics, metricsConfig) => {
               setLogMetricDetailModalData({
@@ -360,16 +361,19 @@ const ProcessingPage = ({
       </ConsoleArea>
       <LoadingOverlay spinning={loading} tip={loadingTip} />
       <JSONViewModal
-        title={'Log Detail'}
-        open={logDetailModalOpen}
-        jsonObject={operatingLog}
+        title={operatingLog ? 'Log Detail' : 'Detail Data'}
+        open={jsonViewModalOpen}
+        jsonObject={jsonViewModalData || operatingLog}
         onNeedClose={() => {
-          setLogDetailModalOpen(false);
+          setJSONViewModalOpen(false);
+          setJSONViewModalData(undefined);
+          setOperatingLog(undefined);
         }}
       />
       <LogMetricDetailModal
         open={logMetricDetailModalOpen}
         editable={true}
+        serverUrl={serverUrl}
         log={logMetricDetailModalData?.log}
         metrics={logMetricDetailModalData?.metrics}
         metricsConfig={logMetricDetailModalData?.metricsConfig}
@@ -377,10 +381,23 @@ const ProcessingPage = ({
           setLogMetricDetailModalOpen(false);
           setLogMetricDetailModalData(undefined);
         }}
-        onLogUpdated={(log) => {}}
-        onOpenJSONDetail={(log) => {
-          setOperatingLog(log);
-          setLogDetailModalOpen(true);
+        onLogUpdated={(log) => {
+          setLogs((prev) => {
+            return prev.map((oldLog) => {
+              if (oldLog.id === log.id) {
+                return log;
+              }
+              return oldLog;
+            });
+          });
+          setLogMetricDetailModalData({
+            ...logMetricDetailModalData!,
+            log,
+          });
+        }}
+        onOpenJSONDetail={(data) => {
+          setJSONViewModalData(data);
+          setJSONViewModalOpen(true);
         }}
       />
     </PageContainer>
