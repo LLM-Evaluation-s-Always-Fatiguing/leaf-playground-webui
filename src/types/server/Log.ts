@@ -93,6 +93,6 @@ export interface SceneActionLog extends SceneLog {
 
   eval_records?: Record<string, SceneLogMetricRecord[]>;
   compare_records: any;
-  human_eval_records?: Record<string, SceneLogHumanMetricRecord[]>;
-  human_compare_records: Record<string, SceneLogHumanMetricRecord[]>;
+  human_eval_records?: Record<string, SceneLogHumanMetricRecord>;
+  human_compare_records: Record<string, SceneLogHumanMetricRecord>;
 }

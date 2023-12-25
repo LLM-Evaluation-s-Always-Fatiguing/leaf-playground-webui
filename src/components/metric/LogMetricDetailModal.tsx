@@ -310,7 +310,6 @@ interface LogMetricDetailModalProps {
   log?: SceneActionLog;
   metrics?: SceneMetricDefinition[];
   metricsConfig?: Record<string, SceneMetricConfig>;
-  onLogUpdated: (log: SceneActionLog) => void;
   onNeedClose: () => void;
   onOpenJSONDetail: (json: any) => void;
 }
@@ -352,12 +351,6 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
         try {
           setLoadingTip('Saving...');
           setLoading(true);
-          const newHumanEvalRecord = {
-            ...props.log.human_eval_records,
-          };
-          const newHumanCompareRecord = {
-            ...props.log.human_compare_records,
-          };
           for (const metricName of Object.keys(newHumanMetrics)) {
             const metricKey = `${props.log?.action_belonged_chain}.${metricName}`;
             const metric = enabledMetrics.find((m) => m.name === metricName);
@@ -369,7 +362,6 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
                   value: [],
                   reason: newHumanMetrics[metricName].reason,
                 });
-                newHumanCompareRecord[metricKey] = [newHumanMetrics[metricName]];
               } else {
                 await ServerAPI.sceneTask.updateLogHumanMetricRecord(props.serverUrl, {
                   log_id: props.log.id,
@@ -379,16 +371,9 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
                   target_agent: props.log.response.sender.id,
                   reason: newHumanMetrics[metricName].reason,
                 });
-                newHumanEvalRecord[metricKey] = [newHumanMetrics[metricName]];
               }
             }
           }
-          const newLog = {
-            ...props.log,
-            human_eval_records: newHumanEvalRecord,
-            human_compare_records: newHumanCompareRecord,
-          };
-          props.onLogUpdated(newLog);
           message.success('Log metrics saved');
           setNewHumanMetrics({});
           setLoading(false);
@@ -576,7 +561,7 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
                                           newHumanMetrics[metric.name]?.value ||
                                             props.log?.human_eval_records?.[
                                               `${props.log?.action_belonged_chain}.${metric.name}`
-                                            ]?.[0]?.value,
+                                            ]?.value,
                                           (newValue) => {
                                             setNewHumanMetrics((prev) => {
                                               if (!props.log) return prev;
@@ -588,8 +573,8 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
                                                   evaluator: 'human',
                                                   display_type: metric.record_display_type!,
                                                   reason: metric.is_comparison
-                                                    ? props.log.human_compare_records?.[metricKey]?.[0]?.reason
-                                                    : props.log.human_eval_records?.[metricKey]?.[0]?.reason,
+                                                    ? props.log.human_compare_records?.[metricKey]?.reason
+                                                    : props.log.human_eval_records?.[metricKey]?.reason,
                                                   is_comparison: metric.is_comparison,
                                                   target_agent: props.log!.response.sender.id,
                                                 };
@@ -605,7 +590,7 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
                                         )
                                       : props.log?.human_eval_records?.[
                                           `${props.log?.action_belonged_chain}.${metric.name}`
-                                        ]?.[0]?.value.toString()}
+                                        ]?.value.toString()}
                                   </div>
                                   <div className="reason">
                                     <div className="label">Reason:</div>
@@ -624,8 +609,8 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
                                             if (!newMetrics[metric.name]) {
                                               newMetrics[metric.name] = {
                                                 value: metric.is_comparison
-                                                  ? props.log.human_compare_records?.[metricKey]?.[0]?.value
-                                                  : props.log.human_eval_records?.[metricKey]?.[0]?.value,
+                                                  ? props.log.human_compare_records?.[metricKey]?.value
+                                                  : props.log.human_eval_records?.[metricKey]?.value,
                                                 evaluator: 'human',
                                                 display_type: metric.record_display_type!,
                                                 reason: value,
@@ -645,13 +630,13 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
                                           newHumanMetrics[metric.name]?.reason ||
                                           props.log?.human_eval_records?.[
                                             `${props.log?.action_belonged_chain}.${metric.name}`
-                                          ]?.[0]?.reason,
+                                          ]?.reason,
                                       }}
                                     >
                                       {newHumanMetrics[metric.name]?.reason ||
                                         props.log?.human_eval_records?.[
                                           `${props.log?.action_belonged_chain}.${metric.name}`
-                                        ]?.[0]?.reason ||
+                                        ]?.reason ||
                                         '-'}
                                     </Paragraph>
                                   </div>

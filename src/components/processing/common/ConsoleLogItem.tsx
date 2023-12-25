@@ -203,7 +203,7 @@ const ConsoleLogItem = ({
           <div className="metrics">
             {enabledMetrics.map((metric, index) => {
               const metricKey = `${log.action_belonged_chain}.${metric.name}`;
-              const humanRecord = log.human_eval_records?.[metricKey]?.[0];
+              const humanRecord = log.human_eval_records?.[metricKey];
               const evaluatorRecord = Array.isArray(log.eval_records?.[metricKey])
                 ? log.eval_records[metricKey][log.eval_records[metricKey].length - 1]
                 : undefined;

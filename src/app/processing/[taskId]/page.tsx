@@ -17,7 +17,6 @@ import BuddhaLogo from '@/components/processing/specialized/buddha/BuddhaLogo';
 import { MdPerson3 } from 'react-icons/md';
 import LoadingOverlay from '@/components/common/LoadingOverlay';
 import { WebsocketMessage, WebsocketMessageOperation } from '@/types/server/WebsocketMessage';
-import scene from '@/services/server/scene';
 import { SceneMetricDefinition } from '@/types/server/meta/Scene';
 import { SceneMetricConfig } from '@/types/server/config/Metric';
 import LogMetricDetailModal from '@/components/metric/LogMetricDetailModal';
@@ -380,20 +379,6 @@ const ProcessingPage = ({
         onNeedClose={() => {
           setLogMetricDetailModalOpen(false);
           setLogMetricDetailModalData(undefined);
-        }}
-        onLogUpdated={(log) => {
-          setLogs((prev) => {
-            return prev.map((oldLog) => {
-              if (oldLog.id === log.id) {
-                return log;
-              }
-              return oldLog;
-            });
-          });
-          setLogMetricDetailModalData({
-            ...logMetricDetailModalData!,
-            log,
-          });
         }}
         onOpenJSONDetail={(data) => {
           setJSONViewModalData(data);

@@ -6,7 +6,7 @@ import { Radio } from '@formily/antd-v5';
 import { WebUIActionMetricConfig } from '@/types/webui/MetricConfig';
 import { generateColorShades } from '@/utils/color/generate-color-shades';
 import { useMemo } from 'react';
-import { FluentSparkle20Filled } from '@/components/homepage/EvaluatorMark';
+import { FluentSparkle20Filled } from '@/components/homepage/icons/EvaluatorMark';
 import { AiOutlineQuestionCircle } from 'react-icons/ai';
 
 const Container = styled.div`

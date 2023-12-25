@@ -4,7 +4,7 @@ import styled from '@emotion/styled';
 import { useTheme } from 'antd-style';
 import { MetricEvaluatorObjConfig } from '@/types/server/config/Evaluator';
 import { FluentBotSparkle20Filled } from '@/components/evaluator/EvaluatorAvatar';
-import { FluentSparkle20Filled } from '@/components/homepage/EvaluatorMark';
+import { FluentSparkle20Filled } from '@/components/homepage/icons/EvaluatorMark';
 import { MdOutlineSettings } from 'react-icons/md';
 
 const Content = styled.div`
