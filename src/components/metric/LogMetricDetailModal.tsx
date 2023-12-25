@@ -365,15 +365,15 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
               if (metric.is_comparison) {
                 await ServerAPI.sceneTask.updateLogHumanCompareMetricRecord(props.serverUrl, {
                   log_id: props.log.id,
+                  metric_name: metricKey,
                   value: [],
-                  metric_name: metricName,
                   reason: newHumanMetrics[metricName].reason,
                 });
                 newHumanCompareRecord[metricKey] = [newHumanMetrics[metricName]];
               } else {
                 await ServerAPI.sceneTask.updateLogHumanMetricRecord(props.serverUrl, {
                   log_id: props.log.id,
-                  metric_name: metricName,
+                  metric_name: metricKey,
                   value: newHumanMetrics[metricName].value,
                   display_type: metric.record_display_type!,
                   target_agent: props.log.response.sender.id,
