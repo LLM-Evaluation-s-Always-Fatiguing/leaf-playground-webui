@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import React, { useEffect, useMemo, useState } from 'react';
 import LocalAPI from '@/services/local';
 import styled from '@emotion/styled';
-import { Button, ButtonProps, Card, Collapse, Descriptions, Space, Table } from 'antd';
+import { Button, ButtonProps, Card, Collapse, Descriptions, Space, Table, Tooltip } from 'antd';
 import { SceneActionLog, SceneLogType } from '@/types/server/Log';
 import dayjs from 'dayjs';
 import JSONViewModal from '@/components/common/JSONViewModal';
@@ -19,6 +19,13 @@ import VegaChart from '@/components/vega/VegaChart';
 import { getRoleAgentConfigsMapFromCreateSceneParams } from '@/types/server/CreateSceneParams';
 import flatten from 'lodash/flatten';
 import keyBy from 'lodash/keyBy';
+import useGlobalStore from '@/stores/global';
+import { SceneMetricDefinition } from '@/types/server/meta/Scene';
+import { SceneMetricConfig } from '@/types/server/config/Metric';
+import { MdEditNote } from 'react-icons/md';
+import { HumanMetricMark } from '@/components/processing/common/icons/HumanMetricMark';
+import { EvaluatorMark } from '@/components/homepage/icons/EvaluatorMark';
+import { Switch } from "@formily/antd-v5";
 
 const Container = styled.div`
   width: 100%;
@@ -26,21 +33,6 @@ const Container = styled.div`
   flex-direction: column;
   justify-content: flex-start;
   align-items: stretch;
-
-  .header {
-    height: 65px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    background-color: ${(props) => props.theme.colorBorderSecondary};
-
-    .title {
-      font-size: 21px;
-      font-weight: 500;
-    }
-  }
 `;
 
 const Content = styled.div`
@@ -141,8 +133,56 @@ const SampleAgentComponent = ({ name, color }: { name: string; color?: string | 
   );
 };
 
+const LogMetricArea = styled.div`
+  .header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    height: 30px;
+    font-weight: 500;
+  }
+
+  .metrics {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-wrap: wrap;
+
+    .metric {
+      min-width: calc(100% / 4 - 6px);
+      margin-right: 6px;
+      margin-bottom: 3px;
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      align-items: center;
+      pointer-events: auto;
+
+      .label {
+        font-weight: 500;
+      }
+
+      .value {
+        margin-left: 6px;
+      }
+
+      .reason {
+        margin-left: 4px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+      }
+    }
+  }
+`;
+
 const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
   const theme = useTheme();
+
+  const globalStore = useGlobalStore();
 
   const _taskId = params.taskId;
   const searchParams = useSearchParams();
@@ -154,6 +194,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
   const actionLogs = useMemo(() => {
     return (serverBundle?.logs || []).filter((l) => l.log_type === SceneLogType.ACTION) as SceneActionLog[];
   }, [serverBundle?.logs]);
+  const [showLogsMetrics, setShowLogsMetrics] = useState<boolean>(false);
   const roleAgentConfigMap = useMemo(() => {
     if (webuiBundle?.createSceneParams) {
       return getRoleAgentConfigsMapFromCreateSceneParams(webuiBundle.createSceneParams);
@@ -179,6 +220,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
     setLoading(true);
     const serverBundle = await LocalAPI.taskBundle.server.get(bundlePath);
     const webuiBundle = await LocalAPI.taskBundle.webui.get(bundlePath);
+    globalStore.updatePageTitle(webuiBundle.scene.scene_metadata.scene_definition.name || '');
     setServerBundle(serverBundle);
     setWebUIBundle(webuiBundle);
     setLoading(false);
@@ -193,17 +235,6 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
       <LoadingOverlay spinning={loading} tip={'Loading...'} />
       {!loading && serverBundle && webuiBundle && (
         <Container>
-          <div className="header">
-            <div></div>
-            <div className="title">{`${webuiBundle.scene.scene_metadata.scene_definition.name}`}</div>
-            <Button
-              onClick={async () => {
-                await LocalAPI.dict.open(bundlePath!);
-              }}
-            >
-              Open Source Dict
-            </Button>
-          </div>
           <Content>
             <Space direction={'vertical'}>
               <Card
@@ -211,10 +242,19 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                 bodyStyle={{
                   padding: 0,
                 }}
+                extra={
+                  <Button
+                    onClick={async () => {
+                      await LocalAPI.dict.open(bundlePath!);
+                    }}
+                  >
+                    Open Source Dict
+                  </Button>
+                }
               >
                 <CustomCollapseWrapper>
                   <Collapse
-                    defaultActiveKey={['basic', ...Object.keys(roleAgentConfigMap).map((rn) => `${rn}-agents`)]}
+                    defaultActiveKey={['basic']}
                     items={[
                       {
                         key: 'basic',
@@ -367,6 +407,28 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                 bodyStyle={{
                   padding: '12px 16px',
                 }}
+                extra={
+                  <Space
+                    size={4}
+                    style={
+                      {
+                        cursor: 'pointer',
+                      }
+                    }
+                    onClick={() => {
+                      setShowLogsMetrics(!showLogsMetrics);
+                    }}
+                  >
+                    <Switch
+                      size="small"
+                      checked={showLogsMetrics}
+                      style={{
+                        pointerEvents: 'none',
+                      }}
+                    />
+                    Show Metrics
+                  </Space>
+                }
               >
                 <Table<SceneActionLog>
                   rowKey={'id'}
@@ -457,6 +519,67 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                       },
                     },
                   ]}
+                  expandable={
+                    showLogsMetrics
+                      ? {
+                          expandedRowKeys: actionLogs.map((l) => l.id),
+                          showExpandColumn: false,
+                          expandedRowRender: (log) => {
+                            const [logRoleName, logActionName] = log.action_belonged_chain
+                              ? log.action_belonged_chain.split('.')
+                              : [];
+                            const metrics =
+                              webuiBundle.scene.scene_metadata.scene_definition.roles
+                                .find((r) => r.name === logRoleName)
+                                ?.actions.find((a) => a.name === logActionName)?.metrics || [];
+                            const metricsConfig =
+                              webuiBundle.createSceneParams.scene_obj_config.scene_config_data.roles_config[logRoleName]
+                                ?.actions_config[logActionName]?.metrics_config || {};
+                            const enabledMetrics = metrics.filter((metric) => {
+                              return metricsConfig[metric.name]?.enable;
+                            });
+                            const hasMetrics = enabledMetrics.length > 0;
+                            if (hasMetrics) {
+                              return (
+                                <LogMetricArea>
+                                  <div className="header">
+                                    <div>Metrics:</div>
+                                  </div>
+                                  <div className="metrics">
+                                    {enabledMetrics.map((metric, index) => {
+                                      const metricKey = `${log.action_belonged_chain}.${metric.name}`;
+                                      const humanRecord = log.human_eval_records?.[metricKey];
+                                      const evaluatorRecord = Array.isArray(log.eval_records?.[metricKey])
+                                        ? log.eval_records[metricKey][log.eval_records[metricKey].length - 1]
+                                        : undefined;
+                                      const record = humanRecord || evaluatorRecord;
+                                      const valueStr = record?.value !== undefined ? record.value.toString() : '-';
+                                      const recordReason = record?.reason;
+                                      return (
+                                        <div key={index} className="metric">
+                                          <div className="label">{metric.name}:</div>
+                                          <div className="value">{valueStr}</div>
+                                          {!!record && (
+                                            <Tooltip title={recordReason}>
+                                              <div className={'reason'}>
+                                                {humanRecord ? <HumanMetricMark /> : <EvaluatorMark />}
+                                              </div>
+                                            </Tooltip>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </LogMetricArea>
+                              );
+                            } else {
+                              return '-';
+                            }
+                          },
+                          rowExpandable: () => true,
+                        }
+                      : undefined
+                  }
                   dataSource={actionLogs}
                   pagination={{
                     responsive: true,

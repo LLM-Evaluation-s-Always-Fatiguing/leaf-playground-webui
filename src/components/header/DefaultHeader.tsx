@@ -23,6 +23,8 @@ const HeaderLogoArea = styled.div`
   align-items: center;
   cursor: pointer;
   user-select: none;
+  flex-grow: 1;
+  flex-basis: 1px;
 
   .title {
     margin-left: 12px;
@@ -34,6 +36,12 @@ const HeaderTitleArea = styled.div`
   font-size: 24px;
   font-weight: 600;
   user-select: none;
+  flex-grow: 1;
+  flex-basis: 1px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
 `;
 
 const HeaderActionsArea = styled.div`
@@ -41,6 +49,8 @@ const HeaderActionsArea = styled.div`
   flex-direction: row;
   justify-content: flex-end;
   align-items: center;
+  flex-grow: 1;
+  flex-basis: 1px;
 
   .actionButton {
     font-size: 21px;
