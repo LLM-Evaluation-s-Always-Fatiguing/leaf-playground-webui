@@ -54,6 +54,7 @@ function bundleWebUI() {
     fs.copySync('./.next/standalone', './bundle/webui'); // Copy and rename standalone directory
     fs.copySync('./public', './bundle/webui/public'); // Copy public directory
     fs.copySync('./.next/static', './bundle/webui/.next/static'); // Copy static directory
+    fs.copySync('./scripts/start.js', './bundle/webui/start.js'); // Copy start script
 
     console.log('WebUI bundled successfully');
   } catch (error) {

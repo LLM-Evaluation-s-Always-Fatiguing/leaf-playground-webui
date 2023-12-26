@@ -1,7 +1,10 @@
 import axios from 'axios';
 
+const SERVER_SIDE_HOST =
+  process.env.HOSTNAME && process.env.PORT ? `${process.env.HOSTNAME}:${process.env.PORT}` : 'localhost:3000';
+
 const request = axios.create({
-  baseURL: typeof window === 'undefined' ? 'http://127.0.0.1:3000/api' : '/api',
+  baseURL: typeof window === 'undefined' ? `http://${SERVER_SIDE_HOST}/api` : '/api',
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
