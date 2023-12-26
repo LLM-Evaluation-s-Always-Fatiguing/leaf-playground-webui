@@ -2,8 +2,10 @@
 
 import React, { useEffect } from 'react';
 import Image from 'next/image';
-import { Tabs } from 'antd';
+import { SceneActionLog } from '@/types/server/Log';
+import { Button, Collapse, Tabs } from 'antd';
 import styled from '@emotion/styled';
+import { IoLogoMarkdown } from 'react-icons/io5';
 import { PiTree } from 'react-icons/pi';
 import { TbCodeDots } from 'react-icons/tb';
 import JSONCrackLogo from '@/assets/json/jsoncrack-logo.png';
@@ -11,10 +13,42 @@ import CustomFullFillAntdModal from '@/components/basic/CustomFullFillAntdModal'
 import JsonCrackViewer from '@/components/common/JSONCrack';
 import MonacoJSONEditor from '@/components/common/JSONEditor';
 import JSONViewer from '@/components/common/JSONViewer';
+import { getSceneLogMessageDisplayContent } from '@/utils/scene-log';
 
 const TabsWrapper = styled.div`
   .ant-tabs-tabpane {
     padding-left: 0 !important;
+  }
+`;
+
+const MarkdownContentItem = styled.div`
+  padding: 0 16px 12px 16px;
+  box-shadow: 0 3px 9px rgba(0, 0, 0, 0.1);
+  background: ${(props) => (props.theme.isDarkMode ? 'rgba(255,255,255,0.08)' : 'white')};
+  border-radius: ${(props) => props.theme.borderRadius}px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  flex-shrink: 0;
+
+  .head {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    height: 40px;
+    color: ${(props) => props.theme.colorTextTertiary};
+    font-weight: 500;
+  }
+
+  .body {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    flex-shrink: 0;
   }
 `;
 
@@ -24,16 +58,21 @@ const ScrollView = styled.div`
   max-height: 80vh;
   padding: 12px 16px;
   overflow: hidden auto;
+
+  ${MarkdownContentItem} + ${MarkdownContentItem} {
+    margin-top: 10px;
+  }
 `;
 
 interface JSONViewModalProps {
   open: boolean;
   title?: string;
-  jsonObject?: object | any[];
+  jsonObject?: any;
+  isSceneLog?: boolean;
   onNeedClose: () => void;
 }
 
-const JSONViewModal: React.FC<JSONViewModalProps> = ({ open, title, jsonObject, onNeedClose }) => {
+const JSONViewModal: React.FC<JSONViewModalProps> = ({ open, title, jsonObject, isSceneLog, onNeedClose }) => {
   const resetState = () => {};
 
   useEffect(() => {
@@ -41,6 +80,8 @@ const JSONViewModal: React.FC<JSONViewModalProps> = ({ open, title, jsonObject, 
       resetState();
     }
   }, [open]);
+
+  const log = isSceneLog ? (jsonObject as SceneActionLog) : undefined;
 
   return (
     <CustomFullFillAntdModal
@@ -73,6 +114,79 @@ const JSONViewModal: React.FC<JSONViewModalProps> = ({ open, title, jsonObject, 
             height: '100%',
           }}
           items={[
+            ...(log
+              ? [
+                  {
+                    key: 'log_markdown',
+                    label: (
+                      <div
+                        style={{
+                          width: '32px',
+                          height: '28px',
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <IoLogoMarkdown size={'24px'} />
+                      </div>
+                    ),
+                    children: (
+                      <ScrollView>
+                        <Collapse
+                          defaultActiveKey={['references', 'response']}
+                          ghost
+                          items={[
+                            ...(log.references
+                              ? [
+                                  {
+                                    key: 'references',
+                                    label: 'References',
+                                    children: (
+                                      <>
+                                        {(log.references || []).map((reference, index) => {
+                                          return (
+                                            <MarkdownContentItem key={index}>
+                                              <div className={'head'}>
+                                                <div>{`${reference.sender.name} --> [${reference.receivers
+                                                  .map((r: any) => r.name)
+                                                  .join(', ')}]: `}</div>
+                                              </div>
+                                              <div className={'body'}>
+                                                {getSceneLogMessageDisplayContent(reference, true)}
+                                              </div>
+                                            </MarkdownContentItem>
+                                          );
+                                        })}
+                                      </>
+                                    ),
+                                  },
+                                ]
+                              : []),
+                            {
+                              key: 'response',
+                              label: 'Response',
+                              children: (
+                                <MarkdownContentItem>
+                                  <div className={'head'}>
+                                    <div>
+                                      {log.log_msg ||
+                                        `${log.response.sender.name} --> [${log.response.receivers
+                                          .map((r: any) => r.name)
+                                          .join(', ')}]: `}
+                                    </div>
+                                  </div>
+                                  <div className={'body'}>{getSceneLogMessageDisplayContent(log.response, true)}</div>
+                                </MarkdownContentItem>
+                              ),
+                            },
+                          ]}
+                        />
+                      </ScrollView>
+                    ),
+                  },
+                ]
+              : []),
             {
               key: 'tree',
               label: (

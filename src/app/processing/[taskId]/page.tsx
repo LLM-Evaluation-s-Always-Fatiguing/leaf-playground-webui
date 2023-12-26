@@ -307,7 +307,7 @@ const ProcessingPage = ({
 
   function getProcessingVisualizationComponent(): React.FC<DefaultProcessingVisualizationComponentProps> {
     switch (tryVisualizationName || globalStore.currentScene?.scene_metadata.scene_definition.name) {
-      // case 'RAG QA Examine':
+      case 'RAG QA Examine':
       case 'GeneralMCQExamine':
       case 'SampleQAVisualization':
         return VisualizationComponentWithExtraProps(SampleQAVisualization, {});
@@ -398,6 +398,7 @@ const ProcessingPage = ({
         title={operatingLog ? 'Log Detail' : 'Detail Data'}
         open={jsonViewModalOpen}
         jsonObject={jsonViewModalData || operatingLog}
+        isSceneLog={!!operatingLog}
         onNeedClose={() => {
           setJSONViewModalOpen(false);
           setJSONViewModalData(undefined);

@@ -459,7 +459,12 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
               <div className="content">
                 <ContentItem>
                   <div className={'head'}>
-                    <div>{props.log?.log_msg}</div>
+                    <div>
+                      {props.log?.log_msg ||
+                        `${props.log?.response.sender.name} --> [${props.log?.response.receivers
+                          .map((r: any) => r.name)
+                          .join(', ')}]: `}
+                    </div>
                     <Button
                       size="small"
                       type="text"

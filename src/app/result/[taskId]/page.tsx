@@ -213,6 +213,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
     );
   }, [roleAgentConfigMap]);
   const [viewingJSON, setViewingJSON] = useState<any>();
+  const [viewingLog, setViewingLog] = useState<SceneActionLog>();
   const [jsonViewerModalTitle, setJSONViewerModalTitle] = useState<string>();
   const [jsonViewerModalOpen, setJSONViewerModalOpen] = useState<boolean>(false);
 
@@ -506,7 +507,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                             <Button
                               {...buttonProps}
                               onClick={() => {
-                                setViewingJSON(record);
+                                setViewingLog(record);
                                 setJSONViewerModalTitle('Log Detail');
                                 setJSONViewerModalOpen(true);
                               }}
@@ -580,9 +581,12 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
       <JSONViewModal
         title={jsonViewerModalTitle}
         open={jsonViewerModalOpen}
-        jsonObject={viewingJSON}
+        jsonObject={viewingLog || viewingJSON}
+        isSceneLog={!!viewingLog}
         onNeedClose={() => {
           setJSONViewerModalOpen(false);
+          setViewingJSON(undefined);
+          setViewingLog(undefined);
         }}
       />
     </>
