@@ -8,6 +8,9 @@ const PLAYGROUND_SERVER_BASE_URL = process.env.PLAYGROUND_SERVER_BASE_URL || 'ht
 
 /** @type {import("next").NextConfig} */
 const nextConfig = {
+  images: {
+    unoptimized: true,
+  },
   experimental: {
     optimizePackageImports: ['react-icons'],
   },
