@@ -4,12 +4,15 @@ import styled from '@emotion/styled';
 import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
 
 const Container = styled.div`
+  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
 `;
+
 const TextArea = styled.div`
+  width: 100%;
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;
