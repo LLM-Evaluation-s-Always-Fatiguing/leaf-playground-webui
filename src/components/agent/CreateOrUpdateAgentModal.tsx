@@ -4,13 +4,13 @@ import React, { useEffect, useState } from 'react';
 import { Spin } from 'antd';
 import SceneAgentConfig from '@/types/server/config/Agent';
 import { Form } from '@formily/antd-v5';
-import { createForm } from '@formily/core';
+import { createForm, onFormValidateFailed, onFormValidateSuccess, onFormValuesChange } from "@formily/core";
 import FormilyDefaultSchemaField from '@/components/formily/FormilyDefaultSchemaField';
 import { getRandomAgentColor } from '@/utils/color';
 import CustomScrollableAntdModal from '@/components/basic/CustomScrollableAntdModal';
 import SceneAgentMetadata from '@/types/server/meta/Agent';
 
-const nanoid = () => Math.random().toString(16).substring(2, 10);
+const nanoid = () => Math.random().toString(16).substring(6, 10);
 
 interface CreateOrUpdateAgentModalProps {
   open: boolean;
@@ -48,6 +48,17 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
           },
           chart_major_color: getRandomAgentColor(otherAgentColors),
         } as any),
+      effects() {
+        onFormValuesChange((form) => {
+          const currentValues = form.values;
+          const oldId = currentValues?.profile?.id;
+          let uuid = nanoid();
+          if (oldId && oldId.split('_').length > 1) {
+            uuid = oldId.split('_')[1];
+          }
+          currentValues.profile.id = `${currentValues?.profile?.name || 'agent'}_${uuid}`;
+        });
+      },
     });
     setForm(newForm);
   };
