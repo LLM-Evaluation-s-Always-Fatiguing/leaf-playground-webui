@@ -1,3 +1,5 @@
+const path = require('path');
+
 const args = process.argv.slice(2);
 
 let hostname = '0.0.0.0'; // Default hostname
@@ -26,10 +28,12 @@ process.env.PORT = currentPort;
 process.env.PLAYGROUND_SERVER_BASE_URL = serverUrl;
 
 // Log current status
-console.log(`Environment settings:\n - Hostname: ${hostname}\n - Port: ${currentPort}\n - Server URL: ${serverUrl}\n\n`);
+console.log(
+  `Environment settings:\n - Hostname: ${hostname}\n - Port: ${currentPort}\n - Server URL: ${serverUrl}\n\n`
+);
 
 const { spawn } = require('child_process');
-const server = spawn('node', ['server.js'], { stdio: 'inherit' });
+const server = spawn('node', [path.resolve(__dirname, 'server.js')], { stdio: 'inherit' });
 
 server.on('close', (code) => {
   console.log(`server.js process exited with exit code ${code}`);
