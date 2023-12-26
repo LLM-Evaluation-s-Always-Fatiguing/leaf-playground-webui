@@ -6,7 +6,7 @@ import { TbCodeDots } from 'react-icons/tb';
 import TruncatableParagraph, {
   TruncatableParagraphEllipsisStatus,
 } from '@/components/processing/common/TruncatableParagraph';
-import { getSceneLogMessageDisplayContent } from '@/utils/scene-log';
+import { getSceneActionLogMetricEvalRecordDisplayInfo, getSceneLogMessageDisplayContent } from '@/utils/scene-log';
 import { SceneMetricDefinition } from '@/types/server/meta/Scene';
 import { SceneMetricConfig } from '@/types/server/config/Metric';
 import { HumanMetricMark } from '@/components/processing/common/icons/HumanMetricMark';
@@ -203,23 +203,16 @@ const ConsoleLogItem = ({
           </div>
           <div className="metrics">
             {enabledMetrics.map((metric, index) => {
-              const metricKey = `${log.action_belonged_chain}.${metric.name}`;
-              const humanRecord = log.human_eval_records?.[metricKey];
-              const evaluatorRecord = Array.isArray(log.eval_records?.[metricKey])
-                ? log.eval_records[metricKey][log.eval_records[metricKey].length - 1]
-                : undefined;
-              const record = humanRecord || evaluatorRecord;
-              const valueStr = record?.value !== undefined ? record.value.toString() : '-';
-              const recordReason = record?.reason;
+              const { value, valueStr, reason, human } = getSceneActionLogMetricEvalRecordDisplayInfo(log, metric.name);
               return (
                 <div key={index} className="metric">
                   <div className="label">{metric.name}:</div>
                   <div className="value">{valueStr}</div>
-                  {(!!record) &&
-                    <Tooltip title={recordReason}>
-                      <div className={'reason'}>{humanRecord ? <HumanMetricMark /> : <EvaluatorMark />}</div>
+                  {value !== undefined && (
+                    <Tooltip title={reason}>
+                      <div className={'reason'}>{human ? <HumanMetricMark /> : <EvaluatorMark />}</div>
                     </Tooltip>
-                  }
+                  )}
                 </div>
               );
             })}

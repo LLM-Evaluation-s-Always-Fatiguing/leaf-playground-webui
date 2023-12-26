@@ -12,7 +12,7 @@ import { BsFillArrowUpLeftCircleFill } from 'react-icons/bs';
 import SceneAgentConfig from '@/types/server/config/Agent';
 import { EvaluationModeIcon } from '@/components/processing/common/icons/EvaluationModeIcon';
 import Scene, { SceneMetricDefinition } from '@/types/server/meta/Scene';
-import { CreateSceneParams } from '@/types/server/CreateSceneParams';
+import { CreateSceneParams, getEnabledMetricsFromCreateSceneParams } from '@/types/server/CreateSceneParams';
 import { SceneMetricConfig } from '@/types/server/config/Metric';
 
 const Container = styled.div`
@@ -157,6 +157,7 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
   const [activeKey, setActiveKey] = React.useState<string>('');
   const [autoPlay, setAutoPlay] = useState(true);
   const [evaluationMode, setEvaluationMode] = useState(false);
+  const hasEnabledMetric = getEnabledMetricsFromCreateSceneParams(props.createSceneParams).length > 0;
 
   const displayLogs = useMemo(() => {
     if (!activeKey) {
@@ -299,17 +300,19 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
             </div>
             <div className="title">Now</div>
           </div>
-          <div
-            className={`actionButton ${evaluationMode ? 'selected' : ''}`}
-            onClick={() => {
-              setEvaluationMode(!evaluationMode);
-            }}
-          >
-            <div className="icon">
-              <EvaluationModeIcon />
+          {hasEnabledMetric && (
+            <div
+              className={`actionButton ${evaluationMode ? 'selected' : ''}`}
+              onClick={() => {
+                setEvaluationMode(!evaluationMode);
+              }}
+            >
+              <div className="icon">
+                <EvaluationModeIcon />
+              </div>
+              <div className="title">{'Evaluation\nMode'}</div>
             </div>
-            <div className="title">{'Evaluation\nMode'}</div>
-          </div>
+          )}
         </div>
       </Header>
       <Tabs

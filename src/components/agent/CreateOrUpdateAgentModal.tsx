@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Spin } from 'antd';
 import SceneAgentConfig from '@/types/server/config/Agent';
 import { Form } from '@formily/antd-v5';
-import { createForm, onFormValidateFailed, onFormValidateSuccess, onFormValuesChange } from "@formily/core";
+import { createForm, onFormValuesChange } from '@formily/core';
 import FormilyDefaultSchemaField from '@/components/formily/FormilyDefaultSchemaField';
 import { getRandomAgentColor } from '@/utils/color';
 import CustomScrollableAntdModal from '@/components/basic/CustomScrollableAntdModal';
@@ -54,9 +54,10 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
           const oldId = currentValues?.profile?.id;
           let uuid = nanoid();
           if (oldId && oldId.split('_').length > 1) {
-            uuid = oldId.split('_')[1];
+            const splitId = oldId.split('_');
+            uuid = splitId[splitId.length - 1];
           }
-          currentValues.profile.id = `${currentValues?.profile?.name || 'agent'}_${uuid}`;
+          currentValues.profile.id = `${(currentValues?.profile?.name || 'agent').trim().replace(/\s+/g, '_')}_${uuid}`;
         });
       },
     });

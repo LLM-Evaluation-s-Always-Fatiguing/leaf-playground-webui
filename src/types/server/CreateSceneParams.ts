@@ -2,6 +2,7 @@ import { SceneObjConfig } from '@/types/server/config/Scene';
 import { MetricEvaluatorObjsConfig } from '@/types/server/config/Evaluator';
 import SceneAgentConfig from '@/types/server/config/Agent';
 import { SceneReporterConfig } from '@/types/server/config/Reporter';
+import Scene, { SceneMetricDefinition } from '@/types/server/meta/Scene';
 
 export interface CreateSceneParams {
   scene_obj_config: SceneObjConfig;
@@ -19,4 +20,22 @@ export function getRoleAgentConfigsMapFromCreateSceneParams(createSceneParams: C
     }
   });
   return roleAgentConfigsMap;
+}
+
+export function getEnabledMetricsFromCreateSceneParams(createSceneParams: CreateSceneParams) {
+  const enabledMetrics: string[] = [];
+  Object.entries(createSceneParams.scene_obj_config.scene_config_data.roles_config).forEach(
+    ([roleName, roleConfig]) => {
+      Object.entries(roleConfig.actions_config).forEach(([actionName, actionConfig]) => {
+        if (actionConfig.metrics_config) {
+          Object.entries(actionConfig.metrics_config).forEach(([metricName, metricConfig]) => {
+            if (metricConfig.enable) {
+              enabledMetrics.push(`${roleName}.${actionName}.${metricName}`);
+            }
+          });
+        }
+      });
+    }
+  );
+  return enabledMetrics;
 }

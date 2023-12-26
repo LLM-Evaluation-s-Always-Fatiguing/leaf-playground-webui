@@ -11,7 +11,11 @@ import JSONViewModal from '@/components/common/JSONViewModal';
 import { useTheme } from 'antd-style';
 import ServerTaskBundle from '@/types/api-router/server/task-bundle';
 import WebUITaskBundle from '@/types/api-router/webui/task-bundle';
-import { getSceneLogMessageDisplayContent } from '@/utils/scene-log';
+import {
+  getSceneActionLogMetricEvalRecordDisplayInfo,
+  getSceneActionLogMetricInfo,
+  getSceneLogMessageDisplayContent,
+} from '@/utils/scene-log';
 import LoadingOverlay from '@/components/common/LoadingOverlay';
 import { TbCodeDots } from 'react-icons/tb';
 import AgentCard from '@/components/agent/AgentCard';
@@ -25,7 +29,7 @@ import { SceneMetricConfig } from '@/types/server/config/Metric';
 import { MdEditNote } from 'react-icons/md';
 import { HumanMetricMark } from '@/components/processing/common/icons/HumanMetricMark';
 import { EvaluatorMark } from '@/components/homepage/icons/EvaluatorMark';
-import { Switch } from "@formily/antd-v5";
+import { Switch } from '@formily/antd-v5';
 
 const Container = styled.div`
   width: 100%;
@@ -410,11 +414,9 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                 extra={
                   <Space
                     size={4}
-                    style={
-                      {
-                        cursor: 'pointer',
-                      }
-                    }
+                    style={{
+                      cursor: 'pointer',
+                    }}
                     onClick={() => {
                       setShowLogsMetrics(!showLogsMetrics);
                     }}
@@ -525,20 +527,11 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                           expandedRowKeys: actionLogs.map((l) => l.id),
                           showExpandColumn: false,
                           expandedRowRender: (log) => {
-                            const [logRoleName, logActionName] = log.action_belonged_chain
-                              ? log.action_belonged_chain.split('.')
-                              : [];
-                            const metrics =
-                              webuiBundle.scene.scene_metadata.scene_definition.roles
-                                .find((r) => r.name === logRoleName)
-                                ?.actions.find((a) => a.name === logActionName)?.metrics || [];
-                            const metricsConfig =
-                              webuiBundle.createSceneParams.scene_obj_config.scene_config_data.roles_config[logRoleName]
-                                ?.actions_config[logActionName]?.metrics_config || {};
-                            const enabledMetrics = metrics.filter((metric) => {
-                              return metricsConfig[metric.name]?.enable;
-                            });
-                            const hasMetrics = enabledMetrics.length > 0;
+                            const { enabledMetrics, hasMetrics } = getSceneActionLogMetricInfo(
+                              log,
+                              webuiBundle.scene,
+                              webuiBundle.createSceneParams
+                            );
                             if (hasMetrics) {
                               return (
                                 <LogMetricArea>
@@ -547,22 +540,16 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                                   </div>
                                   <div className="metrics">
                                     {enabledMetrics.map((metric, index) => {
-                                      const metricKey = `${log.action_belonged_chain}.${metric.name}`;
-                                      const humanRecord = log.human_eval_records?.[metricKey];
-                                      const evaluatorRecord = Array.isArray(log.eval_records?.[metricKey])
-                                        ? log.eval_records[metricKey][log.eval_records[metricKey].length - 1]
-                                        : undefined;
-                                      const record = humanRecord || evaluatorRecord;
-                                      const valueStr = record?.value !== undefined ? record.value.toString() : '-';
-                                      const recordReason = record?.reason;
+                                      const { value, valueStr, reason, human } =
+                                        getSceneActionLogMetricEvalRecordDisplayInfo(log, metric.name);
                                       return (
                                         <div key={index} className="metric">
                                           <div className="label">{metric.name}:</div>
                                           <div className="value">{valueStr}</div>
-                                          {!!record && (
-                                            <Tooltip title={recordReason}>
+                                          {value !== undefined && (
+                                            <Tooltip title={reason}>
                                               <div className={'reason'}>
-                                                {humanRecord ? <HumanMetricMark /> : <EvaluatorMark />}
+                                                {human ? <HumanMetricMark /> : <EvaluatorMark />}
                                               </div>
                                             </Tooltip>
                                           )}
