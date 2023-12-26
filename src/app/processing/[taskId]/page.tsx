@@ -50,20 +50,45 @@ const PageContainer = styled.div`
 `;
 
 const VisualizationArea = styled.div`
+    --try-component-bar-height: 35px;
+
     width: 45%;
     min-width: 480px;
     height: 100%;
     border-right: 1px solid ${(props) => props.theme.dividerColor};
     position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
 
-    .closeButton {
-        position: absolute;
-        top: 4px;
-        right: 4px;
-        z-index: 10;
-        font-size: 21px;
-        color: ${(props) => props.theme.colorError};
-        cursor: pointer;
+    .tryComponentTopBar {
+        height: var(--try-component-bar-height);
+      padding: 0 12px;
+        border-bottom: 1px solid ${(props) => props.theme.dividerColor};
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+
+        .closeButton {
+            font-size: 21px;
+            color: ${(props) => props.theme.colorError};
+            cursor: pointer;
+          display: flex;
+          flex-direction: row;
+          justify-content: center;
+          align-items: center;
+        }
+    }
+
+    .visualizationComponentWrapper {
+        width: 100%;
+        height: 100%;
+    }
+
+    .tryComponentTopBar + .visualizationComponentWrapper {
+        height: calc(100% - var(--try-component-bar-height));
     }
 `;
 
@@ -332,23 +357,30 @@ const ProcessingPage = ({
   return (
     <PageContainer>
       <VisualizationArea>
-        {globalStore.currentScene && globalStore.createSceneParams && (
-          <VisualizationComponent
-            scene={globalStore.currentScene}
-            createSceneParams={globalStore.createSceneParams}
-            logs={logs}
-          />
-        )}
         {tryVisualizationName && (
-          <div
-            className="closeButton"
-            onClick={() => {
-              setTryVisualizationName(undefined);
-            }}
-          >
-            <MdClose size={'1em'} />
+          <div className="tryComponentTopBar">
+            <div>{
+              tryVisualizationName
+            }</div>
+            <div
+              className="closeButton"
+              onClick={() => {
+                setTryVisualizationName(undefined);
+              }}
+            >
+              <MdClose size={'1em'} />
+            </div>
           </div>
         )}
+        <div className="visualizationComponentWrapper">
+          {globalStore.currentScene && globalStore.createSceneParams && (
+            <VisualizationComponent
+              scene={globalStore.currentScene}
+              createSceneParams={globalStore.createSceneParams}
+              logs={logs}
+            />
+          )}
+        </div>
       </VisualizationArea>
       <ConsoleArea>
         {globalStore.currentScene && globalStore.createSceneParams && (
