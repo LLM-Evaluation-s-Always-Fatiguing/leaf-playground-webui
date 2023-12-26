@@ -9,11 +9,12 @@ import { SceneMetricConfig } from '@/types/server/config/Metric';
 import { SceneMetricDefinition } from '@/types/server/meta/Scene';
 import { Button, message } from 'antd';
 import styled from '@emotion/styled';
-import { MdPerson3 } from 'react-icons/md';
+import { MdClose, MdPerson3 } from 'react-icons/md';
 import JSONViewModal from '@/components/common/JSONViewModal';
 import LoadingOverlay from '@/components/common/LoadingOverlay';
 import LogMetricDetailModal from '@/components/metric/LogMetricDetailModal';
 import ProcessingConsole from '@/components/processing/Console';
+import BaseVisualization from '@/components/processing/common/BaseVisualization';
 import VisualizationComponentWithExtraProps from '@/components/processing/common/VisualizationComponentWithExtraProps';
 import { DefaultProcessingVisualizationComponentProps } from '@/components/processing/def';
 import BuddhaLogo from '@/components/processing/specialized/buddha/BuddhaLogo';
@@ -49,11 +50,21 @@ const PageContainer = styled.div`
 `;
 
 const VisualizationArea = styled.div`
-  width: 45%;
-  min-width: 480px;
-  height: 100%;
+    width: 45%;
+    min-width: 480px;
+    height: 100%;
+    border-right: 1px solid ${(props) => props.theme.dividerColor};
+    position: relative;
 
-  border-right: 1px solid ${(props) => props.theme.dividerColor};
+    .closeButton {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        z-index: 10;
+        font-size: 21px;
+        color: ${(props) => props.theme.colorError};
+        cursor: pointer;
+    }
 `;
 
 const ConsoleArea = styled.div`
@@ -100,6 +111,8 @@ const ProcessingPage = ({
 
   const [loading, setLoading] = useState(true);
   const [loadingTip, setLoadingTip] = useState('Loading...');
+
+  const [tryVisualizationName, setTryVisualizationName] = useState<string>();
 
   const wsRef = useRef<WebSocket>();
   const wsOpenRef = useRef(false);
@@ -293,9 +306,10 @@ const ProcessingPage = ({
   };
 
   function getProcessingVisualizationComponent(): React.FC<DefaultProcessingVisualizationComponentProps> {
-    switch (globalStore.currentScene?.scene_metadata.scene_definition.name) {
-      case 'RAG QA Examine':
+    switch (tryVisualizationName || globalStore.currentScene?.scene_metadata.scene_definition.name) {
+      // case 'RAG QA Examine':
       case 'GeneralMCQExamine':
+      case 'SampleQAVisualization':
         return VisualizationComponentWithExtraProps(SampleQAVisualization, {});
       case 'Buddha':
         return VisualizationComponentWithExtraProps(SampleQAVisualization, {
@@ -303,18 +317,38 @@ const ProcessingPage = ({
           answererAvatar: BuddhaLogo,
         });
       default:
-        return () => false;
+        return VisualizationComponentWithExtraProps(BaseVisualization, {
+          onTryVisualization: (name) => {
+            setTryVisualizationName(name);
+          },
+        });
     }
   }
 
   const VisualizationComponent = useMemo(() => {
     return getProcessingVisualizationComponent();
-  }, [globalStore.currentScene, globalStore.createSceneParams]);
+  }, [globalStore.currentScene, globalStore.createSceneParams, tryVisualizationName]);
 
   return (
     <PageContainer>
       <VisualizationArea>
-        <VisualizationComponent logs={logs} />
+        {globalStore.currentScene && globalStore.createSceneParams && (
+          <VisualizationComponent
+            scene={globalStore.currentScene}
+            createSceneParams={globalStore.createSceneParams}
+            logs={logs}
+          />
+        )}
+        {tryVisualizationName && (
+          <div
+            className="closeButton"
+            onClick={() => {
+              setTryVisualizationName(undefined);
+            }}
+          >
+            <MdClose size={'1em'} />
+          </div>
+        )}
       </VisualizationArea>
       <ConsoleArea>
         {globalStore.currentScene && globalStore.createSceneParams && (

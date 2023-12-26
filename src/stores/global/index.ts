@@ -31,6 +31,7 @@ const useGlobalStore = create<GlobalState>()(
   immer(
     devtools((set) => ({
       pageTitle: undefined,
+      currentScene: undefined,
       createSceneParams: undefined,
       create: undefined,
       taskId: undefined,

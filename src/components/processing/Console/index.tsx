@@ -40,6 +40,11 @@ const Header = styled.div`
   font-weight: 500;
   padding: 0 16px;
 
+  > div {
+    flex-grow: 1;
+    flex-basis: 1px;
+  }
+
   .connectionStatus {
     display: flex;
     flex-direction: row;
@@ -55,6 +60,13 @@ const Header = styled.div`
 
     font-size: 14px;
     font-weight: normal;
+  }
+
+  .titleArea {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
   }
 
   .actionsArea {
@@ -264,6 +276,14 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
     return [...total, ...(roleConfig.agents_config || [])];
   }, [] as SceneAgentConfig[]);
 
+  const processStatusStr = props.wsConnected
+    ? props.simulationFinished && props.evaluationFinished
+      ? 'All Done'
+      : props.simulationFinished
+        ? 'Evaluating...'
+        : 'Simulating...'
+    : '';
+
   return (
     <Container>
       <Header>
@@ -274,9 +294,9 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
               background: props.wsConnected ? theme.colorSuccess : theme.colorError,
             }}
           />
-          {props.wsConnected ? <span>Connected</span> : <span>Disconnected</span>}
+          {props.wsConnected ? <span>Server Connected( {processStatusStr} )</span> : <span>Server Disconnected</span>}
         </div>
-        <div>
+        <div className={'titleArea'}>
           <span>Console</span>
           {!!props.logs.length && (
             <span
@@ -284,7 +304,7 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
                 fontSize: '14px',
               }}
             >
-              （{props.logs.length} Messages）
+              （{props.logs.length} Logs）
             </span>
           )}
         </div>
