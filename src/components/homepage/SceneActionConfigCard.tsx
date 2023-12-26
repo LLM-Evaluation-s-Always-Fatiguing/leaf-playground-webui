@@ -1,15 +1,15 @@
+import { useMemo } from 'react';
 import { SceneActionDefinition, SceneMetricRecordDisplayType } from '@/types/server/meta/Scene';
+import { WebUIActionMetricConfig } from '@/types/webui/MetricConfig';
 import { Card, Checkbox, Flex, InputNumber, Popover, Rate } from 'antd';
-import styled from '@emotion/styled';
 import { useTheme } from 'antd-style';
 import { Radio } from '@formily/antd-v5';
-import { WebUIActionMetricConfig } from '@/types/webui/MetricConfig';
-import { generateColorShades } from '@/utils/color/generate-color-shades';
-import { useMemo } from 'react';
-import { EvaluatorMark } from '@/components/homepage/icons/EvaluatorMark';
+import styled from '@emotion/styled';
 import { AiOutlineQuestionCircle } from 'react-icons/ai';
-import { MetricIcon } from '@/components/homepage/icons/MetricIcon';
 import { CompareMetricIcon } from '@/components/homepage/icons/CompareMetricIcon';
+import { EvaluatorMark } from '@/components/homepage/icons/EvaluatorMark';
+import { MetricIcon } from '@/components/homepage/icons/MetricIcon';
+import { generateColorShades } from '@/utils/color/generate-color-shades';
 
 const Container = styled.div`
   margin: 6px;

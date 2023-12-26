@@ -1,10 +1,13 @@
 # LEAF Playground WebUI
+
 A browser interface based on Next.js for [leaf-playground](https://github.com/LLM-Evaluation-s-Always-Fatiguing/leaf-playground).
 
 ## Development
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ### Requirements
+
 - yarn >= 1.22.10
 - node >= 18
 - Running [leaf-playground](https://github.com/LLM-Evaluation-s-Always-Fatiguing/leaf-playground)

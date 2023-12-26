@@ -1,8 +1,8 @@
-import request from '@/services/server/request';
-import { default as localRequest } from '@/services/local/request';
 import { CreateSceneParams } from '@/types/server/CreateSceneParams';
 import { SceneTaskStatus } from '@/types/server/SceneTask';
 import { SceneMetricRecordDisplayType } from '@/types/server/meta/Scene';
+import { default as localRequest } from '@/services/local/request';
+import request from '@/services/server/request';
 
 const sceneTaskAPI = {
   async createSceneTask(config: CreateSceneParams): Promise<{

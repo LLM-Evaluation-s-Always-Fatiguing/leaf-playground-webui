@@ -1,11 +1,11 @@
 'use client';
 
 import React, { CSSProperties, useEffect, useState } from 'react';
-import { Descriptions, message, Modal, Space, Button, Spin, ButtonProps } from 'antd';
-import ServerAPI from '@/services/server';
 import ServerInfo from '@/types/server/meta/ServerInfo';
+import { Button, ButtonProps, Descriptions, Modal, Space, Spin, message } from 'antd';
 import { AiOutlineFolderOpen } from 'react-icons/ai';
 import LocalAPI from '@/services/local';
+import ServerAPI from '@/services/server';
 
 interface AboutModalProps {
   open: boolean;

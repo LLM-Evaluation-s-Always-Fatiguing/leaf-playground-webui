@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server';
 import { exec as execCallback } from 'child_process';
-import { promisify } from 'util';
 import { promises as fs } from 'fs';
 import os from 'os';
+import { promisify } from 'util';
 
 const exec = promisify(execCallback);
 

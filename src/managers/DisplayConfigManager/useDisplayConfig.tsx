@@ -1,5 +1,5 @@
+import React, { PropsWithChildren, createContext, useContext } from 'react';
 import { ThemeMode } from 'antd-style/lib/types';
-import React, { createContext, PropsWithChildren, useContext } from 'react';
 
 export interface DisplayConfigContextProps {
   themeMode: ThemeMode;

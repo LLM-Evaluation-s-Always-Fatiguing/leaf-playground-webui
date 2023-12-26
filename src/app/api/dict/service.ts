@@ -1,7 +1,7 @@
-import DirectoryItem from "@/types/api-router/webui/DirectoryItem";
-import fs from "fs/promises";
-import path from "path";
-import mime from "mime-types";
+import DirectoryItem from '@/types/api-router/webui/DirectoryItem';
+import fs from 'fs/promises';
+import mime from 'mime-types';
+import path from 'path';
 
 export async function listDict(dictPath: string): Promise<DirectoryItem[]> {
   const direntArr = await fs.readdir(dictPath, { withFileTypes: true });

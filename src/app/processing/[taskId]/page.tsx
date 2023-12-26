@@ -1,26 +1,26 @@
 'use client';
 
-import styled from '@emotion/styled';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import SceneLog, { SceneActionLog, SceneLogType, SceneSystemLog, SceneSystemLogEvent } from '@/types/server/Log';
-import SampleQAVisualization from '@/components/processing/specialized/sample-qa/SampleQAVisualization';
-import { DefaultProcessingVisualizationComponentProps } from '@/components/processing/def';
-import VisualizationComponentWithExtraProps from '@/components/processing/common/VisualizationComponentWithExtraProps';
-import useGlobalStore from '@/stores/global';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Button, message } from 'antd';
-import LocalAPI from '@/services/local';
-import ProcessingConsole from '@/components/processing/common/Console';
-import ServerAPI from '@/services/server';
+import SceneLog, { SceneActionLog, SceneLogType, SceneSystemLog, SceneSystemLogEvent } from '@/types/server/Log';
 import { SceneTaskStatus } from '@/types/server/SceneTask';
-import BuddhaLogo from '@/components/processing/specialized/buddha/BuddhaLogo';
-import { MdPerson3 } from 'react-icons/md';
-import LoadingOverlay from '@/components/common/LoadingOverlay';
 import { WebsocketMessage, WebsocketMessageOperation } from '@/types/server/WebsocketMessage';
-import { SceneMetricDefinition } from '@/types/server/meta/Scene';
 import { SceneMetricConfig } from '@/types/server/config/Metric';
-import LogMetricDetailModal from '@/components/metric/LogMetricDetailModal';
+import { SceneMetricDefinition } from '@/types/server/meta/Scene';
+import { Button, message } from 'antd';
+import styled from '@emotion/styled';
+import { MdPerson3 } from 'react-icons/md';
 import JSONViewModal from '@/components/common/JSONViewModal';
+import LoadingOverlay from '@/components/common/LoadingOverlay';
+import LogMetricDetailModal from '@/components/metric/LogMetricDetailModal';
+import ProcessingConsole from '@/components/processing/Console';
+import VisualizationComponentWithExtraProps from '@/components/processing/common/VisualizationComponentWithExtraProps';
+import { DefaultProcessingVisualizationComponentProps } from '@/components/processing/def';
+import BuddhaLogo from '@/components/processing/specialized/buddha/BuddhaLogo';
+import SampleQAVisualization from '@/components/processing/specialized/sample-qa/SampleQAVisualization';
+import LocalAPI from '@/services/local';
+import ServerAPI from '@/services/server';
+import useGlobalStore from '@/stores/global';
 
 const PageContainer = styled.div`
   width: 100%;
@@ -347,7 +347,7 @@ const ProcessingPage = ({
                 onClick={async () => {
                   setLoadingTip('Saving task result...');
                   setLoading(true);
-                  wsRef.current?.send("disconnect");
+                  wsRef.current?.send('disconnect');
                   wsRef.current?.close();
                   await ServerAPI.sceneTask.save(serverUrl);
                   goToResult();

@@ -1,26 +1,26 @@
 'use client';
 
 import { PropsWithChildren, useEffect } from 'react';
-import { createStyles, setupStyled, StyleProvider, ThemeProvider, useTheme } from 'antd-style';
-import { HappyProvider } from '@ant-design/happy-work-theme';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { App, ConfigProvider, Layout } from 'antd';
-import { ThemeContext } from '@emotion/react';
+import { StyleProvider, ThemeProvider, createStyles, setupStyled, useTheme } from 'antd-style';
 import { ThemeAppearance } from 'antd-style/lib/types/appearance';
-import {
-  commonTheme,
-  lightTheme,
-  darkTheme,
-  commonCustomToken,
-  lightCustomToken,
-  darkCustomToken,
-} from '@/layouts/GlobalLayout/theme';
-import DefaultHeader from '@/components/header/DefaultHeader';
-import merge from 'lodash/merge';
 import en_US from 'antd/locale/en_US';
+import { setValidateLanguage } from '@formily/core';
+import { HappyProvider } from '@ant-design/happy-work-theme';
+import { ThemeContext } from '@emotion/react';
+import merge from 'lodash/merge';
+import DefaultHeader from '@/components/header/DefaultHeader';
+import {
+  commonCustomToken,
+  commonTheme,
+  darkCustomToken,
+  darkTheme,
+  lightCustomToken,
+  lightTheme,
+} from '@/layouts/GlobalLayout/theme';
 import useDisplayConfig from '@/managers/DisplayConfigManager/useDisplayConfig';
 import useGlobalStore from '@/stores/global';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { setValidateLanguage } from '@formily/core';
 
 setValidateLanguage('en-US');
 setupStyled({ ThemeContext });

@@ -1,15 +1,15 @@
 'use client';
 
-import { Card } from 'antd';
-import SceneAgentConfig from '@/types/server/config/Agent';
-import styled from '@emotion/styled';
-import { FiPlus } from 'react-icons/fi';
-import { FaCheck } from 'react-icons/fa6';
-import { RiRobot2Fill } from 'react-icons/ri';
-import { MdClose, MdOutlineSettings } from 'react-icons/md';
 import { useMemo } from 'react';
-import { useTheme } from 'antd-style';
+import SceneAgentConfig from '@/types/server/config/Agent';
 import SceneAgentMetadata from '@/types/server/meta/Agent';
+import { Card } from 'antd';
+import { useTheme } from 'antd-style';
+import styled from '@emotion/styled';
+import { FaCheck } from 'react-icons/fa6';
+import { FiPlus } from 'react-icons/fi';
+import { MdClose, MdOutlineSettings } from 'react-icons/md';
+import { RiRobot2Fill } from 'react-icons/ri';
 
 const AddContent = styled.div`
   width: 100%;
@@ -22,94 +22,94 @@ const AddContent = styled.div`
 `;
 
 const AgentContent = styled.div`
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 16px 12px 0 12px;
+  overflow: hidden;
+  position: relative;
+
+  .avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
     display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
+    flex-direction: row;
+    justify-content: center;
     align-items: center;
-    padding: 16px 12px 0 12px;
+    font-size: 28px;
+    background: ${(props) => props.theme.colorFillSecondary};
+    color: ${(props) => props.theme.colorPrimary};
+  }
+
+  .name {
+    align-self: stretch;
+    font-size: 18px;
+    font-weight: 500;
+    margin-top: 8px;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     overflow: hidden;
-    position: relative;
+  }
 
-    .avatar {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-        font-size: 28px;
-        background: ${(props) => props.theme.colorFillSecondary};
-        color: ${(props) => props.theme.colorPrimary};
-    }
+  .infoArea {
+    align-self: stretch;
+    margin-top: 0;
+    flex-grow: 1;
+    overflow: hidden auto;
+  }
 
-    .name {
-        align-self: stretch;
-        font-size: 18px;
-        font-weight: 500;
-        margin-top: 8px;
-        text-align: center;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        overflow: hidden;
-    }
+  .connectionStatus {
+    align-self: stretch;
+    flex-shrink: 0;
+    height: 40px;
+    margin-top: 8px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+  }
 
-    .infoArea {
-        align-self: stretch;
-        margin-top: 0;
-        flex-grow: 1;
-        overflow: hidden auto;
-    }
+  .editButton {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    font-size: 21px;
+    color: ${(props) => props.theme.colorPrimary};
+    cursor: pointer;
+  }
 
-    .connectionStatus {
-        align-self: stretch;
-        flex-shrink: 0;
-        height: 40px;
-        margin-top: 8px;
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-    }
+  .deleteButton {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    font-size: 21px;
+    color: ${(props) => props.theme.colorError};
+    cursor: pointer;
+    visibility: hidden;
+  }
 
-    .editButton {
-        position: absolute;
-        top: 2px;
-        right: 2px;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-        font-size: 21px;
-        color: ${(props) => props.theme.colorPrimary};
-        cursor: pointer;
-    }
-
+  :hover {
     .deleteButton {
-        position: absolute;
-        top: 2px;
-        left: 2px;
-        width: 40px;
-        height: 40px;
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-        font-size: 21px;
-        color: ${(props) => props.theme.colorError};
-        cursor: pointer;
-        visibility: hidden;
+      visibility: visible;
     }
-
-    :hover {
-        .deleteButton {
-            visibility: visible;
-        }
-    }
+  }
 `;
 
 interface AgentCardProps {

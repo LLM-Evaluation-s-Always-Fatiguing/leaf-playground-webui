@@ -1,17 +1,17 @@
 'use client';
 
-import { Button, Layout, Tooltip, ColorPicker } from 'antd';
-import styled from '@emotion/styled';
-import LEAFLogo from '@/components/project/LEAFLogo';
-import { ThemeMode, useTheme } from 'antd-style';
-import { MdOutlineBrightnessAuto, MdOutlineLightMode, MdOutlineDarkMode, MdOutlineInfo } from 'react-icons/md';
-import { TbBrandGithub } from 'react-icons/tb';
-import { FaRegAngry, FaRegLaughSquint } from 'react-icons/fa';
-import useDisplayConfig from '@/managers/DisplayConfigManager/useDisplayConfig';
-import HeaderPrimaryColorPicker from '@/components/header/PrimaryColorPicker';
-import { useRouter } from 'next/navigation';
-import AboutModal from '@/components/AboutModal';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button, ColorPicker, Layout, Tooltip } from 'antd';
+import { ThemeMode, useTheme } from 'antd-style';
+import styled from '@emotion/styled';
+import { FaRegAngry, FaRegLaughSquint } from 'react-icons/fa';
+import { MdOutlineBrightnessAuto, MdOutlineDarkMode, MdOutlineInfo, MdOutlineLightMode } from 'react-icons/md';
+import { TbBrandGithub } from 'react-icons/tb';
+import AboutModal from '@/components/common/AboutModal';
+import HeaderPrimaryColorPicker from '@/components/header/PrimaryColorPicker';
+import LEAFLogo from '@/components/project/LEAFLogo';
+import useDisplayConfig from '@/managers/DisplayConfigManager/useDisplayConfig';
 import useGlobalStore from '@/stores/global';
 
 const { Header } = Layout;

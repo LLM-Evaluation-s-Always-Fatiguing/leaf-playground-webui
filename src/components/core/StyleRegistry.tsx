@@ -1,8 +1,8 @@
 'use client';
 
 import { PropsWithChildren, useRef } from 'react';
-import { StyleProvider, extractStaticStyle } from 'antd-style';
 import { useServerInsertedHTML } from 'next/navigation';
+import { StyleProvider, extractStaticStyle } from 'antd-style';
 import NextAppDirEmotionCacheProvider from '@/components/core/EmotionCache';
 
 const StyleRegistry = ({ children }: PropsWithChildren) => {

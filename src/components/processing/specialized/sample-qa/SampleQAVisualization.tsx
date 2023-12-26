@@ -1,20 +1,20 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { DefaultProcessingVisualizationComponentProps } from '@/components/processing/def';
-import styled from '@emotion/styled';
-import { RiRobot2Fill } from 'react-icons/ri';
-import { GiTeacher } from 'react-icons/gi';
-import { FaPlay, FaPause } from 'react-icons/fa6';
 import { SceneActionLog } from '@/types/server/Log';
-import useGlobalStore from '@/stores/global';
-import { useTheme } from 'antd-style';
-import keyBy from 'lodash/keyBy';
-import { Button, Slider, Space } from 'antd';
-import SampleStatusAvatar from '@/components/processing/common/SampleStatusAvatar';
-import SampleAvatar from '@/components/processing/common/SampleAvatar';
-import { getSceneLogMessageDisplayContent } from '@/utils/scene-log';
 import SceneAgentConfig from '@/types/server/config/Agent';
+import { Button, Slider, Space } from 'antd';
+import { useTheme } from 'antd-style';
+import styled from '@emotion/styled';
+import keyBy from 'lodash/keyBy';
+import { FaPause, FaPlay } from 'react-icons/fa6';
+import { GiTeacher } from 'react-icons/gi';
+import { RiRobot2Fill } from 'react-icons/ri';
+import SampleAvatar from '@/components/processing/common/SampleAvatar';
+import SampleStatusAvatar from '@/components/processing/common/SampleStatusAvatar';
+import { DefaultProcessingVisualizationComponentProps } from '@/components/processing/def';
+import useGlobalStore from '@/stores/global';
+import { getSceneLogMessageDisplayContent } from '@/utils/scene-log';
 
 const Container = styled.div`
   width: 100%;

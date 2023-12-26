@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
-import embed, { VisualizationSpec } from 'vega-embed';
-import { View } from 'vega';
-import styled from '@emotion/styled';
 import { useTheme } from 'antd-style';
+import styled from '@emotion/styled';
+import { View } from 'vega';
+import embed, { VisualizationSpec } from 'vega-embed';
 
 const Container = styled.div`
   width: 100%;

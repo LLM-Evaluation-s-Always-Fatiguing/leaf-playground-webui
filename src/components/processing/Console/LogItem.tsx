@@ -1,17 +1,17 @@
-import styled from '@emotion/styled';
-import { SceneActionLog } from '@/types/server/Log';
 import React, { useEffect, useMemo } from 'react';
+import { SceneActionLog } from '@/types/server/Log';
+import { SceneMetricConfig } from '@/types/server/config/Metric';
+import { SceneMetricDefinition } from '@/types/server/meta/Scene';
 import { Button, Tooltip } from 'antd';
+import styled from '@emotion/styled';
+import { MdEditNote } from 'react-icons/md';
 import { TbCodeDots } from 'react-icons/tb';
+import { EvaluatorMark } from '@/components/homepage/icons/EvaluatorMark';
 import TruncatableParagraph, {
   TruncatableParagraphEllipsisStatus,
-} from '@/components/processing/common/TruncatableParagraph';
-import { getSceneActionLogMetricEvalRecordDisplayInfo, getSceneLogMessageDisplayContent } from '@/utils/scene-log';
-import { SceneMetricDefinition } from '@/types/server/meta/Scene';
-import { SceneMetricConfig } from '@/types/server/config/Metric';
+} from '@/components/processing/Console/TruncatableParagraph';
 import { HumanMetricMark } from '@/components/processing/common/icons/HumanMetricMark';
-import { MdEditNote } from 'react-icons/md';
-import { EvaluatorMark } from '@/components/homepage/icons/EvaluatorMark';
+import { getSceneActionLogMetricEvalRecordDisplayInfo, getSceneLogMessageDisplayContent } from '@/utils/scene-log';
 
 const Container = styled.div`
   margin: 9px 16px;

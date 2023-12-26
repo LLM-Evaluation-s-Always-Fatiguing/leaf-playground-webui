@@ -1,5 +1,5 @@
-import request from '@/services/local/request';
 import DirectoryItem from '@/types/api-router/webui/DirectoryItem';
+import request from '@/services/local/request';
 
 const prefix = '/dict';
 

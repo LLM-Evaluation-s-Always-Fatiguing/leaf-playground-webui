@@ -1,6 +1,6 @@
 import Image from 'next/image';
-import LogoPNG from '@/assets/Logo.png';
 import { useTheme } from 'antd-style';
+import LogoPNG from '@/assets/Logo.png';
 
 export default function LEAFLogo() {
   const theme = useTheme();

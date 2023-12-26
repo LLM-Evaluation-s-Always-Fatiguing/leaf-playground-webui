@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Spin } from 'antd';
 import SceneAgentConfig from '@/types/server/config/Agent';
+import SceneAgentMetadata from '@/types/server/meta/Agent';
+import { Spin } from 'antd';
 import { Form } from '@formily/antd-v5';
 import { createForm, onFormValuesChange } from '@formily/core';
+import CustomScrollableAntdModal from '@/components/basic/CustomScrollableAntdModal';
 import FormilyDefaultSchemaField from '@/components/formily/FormilyDefaultSchemaField';
 import { getRandomAgentColor } from '@/utils/color';
-import CustomScrollableAntdModal from '@/components/basic/CustomScrollableAntdModal';
-import SceneAgentMetadata from '@/types/server/meta/Agent';
 
 const nanoid = () => Math.random().toString(16).substring(6, 10);
 

@@ -1,6 +1,6 @@
-import DynamicObject from '@/types/server/DynamicObject';
-import SampleJSONSchema from '@/types/SampleJSONSchema';
 import FormilyJSONSchema from '@/types/FormilyJSONSchema';
+import SampleJSONSchema from '@/types/SampleJSONSchema';
+import DynamicObject from '@/types/server/DynamicObject';
 
 export interface ServerEvaluatorMetadata {
   cls_name: string;

@@ -6,7 +6,7 @@ const pathLocalAPI = {
   async join(...paths: string[]): Promise<string> {
     return (
       await request.post(`${prefix}/join`, {
-        paths
+        paths,
       })
     ).data.result;
   },

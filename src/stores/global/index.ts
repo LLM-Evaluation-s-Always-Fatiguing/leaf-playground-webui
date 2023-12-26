@@ -1,9 +1,9 @@
-import { create } from 'zustand';
-import { immer } from 'zustand/middleware/immer';
-import { devtools } from 'zustand/middleware';
+import WebUITaskBundle from '@/types/api-router/webui/task-bundle';
 import { CreateSceneParams } from '@/types/server/CreateSceneParams';
 import Scene from '@/types/server/meta/Scene';
-import WebUITaskBundle from '@/types/api-router/webui/task-bundle';
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
 
 interface GlobalState {
   pageTitle?: string;

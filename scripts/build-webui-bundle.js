@@ -81,7 +81,7 @@ function installDependenciesAndBuild() {
 function zipBundle() {
   return new Promise((resolve, reject) => {
     const archive = archiver('zip', { zlib: { level: 9 } });
-    const filePath = `./bundle/webui-v${packageJson.version}.zip`
+    const filePath = `./bundle/webui-v${packageJson.version}.zip`;
     const stream = fs.createWriteStream(filePath);
     archive
       .directory('./bundle/webui', false)
@@ -118,7 +118,7 @@ async function main() {
     const filePath = await zipBundle();
     console.log('Zip Bundle completed successfully.');
     console.log(`Bundle file: ${filePath}`);
-    console.log('Starting hash generation...')
+    console.log('Starting hash generation...');
     await generateHashFile(filePath);
     console.log('Hash generation completed successfully.');
 

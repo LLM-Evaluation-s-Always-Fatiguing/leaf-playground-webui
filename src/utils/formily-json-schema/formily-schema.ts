@@ -1,9 +1,9 @@
 import FormilyJSONSchema from '@/types/FormilyJSONSchema';
-import { SystemTransformationUnits } from './transformation-units';
-import cloneDeep from 'lodash/cloneDeep';
-import { Resolver } from '@stoplight/json-ref-resolver';
-import { TransformationUnit, TransformCore } from './transformation-unit-defs';
 import SampleJSONSchema from '@/types/SampleJSONSchema';
+import { Resolver } from '@stoplight/json-ref-resolver';
+import cloneDeep from 'lodash/cloneDeep';
+import { TransformCore, TransformationUnit } from './transformation-unit-defs';
+import { SystemTransformationUnits } from './transformation-units';
 
 export default class FormilySchemaTransformer {
   private transformationUnits: TransformationUnit[];

@@ -1,16 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import CustomFullFillAntdModal from '@/components/basic/CustomFullFillAntdModal';
-import { SceneMetricDefinition, SceneMetricRecordDisplayType } from '@/types/server/meta/Scene';
-import { SceneMetricConfig } from '@/types/server/config/Metric';
 import { SceneActionLog, SceneLogHumanMetricRecord } from '@/types/server/Log';
-import styled from '@emotion/styled';
-import { Button, Collapse, Flex, InputNumber, message, Rate, Tabs, Typography } from 'antd';
-import { TbCodeDots } from 'react-icons/tb';
-import { getSceneLogGroundTruthDisplayContent, getSceneLogMessageDisplayContent } from '@/utils/scene-log';
+import { SceneMetricConfig } from '@/types/server/config/Metric';
+import { SceneMetricDefinition, SceneMetricRecordDisplayType } from '@/types/server/meta/Scene';
+import { Button, Collapse, Flex, InputNumber, Rate, Tabs, Typography, message } from 'antd';
 import { Radio } from '@formily/antd-v5';
+import styled from '@emotion/styled';
 import { Resizable } from 're-resizable';
+import { TbCodeDots } from 'react-icons/tb';
+import CustomFullFillAntdModal from '@/components/basic/CustomFullFillAntdModal';
 import LoadingOverlay from '@/components/common/LoadingOverlay';
 import ServerAPI from '@/services/server';
+import { getSceneLogGroundTruthDisplayContent, getSceneLogMessageDisplayContent } from '@/utils/scene-log';
 
 const { Paragraph } = Typography;
 

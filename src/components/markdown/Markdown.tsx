@@ -1,20 +1,20 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { message, Typography } from 'antd';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import remarkMath from 'remark-math';
-import remarkBreaks from 'remark-breaks';
-import remarkUnwrapImages from 'remark-unwrap-images';
-import 'katex/dist/katex.min.css';
-import rehypeKatex from 'rehype-katex';
-import rehypeHighlight from 'rehype-highlight';
-import rehypeColorChips from 'rehype-color-chips';
-import mermaid from 'mermaid';
+import { Typography, message } from 'antd';
+import { useTheme } from 'antd-style';
 import styled from '@emotion/styled';
 import copy from 'copy-to-clipboard';
-import { useTheme } from 'antd-style';
+import 'katex/dist/katex.min.css';
+import mermaid from 'mermaid';
+import ReactMarkdown from 'react-markdown';
+import rehypeColorChips from 'rehype-color-chips';
+import rehypeHighlight from 'rehype-highlight';
+import rehypeKatex from 'rehype-katex';
+import remarkBreaks from 'remark-breaks';
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import remarkUnwrapImages from 'remark-unwrap-images';
 
 export function copyToClipboard(text: string) {
   const result = copy(text);

@@ -1,5 +1,5 @@
 import { test } from '@jest/globals';
-import { getRandomAgentColor } from "@/utils/color/index";
+import { getRandomAgentColor } from '@/utils/color/index';
 
 test('Test Random Color', async () => {
   const existColors: string[] = [];

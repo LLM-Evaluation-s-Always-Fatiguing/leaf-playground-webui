@@ -1,5 +1,5 @@
-import { connect, mapProps } from '@formily/react';
 import { ColorPicker as AntdColorPicker } from 'antd';
+import { connect, mapProps } from '@formily/react';
 
 const ColorPicker = connect(
   AntdColorPicker,

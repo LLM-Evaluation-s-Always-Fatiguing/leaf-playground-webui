@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { MetricEvaluatorObjConfig } from '@/types/server/config/Evaluator';
+import EvaluatorMetadata from '@/types/server/meta/Evaluator';
 import { Spin } from 'antd';
 import { Form } from '@formily/antd-v5';
 import { createForm } from '@formily/core';
-import FormilyDefaultSchemaField from '@/components/formily/FormilyDefaultSchemaField';
 import CustomScrollableAntdModal from '@/components/basic/CustomScrollableAntdModal';
-import EvaluatorMetadata from '@/types/server/meta/Evaluator';
-import { MetricEvaluatorObjConfig } from '@/types/server/config/Evaluator';
+import FormilyDefaultSchemaField from '@/components/formily/FormilyDefaultSchemaField';
 
 interface EvaluatorConfigModalProps {
   open: boolean;

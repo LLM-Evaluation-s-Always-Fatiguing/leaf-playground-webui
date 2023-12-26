@@ -1,15 +1,15 @@
 'use client';
 
 import { PropsWithChildren, useState } from 'react';
-import { DisplayConfigContextProps, DisplayConfigProvider } from '@/managers/DisplayConfigManager/useDisplayConfig';
 import { setCookie } from 'cookies-next';
+import { OptionsType } from 'cookies-next/lib/types';
+import dayjs from 'dayjs';
 import {
   HAPPY_WORK_EFFECT_COOKIE_NAME,
   PRIMARY_COLOR_COOKIE_NAME,
   THEME_MODE_COOKIE_NAME,
 } from '@/managers/DisplayConfigManager/def';
-import { OptionsType } from 'cookies-next/lib/types';
-import dayjs from 'dayjs';
+import { DisplayConfigContextProps, DisplayConfigProvider } from '@/managers/DisplayConfigManager/useDisplayConfig';
 
 const cookieOptions: OptionsType = {
   expires: dayjs().add(1, 'year').toDate(),

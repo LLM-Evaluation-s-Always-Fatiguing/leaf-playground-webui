@@ -1,5 +1,5 @@
-import SampleJSONSchema from '@/types/SampleJSONSchema';
 import FormilyJSONSchema from '@/types/FormilyJSONSchema';
+import SampleJSONSchema from '@/types/SampleJSONSchema';
 import DynamicObject from '@/types/server/DynamicObject';
 import SceneAgentMetadata, { ServerSceneAgentMetadata } from '@/types/server/meta/Agent';
 import EvaluatorMetadata, { ServerEvaluatorMetadata } from '@/types/server/meta/Evaluator';

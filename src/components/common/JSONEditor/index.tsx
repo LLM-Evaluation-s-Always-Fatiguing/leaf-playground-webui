@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import Editor, { Monaco } from '@monaco-editor/react';
-import { editor } from 'monaco-editor';
 import SampleJSONSchema from '@/types/SampleJSONSchema';
 import { useTheme } from 'antd-style';
+import Editor, { Monaco } from '@monaco-editor/react';
+import { editor } from 'monaco-editor';
 
 interface MonacoJSONEditorProps {
   readonly?: boolean;
@@ -71,7 +71,7 @@ export default function MonacoJSONEditor(props: MonacoJSONEditorProps) {
         minimap: {
           enabled: true,
         },
-        wordWrap: 'on'
+        wordWrap: 'on',
       }}
       onChange={(value) => {
         setEditorValue(value || '');

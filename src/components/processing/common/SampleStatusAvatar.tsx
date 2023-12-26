@@ -1,8 +1,8 @@
-import styled from '@emotion/styled';
 import React from 'react';
-import SampleAvatar, { SampleAvatarProps } from '@/components/processing/common/SampleAvatar';
-import { FaCheckCircle } from 'react-icons/fa';
 import { useTheme } from 'antd-style';
+import styled from '@emotion/styled';
+import { FaCheckCircle } from 'react-icons/fa';
+import SampleAvatar, { SampleAvatarProps } from '@/components/processing/common/SampleAvatar';
 
 const Container = styled.div`
   width: 40px;

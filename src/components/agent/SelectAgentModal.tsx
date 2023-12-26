@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Modal, Spin, Form, FormInstance } from 'antd';
-import { Select } from '@formily/antd-v5';
 import SceneAgentMetadata from '@/types/server/meta/Agent';
+import { Form, FormInstance, Modal, Spin } from 'antd';
+import { Select } from '@formily/antd-v5';
 
 interface SelectAgentModalProps {
   open: boolean;
@@ -86,14 +86,12 @@ const SelectAgentModal: React.FC<SelectAgentModalProps> = ({
           >
             <Select options={selectableAgentOptions} />
           </Form.Item>
-          <Form.Item label={" "} colon={false} dependencies={['cls_name']}>
+          <Form.Item label={' '} colon={false} dependencies={['cls_name']}>
             {() => {
               const cls_name = formRef.current?.getFieldValue('cls_name');
               const currentAgentMetadata = selectableAgentsMetadata.find((m) => m.cls_name === cls_name);
               if (currentAgentMetadata) {
-                return <div>
-                  {currentAgentMetadata.description}
-                </div>
+                return <div>{currentAgentMetadata.description}</div>;
               }
               return false;
             }}

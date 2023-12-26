@@ -1,9 +1,10 @@
 'use client';
 
-import { createSchemaField } from '@formily/react';
+import { Card, Flex } from 'antd';
 import {
   ArrayItems,
   ArrayTabs,
+  Checkbox,
   DatePicker,
   Editable,
   FormGrid,
@@ -11,16 +12,15 @@ import {
   FormLayout,
   Input,
   NumberPicker,
-  Select,
   Radio,
-  Checkbox,
+  Select,
   Space,
   Switch,
 } from '@formily/antd-v5';
-import { Card, Flex } from 'antd';
-import NoConfigRequired from "@/components/formily/components/NoConfigRequired";
-import ColorPicker from "@/components/formily/components/ColorPicker";
-import NullableObject from "@/components/formily/components/NullableObject";
+import { createSchemaField } from '@formily/react';
+import ColorPicker from '@/components/formily/components/ColorPicker';
+import NoConfigRequired from '@/components/formily/components/NoConfigRequired';
+import NullableObject from '@/components/formily/components/NullableObject';
 
 const FormilyDefaultSchemaField = createSchemaField({
   components: {

@@ -1,10 +1,10 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Button, ColorPicker, Flex } from 'antd';
 import { MdOutlineColorLens } from 'react-icons/md';
-import useDisplayConfig from '@/managers/DisplayConfigManager/useDisplayConfig';
-import { useEffect, useState } from 'react';
 import { commonTheme } from '@/layouts/GlobalLayout/theme';
+import useDisplayConfig from '@/managers/DisplayConfigManager/useDisplayConfig';
 
 interface HeaderPrimaryColorPickerProps {}
 

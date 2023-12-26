@@ -1,4 +1,4 @@
-import DynamicObject from "@/types/server/DynamicObject";
+import DynamicObject from '@/types/server/DynamicObject';
 
 export interface SceneAgentProfile {
   id: string;

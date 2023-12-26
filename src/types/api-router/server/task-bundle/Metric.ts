@@ -1,3 +1,1 @@
-export default interface ServerTaskBundleMetrics {
-
-}
+export default interface ServerTaskBundleMetrics {}

@@ -1,7 +1,7 @@
 import FormilyJSONSchema from '@/types/FormilyJSONSchema';
-import type { TransformCore } from '../../transformation-unit-defs';
-import { AbstractBasicTransformationUnit } from "../../transformation-unit-defs";
 import merge from 'lodash/merge';
+import type { TransformCore } from '../../transformation-unit-defs';
+import { AbstractBasicTransformationUnit } from '../../transformation-unit-defs';
 
 export default class BasicAllOfTransformationUnit extends AbstractBasicTransformationUnit {
   shouldTransform(schema: FormilyJSONSchema, level: number): boolean {
@@ -13,7 +13,7 @@ export default class BasicAllOfTransformationUnit extends AbstractBasicTransform
       merge(schema, s);
     });
     if (!schema.type && schema.const) {
-      schema.type = typeof schema.const
+      schema.type = typeof schema.const;
     }
     rootTransform(schema, level, rootTransform);
   }

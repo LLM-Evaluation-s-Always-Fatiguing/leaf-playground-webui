@@ -1,11 +1,11 @@
+import { useMemo, useState } from 'react';
 import { SceneRoleDefinition } from '@/types/server/meta/Scene';
+import { WebUIRoleMetricConfig } from '@/types/webui/MetricConfig';
 import { Card, Checkbox, Collapse, Flex } from 'antd';
+import { useTheme } from 'antd-style';
 import styled from '@emotion/styled';
 import SceneActionConfigCard from '@/components/homepage/SceneActionConfigCard';
-import { WebUIRoleMetricConfig } from '@/types/webui/MetricConfig';
-import { useMemo, useState } from 'react';
 import { generateColorShades } from '@/utils/color/generate-color-shades';
-import { useTheme } from 'antd-style';
 
 const CustomCollapseWrapper = styled.div`
   width: 100%;
@@ -134,13 +134,13 @@ const SceneRoleConfigCard = (props: SceneRoleConfigCardProps) => {
       });
       props.onConfigChange(newConfig);
     }
-  }
+  };
 
   return (
     <CustomCollapseWrapper>
       <Collapse
         activeKey={collapsed ? undefined : 'main'}
-        onChange={()=>{
+        onChange={() => {
           setCollapsed(!collapsed);
         }}
         collapsible={'icon'}
@@ -177,9 +177,12 @@ const SceneRoleConfigCard = (props: SceneRoleConfigCardProps) => {
                     }}
                   />
                 </div>
-                <div className="info" onClick={()=>{
-                  onCheckAllTrigger();
-                }}>
+                <div
+                  className="info"
+                  onClick={() => {
+                    onCheckAllTrigger();
+                  }}
+                >
                   <div className={'title'}>{props.roleMetadata.name} Role</div>
                   <div className="desc">{props.roleMetadata.description}</div>
                 </div>

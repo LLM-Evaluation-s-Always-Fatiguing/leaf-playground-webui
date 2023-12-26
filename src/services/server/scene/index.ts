@@ -1,8 +1,7 @@
-import request from '@/services/server/request';
-
-import {transferStandardJSONSchemaToFormilyJSONSchema} from '@/utils/json-schema';
-import Scene, {ServerScene} from '@/types/server/meta/Scene';
 import SceneAgentMetadata from '@/types/server/meta/Agent';
+import Scene, { ServerScene } from '@/types/server/meta/Scene';
+import request from '@/services/server/request';
+import { transferStandardJSONSchemaToFormilyJSONSchema } from '@/utils/json-schema';
 
 async function asyncReduce<T, U>(
   array: T[],
@@ -49,12 +48,12 @@ const sceneAPI = {
                   if (agentMetadataConfigSchemaTransformResult?.formilySchema.properties?.chart_major_color) {
                     (agentMetadataConfigSchemaTransformResult?.formilySchema.properties.chart_major_color)[
                       'x-component'
-                      ] = 'ColorPicker';
+                    ] = 'ColorPicker';
                   }
                   if (agentMetadataConfigSchemaTransformResult?.formilySchema.properties?.profile?.properties?.id) {
                     (agentMetadataConfigSchemaTransformResult?.formilySchema.properties.profile?.properties.id)[
                       'x-component-props'
-                      ] = {
+                    ] = {
                       disabled: true,
                     };
                   }
@@ -82,7 +81,7 @@ const sceneAPI = {
             })
           ),
           charts_metadata: origin.charts_metadata,
-          work_dir: origin.work_dir
+          work_dir: origin.work_dir,
         } as Scene;
       })
     );

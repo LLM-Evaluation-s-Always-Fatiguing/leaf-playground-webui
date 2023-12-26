@@ -1,10 +1,10 @@
-import request from '@/services/local/request';
-import DirectoryItem from '@/types/api-router/webui/DirectoryItem';
-import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskInfo';
-import WebUITaskBundle from '@/types/api-router/webui/task-bundle';
 import ServerTaskBundle from '@/types/api-router/server/task-bundle';
-import Scene from "@/types/server/meta/Scene";
-import { CreateSceneParams } from "@/types/server/CreateSceneParams";
+import DirectoryItem from '@/types/api-router/webui/DirectoryItem';
+import WebUITaskBundle from '@/types/api-router/webui/task-bundle';
+import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskInfo';
+import { CreateSceneParams } from '@/types/server/CreateSceneParams';
+import Scene from '@/types/server/meta/Scene';
+import request from '@/services/local/request';
 
 const prefix = '/task-bundle';
 
@@ -32,7 +32,7 @@ const taskBundleLocalAPI = {
           taskId,
           serverUrl,
           scene,
-          createSceneParams
+          createSceneParams,
         })
       ).data;
     },

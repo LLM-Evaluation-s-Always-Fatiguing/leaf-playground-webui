@@ -7,5 +7,21 @@
   "jsxSingleQuote": false,
   "bracketSpacing": true,
   "jsxBracketSameLine": false,
-  "arrowParens": "always"
+  "arrowParens": "always",
+  "importOrder": [
+    "^react$",
+    "^next/(.*)$",
+    "^@/types/(.*)$",
+    "^antd(.*)$",
+    "^@formily/(.*)$",
+    "<THIRD_PARTY_MODULES>",
+    "^react-icons/(.*)$",
+    "^@/assets/(.*)$",
+    "^@/components/(.*)$",
+    "@/(.*)",
+    "^[./]"
+  ],
+  "importOrderSeparation": false,
+  "importOrderSortSpecifiers": true,
+  "plugins": ["@trivago/prettier-plugin-sort-imports"]
 }

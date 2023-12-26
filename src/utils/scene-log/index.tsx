@@ -1,14 +1,14 @@
+import { CreateSceneParams } from '@/types/server/CreateSceneParams';
 import {
   SceneActionLog,
   SceneLogContent,
   SceneLogJSONContent,
   SceneLogMediaType,
   SceneLogMessage,
-  SceneLogTextContent
-} from "@/types/server/Log";
+  SceneLogTextContent,
+} from '@/types/server/Log';
+import Scene from '@/types/server/meta/Scene';
 import Markdown from '@/components/markdown/Markdown';
-import Scene from "@/types/server/meta/Scene";
-import { CreateSceneParams } from "@/types/server/CreateSceneParams";
 
 export function getSceneLogMessageDisplayContent(message: SceneLogMessage, markdown = false) {
   switch (message.content.type) {
@@ -57,16 +57,14 @@ export function getSceneLogGroundTruthDisplayContent(content: SceneLogContent, m
 }
 
 export function getSceneActionLogMetricInfo(log: SceneActionLog, scene: Scene, createSceneParams: CreateSceneParams) {
-  const [logRoleName, logActionName] = log.action_belonged_chain
-    ? log.action_belonged_chain.split('.')
-    : [];
+  const [logRoleName, logActionName] = log.action_belonged_chain ? log.action_belonged_chain.split('.') : [];
   const metrics =
     scene.scene_metadata.scene_definition.roles
       .find((r) => r.name === logRoleName)
       ?.actions.find((a) => a.name === logActionName)?.metrics || [];
   const metricsConfig =
-    createSceneParams.scene_obj_config.scene_config_data.roles_config[logRoleName]
-      ?.actions_config[logActionName]?.metrics_config || {};
+    createSceneParams.scene_obj_config.scene_config_data.roles_config[logRoleName]?.actions_config[logActionName]
+      ?.metrics_config || {};
   const enabledMetrics = metrics.filter((metric) => {
     return metricsConfig[metric.name]?.enable;
   });
@@ -75,8 +73,8 @@ export function getSceneActionLogMetricInfo(log: SceneActionLog, scene: Scene, c
     metrics,
     metricsConfig,
     enabledMetrics,
-    hasMetrics
-  }
+    hasMetrics,
+  };
 }
 
 export function getSceneActionLogMetricEvalRecordDisplayInfo(log: SceneActionLog, metricName: string) {
@@ -92,6 +90,6 @@ export function getSceneActionLogMetricEvalRecordDisplayInfo(log: SceneActionLog
     value: record?.value,
     valueStr: valueStr,
     reason: recordReason,
-    human: !!humanRecord
-  }
+    human: !!humanRecord,
+  };
 }

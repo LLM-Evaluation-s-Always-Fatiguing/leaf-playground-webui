@@ -1,19 +1,19 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import styled from '@emotion/styled';
-import { message } from 'antd';
-import SceneListComponent from '@/components/scene/SceneListComponent';
-import ServerAPI from '@/services/server';
-import SceneInfoBoard from '@/components/homepage/SceneInfoBoard';
-import SceneConfigBoard from '@/components/homepage/SceneConfigBoard';
-import useGlobalStore from '@/stores/global';
 import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskInfo';
-import LocalAPI from '@/services/local';
-import LoadingOverlay from '@/components/common/LoadingOverlay';
-import ServerInfo from '@/types/server/meta/ServerInfo';
 import Scene from '@/types/server/meta/Scene';
+import ServerInfo from '@/types/server/meta/ServerInfo';
+import { message } from 'antd';
+import styled from '@emotion/styled';
 import md5 from 'crypto-js/md5';
+import LoadingOverlay from '@/components/common/LoadingOverlay';
+import SceneConfigBoard from '@/components/homepage/SceneConfigBoard';
+import SceneInfoBoard from '@/components/homepage/SceneInfoBoard';
+import SceneListComponent from '@/components/scene/SceneListComponent';
+import LocalAPI from '@/services/local';
+import ServerAPI from '@/services/server';
+import useGlobalStore from '@/stores/global';
 
 const ScenesArea = styled.div`
   width: 24%;

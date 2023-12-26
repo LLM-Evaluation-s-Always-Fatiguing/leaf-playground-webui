@@ -1,6 +1,6 @@
-import ServerAPI from '@/services/server';
 import HomePage from '@/app/homepage';
 import LocalAPI from '@/services/local';
+import ServerAPI from '@/services/server';
 
 export default async function Page() {
   const serverInfo = await ServerAPI.info();

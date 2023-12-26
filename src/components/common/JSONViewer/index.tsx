@@ -1,7 +1,7 @@
 'use client';
 
-import { JsonViewer } from '@textea/json-viewer';
 import { useTheme } from 'antd-style';
+import { JsonViewer } from '@textea/json-viewer';
 
 interface JSONViewerProps {
   jsonObject?: object | any[];

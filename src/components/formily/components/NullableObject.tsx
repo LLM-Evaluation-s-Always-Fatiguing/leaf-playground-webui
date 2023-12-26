@@ -1,10 +1,10 @@
 import React, { PropsWithChildren, useEffect, useRef, useState } from 'react';
-import { Checkbox } from 'antd';
 import FormilyJSONSchema from '@/types/FormilyJSONSchema';
-import FormilyDefaultSchemaField from '@/components/formily/FormilyDefaultSchemaField';
-import { useField, useForm, observer } from '@formily/react';
-import { ObjectField } from '@formily/core';
+import { Checkbox } from 'antd';
 import { FormItem } from '@formily/antd-v5';
+import { ObjectField } from '@formily/core';
+import { observer, useField, useForm } from '@formily/react';
+import FormilyDefaultSchemaField from '@/components/formily/FormilyDefaultSchemaField';
 
 interface NullableObjectProps extends PropsWithChildren {
   label?: string;
@@ -39,9 +39,9 @@ const NullableObject = observer((props: NullableObjectProps) => {
   useEffect(() => {
     mountedRef.current = true;
     setChildFieldDisplay(enable);
-    return ()=>{
+    return () => {
       mountedRef.current = false;
-    }
+    };
   }, []);
 
   return (

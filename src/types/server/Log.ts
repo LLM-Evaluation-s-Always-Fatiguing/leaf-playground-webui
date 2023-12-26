@@ -1,4 +1,4 @@
-import { SceneMetricRecordDisplayType } from "@/types/server/meta/Scene";
+import { SceneMetricRecordDisplayType } from '@/types/server/meta/Scene';
 
 export interface SceneLogRole {
   name: string;

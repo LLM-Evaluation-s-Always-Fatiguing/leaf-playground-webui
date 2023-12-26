@@ -1,11 +1,11 @@
+import { MetricEvaluatorObjConfig } from '@/types/server/config/Evaluator';
 import EvaluatorMetadata from '@/types/server/meta/Evaluator';
 import { Card, Tooltip } from 'antd';
-import styled from '@emotion/styled';
 import { useTheme } from 'antd-style';
-import { MetricEvaluatorObjConfig } from '@/types/server/config/Evaluator';
+import styled from '@emotion/styled';
+import { MdOutlineSettings } from 'react-icons/md';
 import { FluentBotSparkle20Filled } from '@/components/evaluator/EvaluatorAvatar';
 import { EvaluatorMark } from '@/components/homepage/icons/EvaluatorMark';
-import { MdOutlineSettings } from 'react-icons/md';
 
 const Content = styled.div`
   width: 100%;

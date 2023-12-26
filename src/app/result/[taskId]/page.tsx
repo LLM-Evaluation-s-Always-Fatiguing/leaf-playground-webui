@@ -1,35 +1,35 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
 import React, { useEffect, useMemo, useState } from 'react';
-import LocalAPI from '@/services/local';
-import styled from '@emotion/styled';
-import { Button, ButtonProps, Card, Collapse, Descriptions, Space, Table, Tooltip } from 'antd';
-import { SceneActionLog, SceneLogType } from '@/types/server/Log';
-import dayjs from 'dayjs';
-import JSONViewModal from '@/components/common/JSONViewModal';
-import { useTheme } from 'antd-style';
+import { useSearchParams } from 'next/navigation';
 import ServerTaskBundle from '@/types/api-router/server/task-bundle';
 import WebUITaskBundle from '@/types/api-router/webui/task-bundle';
+import { getRoleAgentConfigsMapFromCreateSceneParams } from '@/types/server/CreateSceneParams';
+import { SceneActionLog, SceneLogType } from '@/types/server/Log';
+import { SceneMetricConfig } from '@/types/server/config/Metric';
+import { SceneMetricDefinition } from '@/types/server/meta/Scene';
+import { Button, ButtonProps, Card, Collapse, Descriptions, Space, Table, Tooltip } from 'antd';
+import { useTheme } from 'antd-style';
+import { Switch } from '@formily/antd-v5';
+import styled from '@emotion/styled';
+import dayjs from 'dayjs';
+import flatten from 'lodash/flatten';
+import keyBy from 'lodash/keyBy';
+import { MdEditNote } from 'react-icons/md';
+import { TbCodeDots } from 'react-icons/tb';
+import AgentCard from '@/components/agent/AgentCard';
+import JSONViewModal from '@/components/common/JSONViewModal';
+import LoadingOverlay from '@/components/common/LoadingOverlay';
+import { EvaluatorMark } from '@/components/homepage/icons/EvaluatorMark';
+import { HumanMetricMark } from '@/components/processing/common/icons/HumanMetricMark';
+import VegaChart from '@/components/vega/VegaChart';
+import LocalAPI from '@/services/local';
+import useGlobalStore from '@/stores/global';
 import {
   getSceneActionLogMetricEvalRecordDisplayInfo,
   getSceneActionLogMetricInfo,
   getSceneLogMessageDisplayContent,
 } from '@/utils/scene-log';
-import LoadingOverlay from '@/components/common/LoadingOverlay';
-import { TbCodeDots } from 'react-icons/tb';
-import AgentCard from '@/components/agent/AgentCard';
-import VegaChart from '@/components/vega/VegaChart';
-import { getRoleAgentConfigsMapFromCreateSceneParams } from '@/types/server/CreateSceneParams';
-import flatten from 'lodash/flatten';
-import keyBy from 'lodash/keyBy';
-import useGlobalStore from '@/stores/global';
-import { SceneMetricDefinition } from '@/types/server/meta/Scene';
-import { SceneMetricConfig } from '@/types/server/config/Metric';
-import { MdEditNote } from 'react-icons/md';
-import { HumanMetricMark } from '@/components/processing/common/icons/HumanMetricMark';
-import { EvaluatorMark } from '@/components/homepage/icons/EvaluatorMark';
-import { Switch } from '@formily/antd-v5';
 
 const Container = styled.div`
   width: 100%;

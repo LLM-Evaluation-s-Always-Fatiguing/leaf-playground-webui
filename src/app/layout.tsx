@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
-import ManagersServerRegistry from '@/managers/ManagersServerRegistry';
 import StyleRegistry from '@/components/core/StyleRegistry';
 import GlobalLayout from '@/layouts/GlobalLayout';
+import ManagersServerRegistry from '@/managers/ManagersServerRegistry';
 import './globals.css';
 
 export const metadata: Metadata = {
