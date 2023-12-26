@@ -3,6 +3,7 @@ import DynamicObject from '@/types/server/DynamicObject';
 export interface SceneAgentProfile {
   id: string;
   name: string;
+
   [key: string]: any;
 }
 
@@ -13,7 +14,9 @@ export interface SceneAgentBackendConfig {
 export interface SceneAgentConfigData {
   profile: SceneAgentProfile;
   chart_major_color?: string;
-  ai_backend_config: SceneAgentBackendConfig;
+  ai_backend_config?: SceneAgentBackendConfig;
+
+  [key: string]: any;
 }
 
 export default interface SceneAgentConfig {

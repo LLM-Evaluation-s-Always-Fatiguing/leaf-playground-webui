@@ -130,7 +130,7 @@ const AgentCard = (props: AgentCardProps) => {
 
   const requiredBackendConfigs = useMemo(() => {
     if (!props.sceneAgentConfig) return [];
-    return (props.sceneAgentMeta?.configSchema?.properties?.ai_backend_config.required || []) as string[];
+    return (props.sceneAgentMeta?.configSchema?.properties?.ai_backend_config?.required || []) as string[];
   }, [props.sceneAgentConfig, props.sceneAgentMeta]);
 
   const displayKV = Object.entries(props.sceneAgentConfig?.config_data.ai_backend_config || {}).filter(([key]) =>
