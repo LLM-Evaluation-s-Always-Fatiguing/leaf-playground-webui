@@ -2,6 +2,44 @@ const { execSync } = require('child_process');
 const fs = require('fs-extra');
 const packageJson = require('../package.json');
 const archiver = require('archiver');
+const crypto = require('crypto');
+
+/**
+ * Generate the hash of a file and write it to a new file
+ * @param {string} filePath Path of the file
+ * @param {string} hashType The hash type to use (e.g., 'sha256', 'md5', etc.)
+ */
+function generateHashFile(filePath, hashType = 'sha256') {
+  return new Promise((resolve, reject) => {
+    // Create a hash instance
+    const hash = crypto.createHash(hashType);
+    const stream = fs.createReadStream(filePath);
+
+    stream.on('data', (data) => {
+      hash.update(data);
+    });
+
+    stream.on('end', () => {
+      // Compute the hash
+      const fileHash = hash.digest('hex');
+      // Create path for the hash file
+      const hashFilePath = `${filePath}.${hashType}`;
+
+      // Write the hash to a file
+      fs.writeFile(hashFilePath, fileHash, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(hashFilePath);
+        }
+      });
+    });
+
+    stream.on('error', (err) => {
+      reject(err);
+    });
+  });
+}
 
 /**
  * Bundle WebUI.
@@ -43,13 +81,14 @@ function installDependenciesAndBuild() {
 function zipBundle() {
   return new Promise((resolve, reject) => {
     const archive = archiver('zip', { zlib: { level: 9 } });
-    const stream = fs.createWriteStream(`./bundle/webui-v${packageJson.version}.zip`);
+    const filePath = `./bundle/webui-v${packageJson.version}.zip`
+    const stream = fs.createWriteStream(filePath);
     archive
       .directory('./bundle/webui', false)
       .on('error', (err) => reject(err))
       .pipe(stream);
 
-    stream.on('close', () => resolve());
+    stream.on('close', () => resolve(filePath));
     archive.finalize();
   });
 }
@@ -76,8 +115,14 @@ async function main() {
 
   try {
     console.log('Starting Zip Bundle...');
-    await zipBundle();
+    const filePath = await zipBundle();
     console.log('Zip Bundle completed successfully.');
+    console.log(`Bundle file: ${filePath}`);
+    console.log('Starting hash generation...')
+    await generateHashFile(filePath);
+    console.log('Hash generation completed successfully.');
+
+    console.log('All done!');
   } catch (e) {
     console.error('Zip Bundle failed:', e);
     throw error;
