@@ -4,7 +4,7 @@ import { Card, Tooltip } from 'antd';
 import { useTheme } from 'antd-style';
 import styled from '@emotion/styled';
 import { MdOutlineSettings } from 'react-icons/md';
-import { FluentBotSparkle20Filled } from '@/components/evaluator/EvaluatorAvatar';
+import { EvaluatorAvatar } from '@/components/evaluator/icons/EvaluatorAvatar';
 import { EvaluatorMark } from '@/components/homepage/icons/EvaluatorMark';
 
 const Content = styled.div`
@@ -204,7 +204,7 @@ const EvaluatorCard = (props: EvaluatorCardProps) => {
                 : {}
             }
           >
-            <FluentBotSparkle20Filled />
+            <EvaluatorAvatar />
           </div>
           <div className="infoArea">
             <div

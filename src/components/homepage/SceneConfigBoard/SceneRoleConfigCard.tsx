@@ -4,7 +4,7 @@ import { WebUIRoleMetricConfig } from '@/types/webui/MetricConfig';
 import { Card, Checkbox, Collapse, Flex } from 'antd';
 import { useTheme } from 'antd-style';
 import styled from '@emotion/styled';
-import SceneActionConfigCard from '@/components/homepage/SceneActionConfigCard';
+import SceneActionConfigCard from '@/components/homepage/SceneConfigBoard/SceneActionConfigCard';
 import { generateColorShades } from '@/utils/color/generate-color-shades';
 
 const CustomCollapseWrapper = styled.div`

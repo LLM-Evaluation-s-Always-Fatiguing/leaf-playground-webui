@@ -30,7 +30,7 @@ import LoadingOverlay from '@/components/common/LoadingOverlay';
 import EvaluatorCard from '@/components/evaluator/EvaluatorCard';
 import EvaluatorConfigModal from '@/components/evaluator/EvaluatorConfigModal';
 import FormilyDefaultSchemaField from '@/components/formily/FormilyDefaultSchemaField';
-import SceneRoleConfigCard from '@/components/homepage/SceneRoleConfigCard';
+import SceneRoleConfigCard from '@/components/homepage/SceneConfigBoard/SceneRoleConfigCard';
 import TaskHistoryModal from '@/components/task/TaskHistoryModal';
 import { DefaultSceneInfoConfig } from '@/models/scene';
 import LocalAPI from '@/services/local';

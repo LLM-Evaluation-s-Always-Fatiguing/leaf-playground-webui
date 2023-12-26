@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, ColorPicker, Layout, Tooltip } from 'antd';
+import { Button, Layout, Tooltip } from 'antd';
 import { ThemeMode, useTheme } from 'antd-style';
 import styled from '@emotion/styled';
 import { FaRegAngry, FaRegLaughSquint } from 'react-icons/fa';
