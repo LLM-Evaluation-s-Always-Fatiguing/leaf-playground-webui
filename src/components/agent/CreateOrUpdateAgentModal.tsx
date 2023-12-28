@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import SceneAgentConfig from '@/types/server/config/Agent';
 import SceneAgentMetadata from '@/types/server/meta/Agent';
-import { Spin } from 'antd';
+import { Spin, message } from 'antd';
 import { Form } from '@formily/antd-v5';
 import { createForm, onFormValuesChange } from '@formily/core';
 import CustomScrollableAntdModal from '@/components/basic/CustomScrollableAntdModal';
@@ -16,6 +16,7 @@ interface CreateOrUpdateAgentModalProps {
   open: boolean;
   sceneAgentConfig?: SceneAgentConfig;
   operatingAgentMetadata?: SceneAgentMetadata;
+  otherAgentNames: string[];
   otherAgentColors: string[];
   onSubmit: (sceneAgent: SceneAgentConfig) => void;
   onNeedClose: () => void;
@@ -25,6 +26,7 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
   open,
   sceneAgentConfig,
   operatingAgentMetadata,
+  otherAgentNames,
   otherAgentColors,
   onSubmit,
   onNeedClose,
@@ -74,6 +76,10 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
     if (!operatingAgentMetadata) return;
     try {
       await form.validate();
+      if (otherAgentNames.includes(form.values.profile.name.trim())) {
+        message.error('Agent name already exists');
+        return;
+      }
       onSubmit({
         obj_for_import: operatingAgentMetadata?.obj_for_import,
         config_data: form.values,

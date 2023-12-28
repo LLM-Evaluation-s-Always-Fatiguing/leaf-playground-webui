@@ -527,9 +527,11 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
                           </CollapseItemTitle>
                         ),
                         children: (
-                          <Flex>
+                          <Flex vertical align={'stretch'} gap={10}>
                             {scene.scene_metadata.scene_definition.roles
-                              .filter((r) => (r.actions || []).length > 0)
+                              .filter(
+                                (r) => (r.actions || []).reduce((acc, a) => acc + (a.metrics || []).length, 0) > 0
+                              )
                               .map((r, index) => {
                                 return (
                                   <SceneRoleConfigCard
@@ -819,6 +821,9 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
           operatingRoleName && operatingAgent ? roleAgentConfigsMap[operatingRoleName][operatingAgent.index] : undefined
         }
         operatingAgentMetadata={operatingAgentMetadata}
+        otherAgentNames={Object.entries(roleAgentConfigsMap).reduce((total, [key, agents]) => {
+          return [...total, ...agents.map((agent) => agent.config_data.profile.name)];
+        }, [] as string[])}
         otherAgentColors={Object.entries(roleAgentConfigsMap).reduce((total, [key, agents]) => {
           return [...total, ...agents.map((agent) => agent.config_data.chart_major_color!)];
         }, [] as string[])}
