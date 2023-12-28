@@ -13,11 +13,8 @@ import { generateColorShades } from '@/utils/color/generate-color-shades';
 
 const Container = styled.div`
   margin: 6px;
-  max-width: calc(100% / 3 - 12px);
+  max-width: calc(100% / 2 - 12px);
   min-width: 320px;
-  @media only screen and (max-width: 1340px) {
-    max-width: calc(100% / 2 - 12px);
-  }
 
   @media only screen and (max-width: 1000px) {
     max-width: calc(100% - 12px);

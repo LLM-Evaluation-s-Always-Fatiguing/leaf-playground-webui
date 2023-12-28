@@ -89,7 +89,7 @@ export interface SceneActionLog extends SceneLog {
 
   ground_truth?: SceneLogContent;
 
-  action_belonged_chain?: string;
+  action_belonged_chain: string;
 
   eval_records?: Record<string, SceneLogMetricRecord[]>;
   compare_records: any;

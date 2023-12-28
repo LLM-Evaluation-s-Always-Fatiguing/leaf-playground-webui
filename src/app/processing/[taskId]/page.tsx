@@ -19,6 +19,7 @@ import VisualizationComponentWithExtraProps from '@/components/processing/common
 import { DefaultProcessingVisualizationComponentProps } from '@/components/processing/def';
 import BuddhaLogo from '@/components/processing/specialized/buddha/BuddhaLogo';
 import SampleQAVisualization from '@/components/processing/specialized/sample-qa/SampleQAVisualization';
+import WhoIsTheSpyVisualization from '@/components/processing/specialized/who-is-the-spy/WhoIsTheSpyVisualization';
 import LocalAPI from '@/services/local';
 import ServerAPI from '@/services/server';
 import useGlobalStore from '@/stores/global';
@@ -50,46 +51,46 @@ const PageContainer = styled.div`
 `;
 
 const VisualizationArea = styled.div`
-    --try-component-bar-height: 35px;
+  --try-component-bar-height: 35px;
 
-    width: 45%;
-    min-width: 480px;
-    height: 100%;
-    border-right: 1px solid ${(props) => props.theme.dividerColor};
-    position: relative;
+  width: 45%;
+  min-width: 480px;
+  height: 100%;
+  border-right: 1px solid ${(props) => props.theme.dividerColor};
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+
+  .tryComponentTopBar {
+    height: var(--try-component-bar-height);
+    padding: 0 12px;
+    border-bottom: 1px solid ${(props) => props.theme.dividerColor};
     display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: stretch;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
 
-    .tryComponentTopBar {
-        height: var(--try-component-bar-height);
-      padding: 0 12px;
-        border-bottom: 1px solid ${(props) => props.theme.dividerColor};
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-
-        .closeButton {
-            font-size: 21px;
-            color: ${(props) => props.theme.colorError};
-            cursor: pointer;
-          display: flex;
-          flex-direction: row;
-          justify-content: center;
-          align-items: center;
-        }
+    .closeButton {
+      font-size: 21px;
+      color: ${(props) => props.theme.colorError};
+      cursor: pointer;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
     }
+  }
 
-    .visualizationComponentWrapper {
-        width: 100%;
-        height: 100%;
-    }
+  .visualizationComponentWrapper {
+    width: 100%;
+    height: 100%;
+  }
 
-    .tryComponentTopBar + .visualizationComponentWrapper {
-        height: calc(100% - var(--try-component-bar-height));
-    }
+  .tryComponentTopBar + .visualizationComponentWrapper {
+    height: calc(100% - var(--try-component-bar-height));
+  }
 `;
 
 const ConsoleArea = styled.div`
@@ -341,6 +342,9 @@ const ProcessingPage = ({
           askerAvatar: MdPerson3,
           answererAvatar: BuddhaLogo,
         });
+      case 'WhoIsTheSpy':
+      case 'WhoIsTheSpyVisualization':
+        return VisualizationComponentWithExtraProps(WhoIsTheSpyVisualization, {});
       default:
         return VisualizationComponentWithExtraProps(BaseVisualization, {
           onTryVisualization: (name) => {
@@ -359,9 +363,7 @@ const ProcessingPage = ({
       <VisualizationArea>
         {tryVisualizationName && (
           <div className="tryComponentTopBar">
-            <div>{
-              tryVisualizationName
-            }</div>
+            <div>{tryVisualizationName}</div>
             <div
               className="closeButton"
               onClick={() => {

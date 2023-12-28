@@ -293,12 +293,15 @@ function getMetricDisplayComponent(
       );
     case SceneMetricRecordDisplayType.FiveStarsRate:
       return (
-        <Rate
-          value={value}
-          onChange={(value) => {
-            onChange?.(value);
-          }}
-        />
+        <Flex align={'center'} gap={5}>
+          <Rate
+            value={value}
+            onChange={(value) => {
+              onChange?.(value);
+            }}
+          />
+          <div>{value || 0}</div>
+        </Flex>
       );
   }
 }

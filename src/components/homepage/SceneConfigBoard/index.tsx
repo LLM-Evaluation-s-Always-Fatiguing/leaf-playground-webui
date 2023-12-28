@@ -205,8 +205,6 @@ function splitCreateSceneParamsToState(
 }
 
 const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardProps) => {
-  console.log(scene);
-
   const router = useRouter();
   const theme = useTheme();
   const globalStore = useGlobalStore();
