@@ -37,6 +37,8 @@ export interface SceneLogMessage {
   content: SceneLogContent;
   receivers: SceneLogProfile[];
   created_at: string;
+
+  [key: string]: any;
 }
 
 export enum SceneLogMediaType {

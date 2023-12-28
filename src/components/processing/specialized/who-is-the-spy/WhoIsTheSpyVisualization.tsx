@@ -4,16 +4,19 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import { SceneActionLog } from '@/types/server/Log';
 import SceneAgentConfig from '@/types/server/config/Agent';
-import { Button, Slider } from 'antd';
+import { Button, Slider, Tabs } from 'antd';
 import { useTheme } from 'antd-style';
 import styled from '@emotion/styled';
 import keyBy from 'lodash/keyBy';
 import { FaPause, FaPlay } from 'react-icons/fa6';
-import { RiRobot2Fill } from 'react-icons/ri';
 import SampleAvatar from '@/components/processing/common/SampleAvatar';
 import SampleStatusAvatar from '@/components/processing/common/SampleStatusAvatar';
 import { DefaultProcessingVisualizationComponentProps } from '@/components/processing/def';
+import GodViewButton from '@/components/processing/specialized/who-is-the-spy/GodViewButton';
 import PlayerCard from '@/components/processing/specialized/who-is-the-spy/PlayerCard';
+import RoleAvatar from '@/components/processing/specialized/who-is-the-spy/RoleAvatar';
+import { EyeCloseIcon } from '@/components/processing/specialized/who-is-the-spy/icons/EyeCloseIcon';
+import { EyeOpenIcon } from '@/components/processing/specialized/who-is-the-spy/icons/EyeOpenIcon';
 import { PresenterIcon } from '@/components/processing/specialized/who-is-the-spy/icons/PresenterIcon';
 import { getSceneLogMessageDisplayContent } from '@/utils/scene-log';
 import DeskImage from './assets/game_table.svg';
@@ -21,6 +24,19 @@ import DeskImage from './assets/game_table.svg';
 const Container = styled.div`
   width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  overflow: hidden;
+
+  .ant-tabs-nav {
+    margin-bottom: 0 !important;
+  }
+`;
+
+const MainArea = styled.div`
+  flex-grow: 1;
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
@@ -54,6 +70,14 @@ const StatusArea = styled.div`
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
+  position: relative;
+
+  .godViewButton {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    z-index: 3;
+  }
 
   .deskArea {
     margin: 15px;
@@ -138,14 +162,15 @@ const StatusArea = styled.div`
   }
 
   .playersArea {
+    align-self: flex-start;
     padding: 15px 15px 15px 0;
     flex-grow: 1;
-    height: 100%;
+    max-height: 100%;
     overflow: hidden auto;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
-    align-items: flex-start;
+    align-items: stretch;
     flex-wrap: wrap;
   }
 `;
@@ -247,23 +272,92 @@ const ChatsArea = styled.div`
   }
 `;
 
-function splitLogsToRoundLogs(logs: SceneActionLog[]): SceneActionLog[][] {
+function splitLogs(logs: SceneActionLog[], by: 'game' | 'round'): SceneActionLog[][] {
+  if (logs.length === 0) return [];
   const result: SceneActionLog[][] = [];
   let currentSegment: SceneActionLog[] = [];
-
+  const byKey = by === 'game' ? 'game_id' : 'round_id';
+  let lastID = logs[0][byKey];
   logs.forEach((log) => {
-    currentSegment.push(log);
-    if (log.action_belonged_chain === 'moderator.check_if_game_over') {
+    if (lastID !== log[byKey]) {
       result.push(currentSegment);
       currentSegment = [];
     }
+    lastID = log[byKey];
+    currentSegment.push(log);
   });
-
   if (currentSegment.length > 0) {
     result.push(currentSegment);
   }
-
   return result;
+}
+
+interface GameAgentsInfo {
+  agentRoleMap: Record<string, 'civilian' | 'spy' | 'blank'>;
+  keys: {
+    civilian: string;
+    spy: string;
+  };
+  agentLiveStatus: Record<string, boolean>;
+  finished: boolean;
+  winners: string[];
+}
+
+function calculateGameAgentsInfo(gameLogs: SceneActionLog[], allAgent: SceneAgentConfig[]) {
+  const info: GameAgentsInfo = {
+    agentRoleMap: {},
+    keys: {
+      civilian: '',
+      spy: '',
+    },
+    agentLiveStatus: allAgent.reduce(
+      (acc, agent) => {
+        acc[agent.config_data.profile.name] = true;
+        return acc;
+      },
+      {} as Record<string, boolean>
+    ),
+    finished: false,
+    winners: [],
+  };
+  if (gameLogs[0]?.response) {
+    const role2players = gameLogs[0].response.role2players;
+    const agentRoleMap: Record<string, 'civilian' | 'spy' | 'blank'> = {};
+    for (let role in role2players) {
+      role2players[role].forEach((agentName: string) => {
+        agentRoleMap[agentName] = role as 'civilian' | 'spy' | 'blank';
+      });
+    }
+    info.agentRoleMap = agentRoleMap;
+    info.keys = gameLogs[0].response.keys;
+  }
+  for (let i = 1; i < gameLogs.length; i++) {
+    const log = gameLogs[i];
+    if (log.action_belonged_chain === 'moderator.summarize_player_votes') {
+      const player_received_votes: Record<string, number> = log.response.player_received_votes;
+      let maxVotes = 0;
+      let maxVotedAgents: string[] = [];
+      for (let agentName in player_received_votes) {
+        const votes = player_received_votes[agentName];
+        if (votes > maxVotes) {
+          maxVotes = votes;
+          maxVotedAgents = [agentName];
+        } else if (votes === maxVotes) {
+          maxVotedAgents.push(agentName);
+        }
+      }
+      if (maxVotedAgents.length === 1) {
+        info.agentLiveStatus[maxVotedAgents[0]] = false;
+      }
+    }
+    if (log.action_belonged_chain === 'moderator.check_if_game_over') {
+      info.finished = log.response.is_game_over;
+      if (log.response.is_game_over) {
+        info.winners = log.response.winners || [];
+      }
+    }
+  }
+  return info;
 }
 
 type RoundStageKey = 'preparation' | 'description' | 'prediction' | 'voting' | 'checkOver';
@@ -424,19 +518,6 @@ const WhoIsTheSpyVisualization = (props: WhoIsTheSpyVisualizationProps) => {
   const [autoPlay, setAutoPlay] = useState<boolean>(true);
   const chatScrollAreaRef = useRef<HTMLDivElement>(null);
 
-  const [currentRound, setCurrentRound] = useState(1);
-  const { splitLogs, sliderMarks } = useMemo(() => {
-    const splitLogs = splitLogsToRoundLogs(props.logs);
-    const sliderMarks: Record<string, string> = {};
-    for (let i = 0; i < splitLogs.length; i++) {
-      sliderMarks[i + 1] = `${i + 1}`;
-    }
-    return {
-      splitLogs,
-      sliderMarks,
-    };
-  }, [props.logs]);
-
   const { allAgents, deskSeatAgentsMap } = useMemo(() => {
     const agents: SceneAgentConfig[] = [];
     Object.entries(props.createSceneParams.scene_obj_config.scene_config_data.roles_config).forEach(
@@ -472,9 +553,31 @@ const WhoIsTheSpyVisualization = (props: WhoIsTheSpyVisualizationProps) => {
     };
   }, [props.createSceneParams]);
 
+  const splitGamesLogs = useMemo(() => {
+    return splitLogs(props.logs, 'game');
+  }, [props.logs]);
+  const [currentGame, setCurrentGame] = useState(1);
+  const currentGameLogs = useMemo(() => {
+    return splitGamesLogs[currentGame - 1] || [];
+  }, [splitGamesLogs, currentGame]);
+  const [currentRound, setCurrentRound] = useState(1);
+  const { splitRoundLogs, sliderMarks } = useMemo(() => {
+    const splitRoundLogs = splitLogs(currentGameLogs, 'round');
+    const sliderMarks: Record<string, string> = {};
+    for (let i = 0; i < splitRoundLogs.length; i++) {
+      sliderMarks[i + 1] = `${i + 1}`;
+    }
+    return {
+      splitRoundLogs,
+      sliderMarks,
+    };
+  }, [currentGameLogs]);
   const currentRoundLogs = useMemo(() => {
-    return splitLogs[currentRound - 1] || [];
-  }, [splitLogs, currentRound]);
+    return splitRoundLogs[currentRound - 1] || [];
+  }, [splitRoundLogs, currentRound]);
+  const currentGameInfo = useMemo(() => {
+    return calculateGameAgentsInfo(splitRoundLogs.slice(0, currentRound).flat(), allAgents);
+  }, [splitRoundLogs, currentRound, allAgents]);
   const roundProgress = useMemo(() => {
     return calculateRoundProgress(currentRoundLogs, allAgents.length);
   }, [currentRoundLogs, allAgents]);
@@ -515,165 +618,219 @@ const WhoIsTheSpyVisualization = (props: WhoIsTheSpyVisualizationProps) => {
     }
     return 'silence';
   }, [roundProgress, allAgents]);
-
+  const sortedAllAgents = useMemo(() => {
+    return [...allAgents].sort((a, b) => {
+      const aLive = currentGameInfo.agentLiveStatus[a.config_data.profile.name];
+      const bLive = currentGameInfo.agentLiveStatus[b.config_data.profile.name];
+      const aWin = currentGameInfo.winners.includes(a.config_data.profile.name);
+      const bWin = currentGameInfo.winners.includes(b.config_data.profile.name);
+      if (aWin && !bWin) return -1;
+      else if (!aWin && bWin) return 1;
+      if (aLive && !bLive) return -1;
+      else if (!aLive && bLive) return 1;
+      else return 0;
+    });
+  }, [allAgents, currentGameInfo]);
   useEffect(() => {
     if (autoPlay) {
-      setCurrentRound(splitLogs.length);
+      setCurrentGame(splitGamesLogs.length);
+      setCurrentRound(splitRoundLogs.length);
       if (chatScrollAreaRef.current) {
         chatScrollAreaRef.current.scrollTo({
           top: chatScrollAreaRef.current.scrollHeight,
         });
       }
     }
-  }, [autoPlay, splitLogs]);
-
-  useEffect(() => {
-    if (autoPlay && chatScrollAreaRef.current) {
-      chatScrollAreaRef.current.scrollTo({
-        top: chatScrollAreaRef.current.scrollHeight,
-      });
-    }
-  }, [props.logs]);
+  }, [autoPlay, splitGamesLogs, splitRoundLogs, currentRoundLogs]);
 
   return (
     <Container>
-      <RoundArea>
-        <div className="title">Round</div>
-        <Button
-          type={'text'}
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            margin: '6px 0',
-          }}
-          size={'small'}
-          icon={autoPlay ? <FaPause size={'1em'} /> : <FaPlay size={'1em'} />}
-          onClick={() => {
-            setAutoPlay(!autoPlay);
-          }}
-        />
-        {splitLogs.length > 1 && (
-          <Slider
+      <Tabs
+        type={'card'}
+        activeKey={`${currentGame}`}
+        onChange={(key) => {
+          setAutoPlay(false);
+          setCurrentGame(parseInt(key));
+          setCurrentRound(1);
+        }}
+        items={splitGamesLogs.map((logs, index) => {
+          return {
+            key: `${index + 1}`,
+            label: `Game ${index + 1}`,
+          };
+        })}
+      />
+      <MainArea>
+        <RoundArea>
+          <div className="title">Round</div>
+          <Button
+            type={'text'}
             style={{
-              position: 'relative',
-              left: '-6px',
-              height: `min(100%, ${splitLogs.length * 45}px)`,
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
+              margin: '6px 0',
             }}
-            vertical
-            reverse
-            value={currentRound}
-            min={1}
-            max={splitLogs.length}
-            step={1}
-            marks={sliderMarks}
-            onChange={(value) => {
-              setCurrentRound(value);
-              setAutoPlay(false);
-              if (chatScrollAreaRef.current) {
-                chatScrollAreaRef.current.scrollTo({
-                  top: 0,
-                });
-              }
+            size={'small'}
+            icon={autoPlay ? <FaPause size={'1em'} /> : <FaPlay size={'1em'} />}
+            onClick={() => {
+              setAutoPlay(!autoPlay);
             }}
           />
-        )}
-      </RoundArea>
-      <Playground>
-        <StatusArea>
-          <div className="deskArea">
-            <div className="deskImage">
-              <Image fill src={DeskImage} alt={''} />
-            </div>
-            {Object.keys(deskSeatAgentsMap).map((seatSide) => {
-              return (
-                <div key={seatSide} className={`${seatSide}Seats`}>
-                  {deskSeatAgentsMap[seatSide].map((agent, index) => {
-                    let agentStatus: 'silence' | 'speaking' | 'done' = 'silence';
-                    switch (roundProgress.progress) {
-                      case RoundStageProgress.DESCRIPTION:
-                      case RoundStageProgress.PREDICTION:
-                      case RoundStageProgress.VOTING:
-                        {
-                          if (
-                            roundProgress[roundProgress.progress].done ||
-                            roundProgress[roundProgress.progress].logs.length === 0
-                          )
-                            return 'silence';
-                          const spokenIds = roundProgress[roundProgress.progress].logs[
-                            roundProgress[roundProgress.progress].logs.length - 1
-                          ].map((log) => log.response.sender.id);
-                          agentStatus = spokenIds.includes(agent.config_data.profile.id) ? 'done' : 'speaking';
+          {splitRoundLogs.length > 1 && (
+            <Slider
+              style={{
+                position: 'relative',
+                left: '-6px',
+                height: `min(100%, ${splitRoundLogs.length * 45}px)`,
+              }}
+              vertical
+              reverse
+              value={currentRound}
+              min={1}
+              max={splitRoundLogs.length}
+              step={1}
+              marks={sliderMarks}
+              onChange={(value) => {
+                setCurrentRound(value);
+                setAutoPlay(false);
+                if (chatScrollAreaRef.current) {
+                  chatScrollAreaRef.current.scrollTo({
+                    top: 0,
+                  });
+                }
+              }}
+            />
+          )}
+        </RoundArea>
+        <Playground>
+          <StatusArea>
+            <div className="deskArea">
+              <div className="deskImage">
+                <Image fill src={DeskImage} alt={''} />
+              </div>
+              {Object.keys(deskSeatAgentsMap).map((seatSide) => {
+                return (
+                  <div key={seatSide} className={`${seatSide}Seats`}>
+                    {deskSeatAgentsMap[seatSide].map((agent, index) => {
+                      const agentName = agent.config_data.profile.name;
+                      let agentStatus: 'silence' | 'speaking' | 'done' = 'silence';
+                      if (currentRound !== 1) {
+                        switch (roundProgress.progress) {
+                          case RoundStageProgress.DESCRIPTION:
+                          case RoundStageProgress.PREDICTION:
+                          case RoundStageProgress.VOTING:
+                            {
+                              if (
+                                roundProgress[roundProgress.progress].done ||
+                                roundProgress[roundProgress.progress].logs.length === 0
+                              )
+                                return 'silence';
+                              const spokenIds = roundProgress[roundProgress.progress].logs[
+                                roundProgress[roundProgress.progress].logs.length - 1
+                              ].map((log) => log.response.sender.id);
+                              agentStatus = spokenIds.includes(agent.config_data.profile.id) ? 'done' : 'speaking';
+                            }
+                            break;
+                          default:
+                            agentStatus = 'silence';
+                            break;
                         }
-                        break;
-                      default:
-                        agentStatus = 'silence';
-                        break;
-                    }
-                    return (
-                      <SampleStatusAvatar
-                        key={agent.config_data.profile.id}
-                        status={agentStatus}
-                        style={{
-                          color: agent.config_data.chart_major_color,
-                        }}
-                      >
-                        <RiRobot2Fill size={'1em'} />
-                      </SampleStatusAvatar>
-                    );
-                  })}
+                      }
+                      const live = currentGameInfo.agentLiveStatus[agentName];
+                      const role = currentGameInfo.agentRoleMap[agentName];
+                      return (
+                        <SampleStatusAvatar
+                          key={agent.config_data.profile.id}
+                          status={agentStatus}
+                          style={{
+                            color: agent.config_data.chart_major_color,
+                            ...(live ? {} : { opacity: 0.35, filter: 'grayscale(60%)' }),
+                          }}
+                        >
+                          <RoleAvatar role={godView ? role : undefined} />
+                        </SampleStatusAvatar>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+              <div className="centerSeat">
+                <SampleStatusAvatar
+                  status={moderatorStatus}
+                  style={{
+                    color: '#FCCF7F',
+                    fontSize: '32px',
+                  }}
+                >
+                  <PresenterIcon />
+                </SampleStatusAvatar>
+              </div>
+            </div>
+            <div className="playersArea">
+              {sortedAllAgents.map((agent) => {
+                const agentName = agent.config_data.profile.name;
+                const live = currentGameInfo.agentLiveStatus[agentName];
+                const win = currentGameInfo.winners.includes(agentName);
+                const role = currentGameInfo.agentRoleMap[agentName];
+                const gameKey = role !== 'blank' ? currentGameInfo.keys[role] : '';
+                return (
+                  <PlayerCard
+                    key={agent.config_data.profile.id}
+                    godView={godView}
+                    live={live}
+                    win={win}
+                    role={role}
+                    gameKey={gameKey}
+                    agent={agent}
+                  />
+                );
+              })}
+            </div>
+            <div className="godViewButton">
+              <GodViewButton
+                godView={godView}
+                onGodViewChange={(newValue) => {
+                  setGodView(newValue);
+                }}
+              />
+            </div>
+          </StatusArea>
+          <ChatsArea
+            ref={chatScrollAreaRef}
+            onWheelCapture={() => {
+              setAutoPlay(false);
+            }}
+          >
+            {currentRoundLogs.map((log, index) => {
+              const isPlayer = log.action_belonged_chain?.startsWith('player');
+              const agentMap = keyBy(allAgents, (c) => c.config_data.profile.id);
+              const avatarColor = isPlayer
+                ? agentMap[log.response.sender.id]?.config_data.chart_major_color
+                : theme.colorPrimary;
+              const role = isPlayer
+                ? currentGameInfo.agentRoleMap[agentMap[log.response.sender.id]?.config_data.profile.name]
+                : undefined;
+              return (
+                <div key={index} className={isPlayer ? 'player' : 'moderator'}>
+                  <SampleAvatar
+                    style={{
+                      color: avatarColor,
+                    }}
+                  >
+                    {isPlayer ? <RoleAvatar role={godView ? role : undefined} /> : <PresenterIcon />}
+                  </SampleAvatar>
+                  <div className="card">
+                    <div className="header">{log.log_msg}</div>
+                    <div className="body">{getSceneLogMessageDisplayContent(log.response, true)}</div>
+                  </div>
                 </div>
               );
             })}
-            <div className="centerSeat">
-              <SampleStatusAvatar
-                status={moderatorStatus}
-                style={{
-                  color: '#FCCF7F',
-                  fontSize: '32px',
-                }}
-              >
-                <PresenterIcon />
-              </SampleStatusAvatar>
-            </div>
-          </div>
-          <div className="playersArea">
-            {allAgents.map((agent) => {
-              return <PlayerCard key={agent.config_data.profile.id} agent={agent} />;
-            })}
-          </div>
-        </StatusArea>
-        <ChatsArea
-          ref={chatScrollAreaRef}
-          onWheelCapture={() => {
-            setAutoPlay(false);
-          }}
-        >
-          {currentRoundLogs.map((log, index) => {
-            const isPlayer = log.action_belonged_chain?.startsWith('player');
-            const agentMap = keyBy(allAgents, (c) => c.config_data.profile.id);
-            const avatarColor = isPlayer
-              ? agentMap[log.response.sender.id]?.config_data.chart_major_color
-              : theme.colorPrimary;
-            return (
-              <div key={index} className={isPlayer ? 'player' : 'moderator'}>
-                <SampleAvatar
-                  style={{
-                    color: avatarColor,
-                  }}
-                >
-                  {isPlayer ? <RiRobot2Fill size={'1em'} /> : <PresenterIcon />}
-                </SampleAvatar>
-                <div className="card">
-                  <div className="header">{log.log_msg}</div>
-                  <div className="body">{getSceneLogMessageDisplayContent(log.response, true)}</div>
-                </div>
-              </div>
-            );
-          })}
-        </ChatsArea>
-      </Playground>
+          </ChatsArea>
+        </Playground>
+      </MainArea>
     </Container>
   );
 };
