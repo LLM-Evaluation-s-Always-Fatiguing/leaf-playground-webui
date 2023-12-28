@@ -35,17 +35,19 @@ const Container = styled.div`
     align-items: stretch;
     flex-shrink: 0;
 
-  @keyframes highlightedAnimation {
-    0%, 100% {
-      border-color: transparent;
+    @keyframes highlightedAnimation {
+        0%, 100% {
+            border-color: transparent;
+            background: ${(props) => (props.theme.isDarkMode ? 'rgba(255,255,255,0.08)' : 'white')};
+        }
+        50% {
+            border-color: ${(props) => props.theme.colorPrimary};
+            background: ${(props) => props.theme.colorPrimary}59;
+        }
     }
-    50% {
-      border-color: ${(props) => props.theme.colorPrimary};
-    }
-  }
 
     ${MainContainer}.highlighted {
-      animation: highlightedAnimation 0.8s ease-in-out infinite;
+        animation: highlightedAnimation 0.8s ease-in-out infinite;
     }
 `;
 
