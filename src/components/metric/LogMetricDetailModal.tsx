@@ -293,7 +293,7 @@ function getMetricDisplayComponent(
       );
     case SceneMetricRecordDisplayType.FiveStarsRate:
       return (
-        <Flex align={'center'} gap={5}>
+        <Flex align={'center'} gap={8}>
           <Rate
             value={value}
             onChange={(value) => {
@@ -309,6 +309,7 @@ function getMetricDisplayComponent(
 interface LogMetricDetailModalProps {
   open: boolean;
   editable: boolean;
+  humanOnlyEvaluationMode: boolean;
   serverUrl: string;
   log?: SceneActionLog;
   metrics?: SceneMetricDefinition[];
@@ -673,13 +674,13 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
                                           }}
                                         >
                                           <div className="label">Value:</div>
-                                          {metric.record_display_type
+                                          {props.humanOnlyEvaluationMode ? '******' : (metric.record_display_type
                                             ? getMetricDisplayComponent(metric.record_display_type, record.value)
-                                            : record.value.toString()}
+                                            : record.value.toString())}
                                         </div>
                                         <div className="reason">
                                           <div className="label">Reason:</div>
-                                          {record.reason || '-'}
+                                          {props.humanOnlyEvaluationMode ? '******' : record.reason || '-'}
                                         </div>
                                       </div>
                                     </div>

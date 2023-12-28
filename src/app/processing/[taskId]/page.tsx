@@ -159,6 +159,7 @@ const ProcessingPage = ({
     log: SceneActionLog;
     metrics: SceneMetricDefinition[];
     metricsConfig: Record<string, SceneMetricConfig>;
+    humanOnlyEvaluationMode: boolean;
   }>();
 
   const checkTaskStatus = async () => {
@@ -335,6 +336,7 @@ const ProcessingPage = ({
     switch (tryVisualizationName || globalStore.currentScene?.scene_metadata.scene_definition.name) {
       case 'RAG QA Examine':
       case 'GeneralMCQExamine':
+      case 'Mmlu':
       case 'SampleQAVisualization':
         return VisualizationComponentWithExtraProps(SampleQAVisualization, {});
       case 'Buddha':
@@ -397,11 +399,12 @@ const ProcessingPage = ({
               setOperatingLog(log);
               setJSONViewModalOpen(true);
             }}
-            onOpenMetricDetail={(log, metrics, metricsConfig) => {
+            onOpenMetricDetail={(log, metrics, metricsConfig, humanOnlyEvaluationMode) => {
               setLogMetricDetailModalData({
                 log,
                 metrics,
                 metricsConfig,
+                humanOnlyEvaluationMode
               });
               setLogMetricDetailModalOpen(true);
             }}
@@ -442,6 +445,7 @@ const ProcessingPage = ({
       <LogMetricDetailModal
         open={logMetricDetailModalOpen}
         editable={true}
+        humanOnlyEvaluationMode={logMetricDetailModalData?.humanOnlyEvaluationMode || false}
         serverUrl={serverUrl}
         log={logMetricDetailModalData?.log}
         metrics={logMetricDetailModalData?.metrics}

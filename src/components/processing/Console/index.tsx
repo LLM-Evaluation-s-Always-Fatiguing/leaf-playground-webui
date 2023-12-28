@@ -4,7 +4,7 @@ import { SceneActionLog } from '@/types/server/Log';
 import SceneAgentConfig from '@/types/server/config/Agent';
 import { SceneMetricConfig } from '@/types/server/config/Metric';
 import Scene, { SceneMetricDefinition } from '@/types/server/meta/Scene';
-import { Space, Tabs } from 'antd';
+import { Segmented, Space, Tabs } from 'antd';
 import { useTheme } from 'antd-style';
 import styled from '@emotion/styled';
 import { CellMeasurer, CellMeasurerCache, List } from 'react-virtualized';
@@ -12,7 +12,9 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import { BsFillArrowUpLeftCircleFill } from 'react-icons/bs';
 import ConsoleLogItem from '@/components/processing/Console/LogItem';
 import { TruncatableParagraphEllipsisStatus } from '@/components/processing/Console/TruncatableParagraph';
-import { EvaluationModeIcon } from '@/components/processing/common/icons/EvaluationModeIcon';
+import HumanEvaluationModeIcon from '@/components/processing/common/icons/HumanEvaluationModeIcon';
+import NoneEvaluationModeIcon from '@/components/processing/common/icons/NoneEvaluationModeIcon';
+import StandardEvaluationModeIcon from '@/components/processing/common/icons/StandardEvaluationModeIcon';
 import useGlobalStore from '@/stores/global';
 
 const Container = styled.div`
@@ -38,7 +40,7 @@ const Header = styled.div`
   align-items: center;
   font-size: 21px;
   font-weight: 500;
-  padding: 0 16px;
+  padding: 0 16px 15px 16px;
 
   > div {
     flex-grow: 1;
@@ -83,24 +85,31 @@ const Header = styled.div`
       justify-content: flex-start;
       align-items: center;
       cursor: pointer;
-      user-select: none;
 
       padding: 4px;
       border-radius: ${(props) => props.theme.borderRadius}px;
 
-      .icon {
-        width: 28px;
-        height: 28px;
+      .iconArea {
+        height: 32px;
         display: flex;
         flex-direction: row;
         justify-content: center;
         align-items: center;
-        font-size: 22px;
-        color: ${(props) => props.theme.colorTextQuaternary};
+
+        .icon {
+          width: 28px;
+          height: 28px;
+          display: flex;
+          flex-direction: row;
+          justify-content: center;
+          align-items: center;
+          font-size: 22px;
+          color: ${(props) => props.theme.colorTextQuaternary};
+        }
       }
 
       .title {
-        margin-top: 2px;
+        margin-top: 5px;
         font-size: 13px;
         line-height: 1;
         font-weight: 500;
@@ -108,7 +117,9 @@ const Header = styled.div`
         text-align: center;
         color: ${(props) => props.theme.colorTextDisabled};
       }
+    }
 
+    .actionButton.hoverable {
       :hover {
         background-color: ${(props) => props.theme.colorBgTextHover};
       }
@@ -116,6 +127,16 @@ const Header = styled.div`
 
     .actionButton.selected {
       .icon {
+        color: ${(props) => props.theme.colorPrimary};
+      }
+
+      .title {
+        color: ${(props) => props.theme.colorText};
+      }
+    }
+
+    .actionButton.normal {
+      .icon.selected {
         color: ${(props) => props.theme.colorPrimary};
       }
 
@@ -150,7 +171,8 @@ interface ProcessingConsoleProps {
   onOpenMetricDetail: (
     log: SceneActionLog,
     metrics: SceneMetricDefinition[],
-    metricsConfig: Record<string, SceneMetricConfig>
+    metricsConfig: Record<string, SceneMetricConfig>,
+    humanOnlyEvaluationMode: boolean
   ) => void;
 }
 
@@ -169,6 +191,7 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
   const [activeKey, setActiveKey] = React.useState<string>('');
   const [autoPlay, setAutoPlay] = useState(true);
   const [evaluationMode, setEvaluationMode] = useState(false);
+  const [humanOnlyEvaluationMode, setHumanOnlyEvaluationMode] = useState(false);
   const hasEnabledMetric = getEnabledMetricsFromCreateSceneParams(props.createSceneParams).length > 0;
 
   const displayLogs = useMemo(() => {
@@ -219,6 +242,7 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
             <ConsoleLogItem
               log={log}
               evaluationMode={evaluationMode}
+              humanOnlyEvaluationMode={humanOnlyEvaluationMode}
               metrics={metrics}
               metricsConfig={metricsConfig}
               ellipsisStatus={logItemEllipsisCache[index] || TruncatableParagraphEllipsisStatus.WaitDetect}
@@ -241,7 +265,7 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
                 props.onOpenJSONDetail(log);
               }}
               onOpenMetricDetail={(log, metrics, metricsConfig) => {
-                props.onOpenMetricDetail(log, metrics, metricsConfig);
+                props.onOpenMetricDetail(log, metrics, metricsConfig, humanOnlyEvaluationMode);
               }}
             />
           </div>
@@ -310,27 +334,67 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
         </div>
         <div className="actionsArea">
           <div
-            className={`actionButton  ${autoPlay ? 'selected' : ''}`}
+            className={`actionButton hoverable ${autoPlay ? 'selected' : ''}`}
             onClick={() => {
               setAutoPlay(!autoPlay);
             }}
           >
-            <div className="icon">
-              <BsFillArrowUpLeftCircleFill size={'1em'} />
+            <div className="iconArea">
+              <div className="icon">
+                <BsFillArrowUpLeftCircleFill size={'1em'} />
+              </div>
             </div>
             <div className="title">Now</div>
           </div>
           {hasEnabledMetric && (
-            <div
-              className={`actionButton ${evaluationMode ? 'selected' : ''}`}
-              onClick={() => {
-                setEvaluationMode(!evaluationMode);
-              }}
-            >
-              <div className="icon">
-                <EvaluationModeIcon />
+            <div className={`actionButton ${evaluationMode ? 'normal' : ''}`}>
+              <div className="iconArea">
+                <Segmented
+                  value={evaluationMode ? (humanOnlyEvaluationMode ? 'human' : 'standard') : 'none'}
+                  onChange={(value) => {
+                    switch (value) {
+                      case 'human':
+                        setHumanOnlyEvaluationMode(true);
+                        setEvaluationMode(true);
+                        break;
+                      case 'standard':
+                        setHumanOnlyEvaluationMode(false);
+                        setEvaluationMode(true);
+                        break;
+                      default:
+                        setHumanOnlyEvaluationMode(false);
+                        setEvaluationMode(false);
+                    }
+                  }}
+                  options={[
+                    {
+                      label: (
+                        <div className={`icon ${!humanOnlyEvaluationMode && !evaluationMode ? 'selected' : ''}`}>
+                          <NoneEvaluationModeIcon />
+                        </div>
+                      ),
+                      value: 'none',
+                    },
+                    {
+                      label: (
+                        <div className={`icon ${humanOnlyEvaluationMode && evaluationMode ? 'selected' : ''}`}>
+                          <HumanEvaluationModeIcon />
+                        </div>
+                      ),
+                      value: 'human',
+                    },
+                    {
+                      label: (
+                        <div className={`icon ${!humanOnlyEvaluationMode && evaluationMode ? 'selected' : ''}`}>
+                          <StandardEvaluationModeIcon />
+                        </div>
+                      ),
+                      value: 'standard',
+                    },
+                  ]}
+                />
               </div>
-              <div className="title">{'Evaluation\nMode'}</div>
+              <div className="title">{`Evaluation Mode${humanOnlyEvaluationMode ? `(Human)` : ``}`}</div>
             </div>
           )}
         </div>

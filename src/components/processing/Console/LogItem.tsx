@@ -106,6 +106,7 @@ const MetricArea = styled.div`
 interface ConsoleLogItemProps {
   log: SceneActionLog;
   evaluationMode: boolean;
+  humanOnlyEvaluationMode: boolean;
   metrics: SceneMetricDefinition[];
   metricsConfig: Record<string, SceneMetricConfig>;
   ellipsisStatus: TruncatableParagraphEllipsisStatus;
@@ -122,6 +123,7 @@ interface ConsoleLogItemProps {
 const ConsoleLogItem = ({
   log,
   evaluationMode,
+  humanOnlyEvaluationMode,
   metrics,
   metricsConfig,
   ellipsisStatus,
@@ -207,9 +209,9 @@ const ConsoleLogItem = ({
               return (
                 <div key={index} className="metric">
                   <div className="label">{metric.name}:</div>
-                  <div className="value">{valueStr}</div>
+                  <div className="value">{humanOnlyEvaluationMode && !human ? '******' : valueStr}</div>
                   {value !== undefined && (
-                    <Tooltip title={reason}>
+                    <Tooltip title={humanOnlyEvaluationMode && !human ? '******' : reason}>
                       <div className={'reason'}>{human ? <HumanMetricMark /> : <EvaluatorMark />}</div>
                     </Tooltip>
                   )}
