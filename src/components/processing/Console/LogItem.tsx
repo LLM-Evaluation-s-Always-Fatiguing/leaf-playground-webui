@@ -13,15 +13,6 @@ import TruncatableParagraph, {
 import { HumanMetricMark } from '@/components/processing/common/icons/HumanMetricMark';
 import { getSceneActionLogMetricEvalRecordDisplayInfo, getSceneLogMessageDisplayContent } from '@/utils/scene-log';
 
-const Container = styled.div`
-  margin: 9px 16px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: stretch;
-  flex-shrink: 0;
-`;
-
 const MainContainer = styled.div`
   padding: 0 16px 12px 16px;
   box-shadow: 0 3px 9px rgba(0, 0, 0, 0.1);
@@ -33,6 +24,29 @@ const MainContainer = styled.div`
   justify-content: flex-start;
   align-items: stretch;
   flex-shrink: 0;
+  border: 1px solid transparent;
+`;
+
+const Container = styled.div`
+    margin: 9px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    flex-shrink: 0;
+
+  @keyframes highlightedAnimation {
+    0%, 100% {
+      border-color: transparent;
+    }
+    50% {
+      border-color: ${(props) => props.theme.colorPrimary};
+    }
+  }
+
+    ${MainContainer}.highlighted {
+      animation: highlightedAnimation 0.8s ease-in-out infinite;
+    }
 `;
 
 const Header = styled.div`
@@ -109,6 +123,7 @@ interface ConsoleLogItemProps {
   humanOnlyEvaluationMode: boolean;
   metrics: SceneMetricDefinition[];
   metricsConfig: Record<string, SceneMetricConfig>;
+  highlighted: boolean;
   ellipsisStatus: TruncatableParagraphEllipsisStatus;
   onEllipsisStatusChange: (status: TruncatableParagraphEllipsisStatus) => void;
   needMeasure: () => void;
@@ -126,6 +141,7 @@ const ConsoleLogItem = ({
   humanOnlyEvaluationMode,
   metrics,
   metricsConfig,
+  highlighted,
   ellipsisStatus,
   onEllipsisStatusChange,
   needMeasure,
@@ -146,7 +162,7 @@ const ConsoleLogItem = ({
 
   return (
     <Container>
-      <MainContainer>
+      <MainContainer className={highlighted ? 'highlighted' : ''}>
         <Header>
           <div>{log.log_msg}</div>
           <Button

@@ -13,7 +13,7 @@ import { MdClose, MdPerson3 } from 'react-icons/md';
 import JSONViewModal from '@/components/common/JSONViewModal';
 import LoadingOverlay from '@/components/common/LoadingOverlay';
 import LogMetricDetailModal from '@/components/metric/LogMetricDetailModal';
-import ProcessingConsole from '@/components/processing/Console';
+import ProcessingConsole, { ProcessingConsoleMethods } from '@/components/processing/Console';
 import BaseVisualization from '@/components/processing/common/BaseVisualization';
 import VisualizationComponentWithExtraProps from '@/components/processing/common/VisualizationComponentWithExtraProps';
 import { DefaultProcessingVisualizationComponentProps } from '@/components/processing/def';
@@ -139,6 +139,8 @@ const ProcessingPage = ({
   const [loadingTip, setLoadingTip] = useState('Loading...');
 
   const [tryVisualizationName, setTryVisualizationName] = useState<string>();
+
+  const consoleRef = useRef<ProcessingConsoleMethods>(null);
 
   const wsRef = useRef<WebSocket>();
   const wsOpenRef = useRef(false);
@@ -382,6 +384,9 @@ const ProcessingPage = ({
               scene={globalStore.currentScene}
               createSceneParams={globalStore.createSceneParams}
               logs={logs}
+              needScrollToLog={(logId) => {
+                consoleRef.current?.scrollToLog(logId);
+              }}
             />
           )}
         </div>
@@ -389,6 +394,7 @@ const ProcessingPage = ({
       <ConsoleArea>
         {globalStore.currentScene && globalStore.createSceneParams && (
           <ProcessingConsole
+            ref={consoleRef}
             wsConnected={wsConnected}
             simulationFinished={simulationFinished}
             evaluationFinished={evaluationFinished}
@@ -404,7 +410,7 @@ const ProcessingPage = ({
                 log,
                 metrics,
                 metricsConfig,
-                humanOnlyEvaluationMode
+                humanOnlyEvaluationMode,
               });
               setLogMetricDetailModalOpen(true);
             }}

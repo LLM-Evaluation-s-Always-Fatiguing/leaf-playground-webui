@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { CreateSceneParams, getEnabledMetricsFromCreateSceneParams } from '@/types/server/CreateSceneParams';
 import { SceneActionLog } from '@/types/server/Log';
 import SceneAgentConfig from '@/types/server/config/Agent';
@@ -176,7 +176,11 @@ interface ProcessingConsoleProps {
   ) => void;
 }
 
-const ProcessingConsole = (props: ProcessingConsoleProps) => {
+export type ProcessingConsoleMethods = {
+  scrollToLog: (logId: string) => void;
+};
+
+const ProcessingConsole = forwardRef<ProcessingConsoleMethods, ProcessingConsoleProps>((props, ref) => {
   const theme = useTheme();
   const globalStore = useGlobalStore();
 
@@ -193,6 +197,7 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
   const [evaluationMode, setEvaluationMode] = useState(false);
   const [humanOnlyEvaluationMode, setHumanOnlyEvaluationMode] = useState(false);
   const hasEnabledMetric = getEnabledMetricsFromCreateSceneParams(props.createSceneParams).length > 0;
+  const [highlightedLogId, setHighlightedLogId] = useState<string>();
 
   const displayLogs = useMemo(() => {
     if (!activeKey) {
@@ -245,6 +250,7 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
               humanOnlyEvaluationMode={humanOnlyEvaluationMode}
               metrics={metrics}
               metricsConfig={metricsConfig}
+              highlighted={highlightedLogId === log.id}
               ellipsisStatus={logItemEllipsisCache[index] || TruncatableParagraphEllipsisStatus.WaitDetect}
               onEllipsisStatusChange={(newStatus) => {
                 setLogItemEllipsisCache((prev) => {
@@ -307,6 +313,33 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
         ? 'Evaluating...'
         : 'Simulating...'
     : '';
+
+  const cancelHighlightTimer = useRef<NodeJS.Timeout>();
+  const scrollToLog = (logId: string) => {
+    setAutoPlay(false);
+    const index = props.logs.findIndex((log) => log.id === logId);
+    if (index < 0) {
+      return;
+    }
+    if (listRef.current) {
+      listRef.current.scrollToRow(index);
+      setTimeout(() => {
+        if (cancelHighlightTimer.current) {
+          clearTimeout(cancelHighlightTimer.current);
+        }
+        setHighlightedLogId(logId);
+        cancelHighlightTimer.current = setTimeout(() => {
+          setHighlightedLogId(undefined);
+        }, 800);
+      }, 0);
+    }
+  };
+
+  useImperativeHandle(ref, () => {
+    return {
+      scrollToLog,
+    };
+  });
 
   return (
     <Container>
@@ -463,6 +496,8 @@ const ProcessingConsole = (props: ProcessingConsoleProps) => {
       </LogsArea>
     </Container>
   );
-};
+});
+
+ProcessingConsole.displayName = 'ChildComponent';
 
 export default ProcessingConsole;

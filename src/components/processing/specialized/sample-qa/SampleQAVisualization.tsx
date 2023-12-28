@@ -9,6 +9,7 @@ import styled from '@emotion/styled';
 import keyBy from 'lodash/keyBy';
 import { FaPause, FaPlay } from 'react-icons/fa6';
 import { GiTeacher } from 'react-icons/gi';
+import { IoMdLocate } from 'react-icons/io';
 import { RiRobot2Fill } from 'react-icons/ri';
 import SampleAvatar from '@/components/processing/common/SampleAvatar';
 import SampleStatusAvatar from '@/components/processing/common/SampleStatusAvatar';
@@ -77,7 +78,7 @@ const Container = styled.div`
         height: 40px;
         display: flex;
         flex-direction: row;
-        justify-content: flex-start;
+        justify-content: space-between;
         align-items: center;
         padding: 0 12px;
         border-radius: 6px 6px 0 0;
@@ -112,7 +113,7 @@ const Container = styled.div`
         height: 40px;
         display: flex;
         flex-direction: row;
-        justify-content: flex-start;
+        justify-content: space-between;
         align-items: center;
         padding: 0 12px;
         border-radius: 6px 6px 0 0;
@@ -274,7 +275,25 @@ const SampleQAVisualization = (props: SampleQAVisualizationProps) => {
                 {isAnswerer ? <AnswererAvatar size={'1em'} /> : <AskerAvatar size={'1em'} />}
               </SampleAvatar>
               <div className="card">
-                <div className="header">{log.log_msg}</div>
+                <div className="header">
+                  {log.log_msg}
+                  <Button
+                    size="small"
+                    type="text"
+                    style={{
+                      fontSize: '18px',
+                      lineHeight: 1,
+                      display: 'flex',
+                      flexDirection: 'row',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}
+                    icon={<IoMdLocate size={'1em'} />}
+                    onClick={() => {
+                      props.needScrollToLog?.(log.id);
+                    }}
+                  />
+                </div>
                 <div className="body">{getSceneLogMessageDisplayContent(log.response, true)}</div>
               </div>
             </div>

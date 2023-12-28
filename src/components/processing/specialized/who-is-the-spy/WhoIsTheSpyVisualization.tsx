@@ -9,14 +9,13 @@ import { useTheme } from 'antd-style';
 import styled from '@emotion/styled';
 import keyBy from 'lodash/keyBy';
 import { FaPause, FaPlay } from 'react-icons/fa6';
+import { IoMdLocate } from 'react-icons/io';
 import SampleAvatar from '@/components/processing/common/SampleAvatar';
 import SampleStatusAvatar from '@/components/processing/common/SampleStatusAvatar';
 import { DefaultProcessingVisualizationComponentProps } from '@/components/processing/def';
 import GodViewButton from '@/components/processing/specialized/who-is-the-spy/GodViewButton';
 import PlayerCard from '@/components/processing/specialized/who-is-the-spy/PlayerCard';
 import RoleAvatar from '@/components/processing/specialized/who-is-the-spy/RoleAvatar';
-import { EyeCloseIcon } from '@/components/processing/specialized/who-is-the-spy/icons/EyeCloseIcon';
-import { EyeOpenIcon } from '@/components/processing/specialized/who-is-the-spy/icons/EyeOpenIcon';
 import { PresenterIcon } from '@/components/processing/specialized/who-is-the-spy/icons/PresenterIcon';
 import { getSceneLogMessageDisplayContent } from '@/utils/scene-log';
 import DeskImage from './assets/game_table.svg';
@@ -205,7 +204,7 @@ const ChatsArea = styled.div`
         height: 40px;
         display: flex;
         flex-direction: row;
-        justify-content: flex-start;
+        justify-content: space-between;
         align-items: center;
         padding: 0 12px;
         border-radius: 6px 6px 0 0;
@@ -240,7 +239,7 @@ const ChatsArea = styled.div`
         height: 40px;
         display: flex;
         flex-direction: row;
-        justify-content: flex-start;
+        justify-content: space-between;
         align-items: center;
         padding: 0 12px;
         border-radius: 6px 6px 0 0;
@@ -822,7 +821,25 @@ const WhoIsTheSpyVisualization = (props: WhoIsTheSpyVisualizationProps) => {
                     {isPlayer ? <RoleAvatar role={godView ? role : undefined} /> : <PresenterIcon />}
                   </SampleAvatar>
                   <div className="card">
-                    <div className="header">{log.log_msg}</div>
+                    <div className="header">
+                      {log.log_msg}
+                      <Button
+                        size="small"
+                        type="text"
+                        style={{
+                          fontSize: '18px',
+                          lineHeight: 1,
+                          display: 'flex',
+                          flexDirection: 'row',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                        }}
+                        icon={<IoMdLocate size={'1em'} />}
+                        onClick={() => {
+                          props.needScrollToLog?.(log.id);
+                        }}
+                      />
+                    </div>
                     <div className="body">{getSceneLogMessageDisplayContent(log.response, true)}</div>
                   </div>
                 </div>
