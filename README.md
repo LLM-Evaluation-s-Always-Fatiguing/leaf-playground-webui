@@ -22,7 +22,24 @@ yarn dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-The default Playground address is set to http://127.0.0.1:8000.
+The Playground is initially configured to use the address http://127.0.0.1:8000. If you wish to change this, you can do so by setting a new address through the PLAYGROUND_SERVER_BASE_URL environment variable.
+
+
+### Custom Scene Visualization Components
+
+To tailor visualization components for specific Scenes, create your custom components within the `src/components/processing/specialized` directory. These components should have their props extending from `DefaultProcessingVisualizationComponentProps` for consistent integration.
+
+Once your component is developed, register it within the `getProcessingVisualizationComponent` function located in `src/app/processing/[taskId]/page.tsx`. This is done by adding a case statement for the scene name.
+
+### Make WebUI Bundle
+
+To make a production-ready bundle, run the following command:
+
+```bash
+yarn bundle
+```
+
+This will create a `bundle` directory with the bundled files.
 
 ### Learn More
 
