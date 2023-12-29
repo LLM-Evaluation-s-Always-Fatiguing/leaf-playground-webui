@@ -22,7 +22,7 @@ yarn dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-The Playground is initially configured to use the address http://127.0.0.1:8000. If you wish to change this, you can do so by setting a new address through the PLAYGROUND_SERVER_BASE_URL environment variable.
+The Playground is initially configured to use the address `http://127.0.0.1:8000`. If you wish to change this, you can do so by setting a new address through the `PLAYGROUND_SERVER_BASE_URL` environment variable.
 
 
 ### Custom Scene Visualization Components
