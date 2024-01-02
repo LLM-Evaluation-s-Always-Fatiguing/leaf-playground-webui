@@ -1,6 +1,6 @@
 'use client';
 
-import React, { PropsWithChildren, useEffect, useMemo, useRef, useState } from 'react';
+import React, { PropsWithChildren, useEffect, useRef, useState } from 'react';
 import { Typography, message } from 'antd';
 import { useTheme } from 'antd-style';
 import styled from '@emotion/styled';
@@ -14,6 +14,7 @@ import rehypeKatex from 'rehype-katex';
 import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
+import remarkRemoveComments from 'remark-remove-comments';
 import remarkUnwrapImages from 'remark-unwrap-images';
 import LocalAPI from '@/services/local';
 
@@ -191,10 +192,23 @@ export const LocalImage = (
   return <img src={realSrc} alt={props.alt} />;
 };
 
-function _MarkDownContent(props: { content: string; useLocalAssets?: boolean; localAssetsBasePath?: string }) {
+interface MarkdownContentProps {
+  content: string;
+  useLocalAssets?: boolean;
+  localAssetsBasePath?: string;
+  removeComments?: boolean;
+}
+
+function _MarkDownContent(props: MarkdownContentProps) {
   return (
     <ReactMarkdown
-      remarkPlugins={[remarkGfm, remarkMath, remarkBreaks, remarkUnwrapImages]}
+      remarkPlugins={[
+        remarkGfm,
+        remarkMath,
+        remarkBreaks,
+        remarkUnwrapImages,
+        ...(props.removeComments ? [remarkRemoveComments] : []),
+      ]}
       rehypePlugins={[
         rehypeKatex,
         rehypeColorChips,
@@ -246,6 +260,7 @@ export default function Markdown(
     content: string;
     useLocalAssets?: boolean;
     localAssetsBasePath?: string;
+    removeComments?: boolean;
     fontSize?: number | string;
   } & React.DOMAttributes<HTMLDivElement>
 ) {
@@ -267,6 +282,7 @@ export default function Markdown(
         <MarkdownContent
           useLocalAssets={props.useLocalAssets}
           localAssetsBasePath={props.localAssetsBasePath}
+          removeComments={props.removeComments}
           content={props.content}
         />
       </ExtraStyleProvider>

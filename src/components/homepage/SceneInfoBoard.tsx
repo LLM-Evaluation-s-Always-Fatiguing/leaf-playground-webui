@@ -75,7 +75,12 @@ const SceneInfoBoard = (props: SceneInfoBoardProps) => {
           </Header>
           <div className="infoArea">
             {props.scene.readme ? (
-              <Markdown content={props.scene.readme} useLocalAssets={true} localAssetsBasePath={props.scene.work_dir} />
+              <Markdown
+                content={props.scene.readme}
+                useLocalAssets={true}
+                localAssetsBasePath={props.scene.work_dir}
+                removeComments={true}
+              />
             ) : (
               <div className="desc">{props.scene.scene_metadata.scene_definition.description}</div>
             )}

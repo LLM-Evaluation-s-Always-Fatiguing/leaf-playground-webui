@@ -748,7 +748,7 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
                 }
               }}
             >
-              Start
+              Create Task
             </Button>
           </Space>
         </Footer>

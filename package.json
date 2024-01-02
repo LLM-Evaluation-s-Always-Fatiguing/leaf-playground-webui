@@ -52,6 +52,7 @@
     "remark-breaks": "^4.0.0",
     "remark-gfm": "^4.0.0",
     "remark-math": "^6.0.0",
+    "remark-remove-comments": "^1.0.1",
     "remark-unwrap-images": "^4.0.0",
     "tinycolor2": "^1.6.0",
     "vega": "^5.26.1",
