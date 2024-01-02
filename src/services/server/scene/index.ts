@@ -1,5 +1,6 @@
 import SceneAgentMetadata from '@/types/server/meta/Agent';
 import Scene, { ServerScene } from '@/types/server/meta/Scene';
+import LocalAPI from '@/services/local';
 import request from '@/services/server/request';
 import { transferStandardJSONSchemaToFormilyJSONSchema } from '@/utils/json-schema';
 
@@ -29,6 +30,13 @@ const sceneAPI = {
         if (Array.isArray(sceneMetadataConfigSchemaTransformResult.formilySchema.required)) {
           sceneMetadataConfigSchemaTransformResult.formilySchema.required =
             sceneMetadataConfigSchemaTransformResult.formilySchema.required.filter((item) => item !== 'roles_config');
+        }
+        let readme: string | undefined = undefined;
+        try {
+          const readmeFilePath = await LocalAPI.path.join(origin.work_dir, 'README.md');
+          readme = await LocalAPI.file.readFileString(readmeFilePath);
+        } catch (e) {
+          console.error(e);
         }
         return {
           scene_metadata: {
@@ -82,6 +90,7 @@ const sceneAPI = {
           ),
           charts_metadata: origin.charts_metadata,
           work_dir: origin.work_dir,
+          readme,
         } as Scene;
       })
     );

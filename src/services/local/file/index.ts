@@ -29,6 +29,16 @@ const fileLocalAPI = {
         return JSON.parse(json);
       });
   },
+  async readFileString(filePath: string): Promise<string> {
+    return (
+      await request.get(`${prefix}`, {
+        params: {
+          filePath,
+        },
+        responseType: 'text',
+      })
+    ).data;
+  },
 };
 
 export default fileLocalAPI;

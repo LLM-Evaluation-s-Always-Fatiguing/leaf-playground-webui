@@ -3,6 +3,7 @@
 import Scene from '@/types/server/meta/Scene';
 import { Button } from 'antd';
 import styled from '@emotion/styled';
+import Markdown from '@/components/markdown/Markdown';
 
 const Header = styled.div`
   width: 100%;
@@ -73,7 +74,11 @@ const SceneInfoBoard = (props: SceneInfoBoardProps) => {
             <div className="title">{props.scene.scene_metadata.scene_definition.name}</div>
           </Header>
           <div className="infoArea">
-            <div className="desc">{props.scene.scene_metadata.scene_definition.description}</div>
+            {props.scene.readme ? (
+              <Markdown content={props.scene.readme} useLocalAssets={true} localAssetsBasePath={props.scene.work_dir} />
+            ) : (
+              <div className="desc">{props.scene.scene_metadata.scene_definition.description}</div>
+            )}
           </div>
           <Footer>
             <Button

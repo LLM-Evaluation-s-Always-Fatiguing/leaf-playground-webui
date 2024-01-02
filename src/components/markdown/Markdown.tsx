@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { PropsWithChildren, useEffect, useMemo, useRef, useState } from 'react';
 import { Typography, message } from 'antd';
 import { useTheme } from 'antd-style';
 import styled from '@emotion/styled';
@@ -15,6 +15,7 @@ import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import remarkUnwrapImages from 'remark-unwrap-images';
+import LocalAPI from '@/services/local';
 
 export function copyToClipboard(text: string) {
   const result = copy(text);
@@ -164,18 +165,33 @@ export const PreCode: React.FunctionComponent<{ children: any }> = (props) => {
   );
 };
 
-const ExtraStyleProvider = styled.div`
-  .gfm-color-chip {
-    margin-left: 0.125rem;
-    display: inline-block;
-    height: 0.625rem;
-    width: 0.625rem;
-    border-radius: 9999px;
-    border: 1px solid gray;
-  }
-`;
+export const LocalImage = (
+  props: {
+    src?: string;
+    alt?: string;
+    localAssetsBasePath?: string;
+  } & PropsWithChildren
+) => {
+  const [realSrc, setRealSrc] = useState('');
+  useEffect(() => {
+    const process = async () => {
+      try {
+        const path = await LocalAPI.path.join(props.localAssetsBasePath || '', props.src || '');
+        if (path) {
+          setRealSrc(`/api/file?filePath=${encodeURIComponent(path)}`);
+        } else {
+          setRealSrc('');
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    process();
+  }, [props.localAssetsBasePath, props.src]);
+  return <img src={realSrc} alt={props.alt} />;
+};
 
-function _MarkDownContent(props: { content: string }) {
+function _MarkDownContent(props: { content: string; useLocalAssets?: boolean; localAssetsBasePath?: string }) {
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm, remarkMath, remarkBreaks, remarkUnwrapImages]}
@@ -198,6 +214,13 @@ function _MarkDownContent(props: { content: string }) {
           return <a {...aProps} target={target} />;
         },
         pre: PreCode as any,
+        ...(props.useLocalAssets
+          ? {
+              img: (imgProps) => {
+                return <LocalImage {...imgProps} localAssetsBasePath={props.localAssetsBasePath} />;
+              },
+            }
+          : {}),
       }}
     >
       {props.content}
@@ -207,9 +230,22 @@ function _MarkDownContent(props: { content: string }) {
 
 export const MarkdownContent = React.memo(_MarkDownContent);
 
+const ExtraStyleProvider = styled.div`
+  .gfm-color-chip {
+    margin-left: 0.125rem;
+    display: inline-block;
+    height: 0.625rem;
+    width: 0.625rem;
+    border-radius: 9999px;
+    border: 1px solid gray;
+  }
+`;
+
 export default function Markdown(
   props: {
     content: string;
+    useLocalAssets?: boolean;
+    localAssetsBasePath?: string;
     fontSize?: number | string;
   } & React.DOMAttributes<HTMLDivElement>
 ) {
@@ -228,7 +264,11 @@ export default function Markdown(
       onDoubleClickCapture={props.onDoubleClickCapture}
     >
       <ExtraStyleProvider>
-        <MarkdownContent content={props.content} />
+        <MarkdownContent
+          useLocalAssets={props.useLocalAssets}
+          localAssetsBasePath={props.localAssetsBasePath}
+          content={props.content}
+        />
       </ExtraStyleProvider>
     </Typography>
   );

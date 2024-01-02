@@ -95,4 +95,5 @@ export default interface Scene extends ServerScene {
   scene_metadata: SceneMetadata;
   agents_metadata: Record<string, SceneAgentMetadata[]>;
   evaluators_metadata: EvaluatorMetadata[];
+  readme?: string;
 }
