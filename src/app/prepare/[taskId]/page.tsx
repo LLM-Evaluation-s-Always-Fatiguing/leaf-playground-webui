@@ -3,9 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getRoleAgentConfigsMapFromCreateSceneParams } from '@/types/server/CreateSceneParams';
-import { SceneActionLog, SceneLogType, SceneSystemLog, SceneSystemLogEvent } from '@/types/server/Log';
-import { SceneTaskStatus } from '@/types/server/SceneTask';
-import { WebsocketMessage, WebsocketMessageOperation } from '@/types/server/WebsocketMessage';
+import { WebsocketMessage } from '@/types/server/WebsocketMessage';
 import { Card, Collapse, Flex, Space, message } from 'antd';
 import styled from '@emotion/styled';
 import AgentCard from '@/components/agent/AgentCard';
@@ -98,6 +96,7 @@ const ProcessingPage = ({
 
   const globalStore = useGlobalStore();
 
+  const pageVisible = useRef(true);
   const [loading, setLoading] = useState(true);
   const [loadingTip, setLoadingTip] = useState('Loading...');
   const [agentConnectedMap, setAgentConnectedMap] = useState<Record<string, boolean>>({});
@@ -105,10 +104,16 @@ const ProcessingPage = ({
   const wsOpenRef = useRef(false);
   const [wsConnected, setWSConnected] = useState(false);
 
+  const pageFinished = useRef(false);
+
   const checkAgentsStatus = async () => {
     try {
       let wait = true;
       while (wait) {
+        if (pageFinished.current || !pageVisible.current) {
+          wait = false;
+          return;
+        }
         const agentConnectedStatusResp = await ServerAPI.sceneTask.getAgentConnectedStatus(serverUrl || '');
         setAgentConnectedMap(agentConnectedStatusResp);
         const allConnected = Object.entries(agentConnectedStatusResp).every(([agentId, connected]) => connected);
@@ -120,6 +125,7 @@ const ProcessingPage = ({
               bundlePath!
             )}${agentId ? `&agentId=${encodeURIComponent(agentId)}` : ''}`
           );
+          pageFinished.current = true;
         }
       }
     } catch (e) {
@@ -127,6 +133,21 @@ const ProcessingPage = ({
       message.error('Check agents connection status failed!');
     }
   };
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      pageVisible.current = document.visibilityState === 'visible';
+      if (pageVisible.current) {
+        checkAgentsStatus();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   useEffect(() => {
     const prepare = async () => {
@@ -163,6 +184,14 @@ const ProcessingPage = ({
             wsOpenRef.current = false;
             setWSConnected(false);
             console.info('WebSocket closed.');
+            if (pageFinished.current) return;
+            pageFinished.current = true;
+            message.error(
+              "The connection to the server has failed. It's possible that it's currently in use. Please refresh your page and give it another shot.",
+              5
+            );
+            setLoadingTip('Connect failed.');
+            setLoading(true);
           };
         }
         setLoading(false);
@@ -248,14 +277,15 @@ const ProcessingPage = ({
                               )}&bundlePath=${encodeURIComponent(bundlePath!)}&hostBaseUrl=${encodeURIComponent(
                                 hostBaseUrl!
                               )}&agentId=${encodeURIComponent(agentConfig.config_data.profile.id)}`;
+                              const you = agentConfig.config_data.profile.id === agentId;
                               return (
                                 <AgentCard
                                   key={index}
                                   role={'agent'}
                                   showConnectionStatus={true}
                                   joinLink={sceneAgentMeta?.is_human ? joinLink : undefined}
-                                  connected={agentConnectedMap[agentConfig.config_data.profile.id]}
-                                  youMark={agentConfig.config_data.profile.id === agentId}
+                                  connected={you ? wsConnected : agentConnectedMap[agentConfig.config_data.profile.id]}
+                                  youMark={you}
                                   sceneAgentMeta={sceneAgentMeta}
                                   sceneAgentConfig={agentConfig}
                                   onEditButtonClick={() => {}}

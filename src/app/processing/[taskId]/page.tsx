@@ -132,6 +132,7 @@ const ProcessingPage = ({
   const searchParams = useSearchParams();
   const serverUrl = searchParams.get('serverUrl') as string;
   const bundlePath = searchParams.get('bundlePath');
+  const agentId = searchParams.get('agentId');
 
   const globalStore = useGlobalStore();
 
@@ -347,6 +348,7 @@ const ProcessingPage = ({
           answererAvatar: BuddhaLogo,
         });
       case 'WhoIsTheSpy':
+      case '谁是卧底':
       case 'WhoIsTheSpyVisualization':
         return VisualizationComponentWithExtraProps(WhoIsTheSpyVisualization, {});
       default:
@@ -401,6 +403,7 @@ const ProcessingPage = ({
             scene={globalStore.currentScene}
             createSceneParams={globalStore.createSceneParams}
             logs={logs}
+            targetAgentId={agentId as string}
             onOpenJSONDetail={(log) => {
               setOperatingLog(log);
               setJSONViewModalOpen(true);

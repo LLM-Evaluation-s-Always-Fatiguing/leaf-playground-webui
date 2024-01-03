@@ -2,51 +2,54 @@ import SceneAgentConfig from '@/types/server/config/Agent';
 import { Card } from 'antd';
 import styled from '@emotion/styled';
 import { RiRobot2Fill } from 'react-icons/ri';
+import Markdown from '@/components/markdown/Markdown';
 import RoleAvatar from '@/components/processing/specialized/who-is-the-spy/RoleAvatar';
 import { TrophyIcon } from '@/components/processing/specialized/who-is-the-spy/icons/TrophyIcon';
 
 const Content = styled.div`
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 8px;
+  overflow: hidden;
+  position: relative;
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
     display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
+    flex-direction: row;
+    justify-content: center;
     align-items: center;
-    padding: 8px;
-    overflow: hidden;
+    font-size: 21px;
+    flex-shrink: 0;
     position: relative;
+    background: ${(props) => props.theme.colorFillSecondary};
+    color: ${(props) => props.theme.colorPrimary};
 
-    .avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-        font-size: 21px;
-        flex-shrink: 0;
-        position: relative;
-        background: ${(props) => props.theme.colorFillSecondary};
-        color: ${(props) => props.theme.colorPrimary};
-
-        .winMark {
-            position: absolute;
-            right: -6px;
-            bottom: -18px;
-            font-size: 21px;
-        }
+    .winMark {
+      position: absolute;
+      right: -6px;
+      bottom: -18px;
+      font-size: 21px;
     }
+  }
 
-    .name {
-        margin-top: 4px;
-    }
+  .name {
+    margin-top: 4px;
+  }
 
-    .role {
-    }
+  .role {
+  }
 
-    .key {
-    }
+  .key {
+    width: 100%;
+    height: 60px;
+  }
 `;
 
 interface PlayerCardProps {
@@ -81,15 +84,17 @@ const PlayerCard = (props: PlayerCardProps) => {
           }}
         >
           <RoleAvatar role={props.godView ? props.role : undefined} />
-          {props.win && <div className="winMark">
-            <TrophyIcon />
-          </div>}
+          {props.win && (
+            <div className="winMark">
+              <TrophyIcon />
+            </div>
+          )}
         </div>
         <div className="name">{props.agent.config_data.profile.name}</div>
         {props.godView ? (
           <>
             <div className="role">{props.role}</div>
-            <div className="key">{props.gameKey}</div>
+            <div className="key">{<Markdown content={props.gameKey} useLocalAssets={true} limitHeight={true} />}</div>
           </>
         ) : (
           <></>

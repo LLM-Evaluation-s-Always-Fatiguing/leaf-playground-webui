@@ -284,7 +284,22 @@ const AgentCard = (props: AgentCardProps) => {
               </div>
             </div>
           )}
-          {props.youMark && <div className="youMark">You</div>}
+          {props.youMark && (
+            <div
+              className="youMark"
+              style={
+                props.youMark
+                  ? props.sceneAgentConfig?.config_data.chart_major_color
+                    ? {
+                        color: props.sceneAgentConfig.config_data.chart_major_color,
+                      }
+                    : {}
+                  : {}
+              }
+            >
+              You
+            </div>
+          )}
           {!displayMode && props.showConnectionStatus && (
             <div className="connectionStatus">
               {!isHuman || props.connected ? (

@@ -197,23 +197,27 @@ const SceneRoleConfigCard = (props: SceneRoleConfigCardProps) => {
                   width: '100%',
                 }}
               >
-                {props.roleMetadata.actions.map((action, index) => {
-                  return (
-                    <SceneActionConfigCard
-                      key={index}
-                      roleName={props.roleMetadata.name}
-                      actionDefinition={action}
-                      config={props.config ? props.config.actions_config[action.name] : undefined}
-                      evaluatorHandledMetrics={props.evaluatorHandledMetrics}
-                      highlightMetrics={props.highlightMetrics}
-                      onConfigChange={(newActionConfig) => {
-                        const newConfig: WebUIRoleMetricConfig = { actions_config: {}, ...props.config };
-                        newConfig.actions_config[action.name] = newActionConfig;
-                        props.onConfigChange(newConfig);
-                      }}
-                    />
-                  );
-                })}
+                {props.roleMetadata.actions
+                  .filter((action) => {
+                    return action.metrics && action.metrics.length > 0;
+                  })
+                  .map((action, index) => {
+                    return (
+                      <SceneActionConfigCard
+                        key={index}
+                        roleName={props.roleMetadata.name}
+                        actionDefinition={action}
+                        config={props.config ? props.config.actions_config[action.name] : undefined}
+                        evaluatorHandledMetrics={props.evaluatorHandledMetrics}
+                        highlightMetrics={props.highlightMetrics}
+                        onConfigChange={(newActionConfig) => {
+                          const newConfig: WebUIRoleMetricConfig = { actions_config: {}, ...props.config };
+                          newConfig.actions_config[action.name] = newActionConfig;
+                          props.onConfigChange(newConfig);
+                        }}
+                      />
+                    );
+                  })}
               </Flex>
             ),
           },

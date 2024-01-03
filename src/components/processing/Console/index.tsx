@@ -167,6 +167,7 @@ interface ProcessingConsoleProps {
   scene: Scene;
   createSceneParams: CreateSceneParams;
   logs: SceneActionLog[];
+  targetAgentId?: string;
   onOpenJSONDetail: (log: SceneActionLog) => void;
   onOpenMetricDetail: (
     log: SceneActionLog,
@@ -196,7 +197,7 @@ const ProcessingConsole = forwardRef<ProcessingConsoleMethods, ProcessingConsole
   const [autoPlay, setAutoPlay] = useState(true);
   const [evaluationMode, setEvaluationMode] = useState(false);
   const [humanOnlyEvaluationMode, setHumanOnlyEvaluationMode] = useState(false);
-  const hasEnabledMetric = getEnabledMetricsFromCreateSceneParams(props.createSceneParams).length > 0;
+  const hasEnabledMetric = !props.targetAgentId && getEnabledMetricsFromCreateSceneParams(props.createSceneParams).length > 0;
   const [highlightedLogId, setHighlightedLogId] = useState<string>();
 
   const displayLogs = useMemo(() => {
@@ -434,16 +435,25 @@ const ProcessingConsole = forwardRef<ProcessingConsoleMethods, ProcessingConsole
       </Header>
       <Tabs
         type="card"
-        activeKey={activeKey}
+        activeKey={props.targetAgentId || activeKey}
         onChange={(newActiveKey) => {
           setActiveKey(newActiveKey);
         }}
         items={[
-          {
-            label: 'All',
-            key: '',
-          },
-          ...allAgents.map((a) => {
+          ...(props.targetAgentId
+            ? []
+            : [
+                {
+                  label: 'All',
+                  key: '',
+                },
+              ]),
+          ...allAgents.filter((agent)=>{
+            if (props.targetAgentId) {
+              return agent.config_data.profile.id === props.targetAgentId
+            }
+            return true;
+          }).map((a) => {
             return {
               label: (
                 <Space>

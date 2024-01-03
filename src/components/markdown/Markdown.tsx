@@ -186,7 +186,18 @@ export const LocalImage = (
   delete imageProps.localAssetsBasePath;
   delete imageProps.node;
   // eslint-disable-next-line @next/next/no-img-element
-  return <img width={'100%'} alt={''} {...imageProps} src={realSrc} />;
+  return (
+    <img
+      width={'100%'}
+      height={'100%'}
+      style={{
+        objectFit: 'contain',
+      }}
+      alt={''}
+      {...imageProps}
+      src={realSrc}
+    />
+  );
 };
 
 export const _Image = (
@@ -227,7 +238,12 @@ function _MarkDownContent(props: MarkdownContentProps) {
       ]}
       rehypePlugins={[
         rehypeFigure,
-        rehypeRaw,
+        [
+          rehypeRaw,
+          {
+            passThrough: ['eos'],
+          },
+        ],
         rehypeKatex,
         rehypeColorChips,
         [
@@ -248,10 +264,6 @@ function _MarkDownContent(props: MarkdownContentProps) {
           const target = isInternal ? '_self' : aProps.target ?? '_blank';
           return <a {...aProps} target={target} />;
         },
-        div: (aProps: any) => {
-          console.log(aProps);
-          return <div {...aProps} />;
-        },
         pre: PreCode as any,
         ...(props.useLocalAssets
           ? {
@@ -260,6 +272,10 @@ function _MarkDownContent(props: MarkdownContentProps) {
               },
             }
           : {}),
+        // @ts-ignore
+        eos: () => {
+          return '<EOS>';
+        },
       }}
     >
       {props.content}
@@ -278,6 +294,10 @@ const ExtraStyleProvider = styled.div`
     border-radius: 9999px;
     border: 1px solid gray;
   }
+
+  img {
+    max-height: 280px;
+  }
 `;
 
 export default function Markdown(
@@ -286,6 +306,7 @@ export default function Markdown(
     useLocalAssets?: boolean;
     localAssetsBasePath?: string;
     removeComments?: boolean;
+    limitHeight?: boolean;
     fontSize?: number | string;
   } & React.DOMAttributes<HTMLDivElement>
 ) {
@@ -298,12 +319,17 @@ export default function Markdown(
             : props.fontSize
           : '0.875rem',
         width: '100%',
-        height: 'auto',
+        height: props.limitHeight ? '100%' : 'auto',
       }}
       onContextMenu={props.onContextMenu}
       onDoubleClickCapture={props.onDoubleClickCapture}
     >
-      <ExtraStyleProvider>
+      <ExtraStyleProvider
+        style={{
+          width: '100%',
+          height: props.limitHeight ? '100%' : 'auto',
+        }}
+      >
         <MarkdownContent
           useLocalAssets={props.useLocalAssets}
           localAssetsBasePath={props.localAssetsBasePath}

@@ -47,6 +47,10 @@ const BaseVisualization = (props: BaseVisualizationProps) => {
               label: 'SampleQAVisualization',
               value: 'SampleQAVisualization',
             },
+            {
+              label: 'WhoIsTheSpyVisualization',
+              value: 'WhoIsTheSpyVisualization',
+            },
           ]}
         />
         <Button

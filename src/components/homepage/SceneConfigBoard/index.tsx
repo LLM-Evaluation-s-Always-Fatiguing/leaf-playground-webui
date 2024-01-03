@@ -743,9 +743,14 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
                   };
                   const { id: task_id, host, port } = await ServerAPI.sceneTask.createSceneTask(createSceneParams);
                   const save_dir = await LocalAPI.path.join(serverInfo.paths.result_dir, task_id);
-                  const serverUrl = `${host}:${port}`;
+                  const serverUrl = `${window.location.protocol}//${host}:${port}`;
                   await LocalAPI.taskBundle.webui.save(save_dir, task_id, serverUrl, scene, createSceneParams);
                   globalStore.updateInfoAfterSceneTaskCreated(save_dir, task_id, scene, createSceneParams);
+                  await new Promise((resolve) => {
+                    setTimeout(() => {
+                      resolve(null);
+                    }, 2000);
+                  });
                   if (hasHumanAgent) {
                     const localIP = await LocalAPI.network.getLocalIP();
                     const hostBaseUrl = `${window.location.protocol}//${localIP}:${window.location.port}`;
