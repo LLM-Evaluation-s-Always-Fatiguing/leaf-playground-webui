@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import Link from 'next/link';
 import SceneAgentConfig from '@/types/server/config/Agent';
 import SceneAgentMetadata from '@/types/server/meta/Agent';
 import { Card } from 'antd';
@@ -8,8 +9,10 @@ import { useTheme } from 'antd-style';
 import styled from '@emotion/styled';
 import { FaCheck } from 'react-icons/fa6';
 import { FiPlus } from 'react-icons/fi';
-import { MdClose, MdOutlineSettings } from 'react-icons/md';
+import { IoMdPerson } from 'react-icons/io';
+import { MdClose, MdOutlineErrorOutline, MdOutlineSettings } from 'react-icons/md';
 import { RiRobot2Fill } from 'react-icons/ri';
+import { copyToClipboard } from '@/utils/clipboard';
 
 const AddContent = styled.div`
   width: 100%;
@@ -61,6 +64,34 @@ const AgentContent = styled.div`
     margin-top: 0;
     flex-grow: 1;
     overflow: hidden auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .gameLinkArea {
+    margin-top: 20px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+
+    .copyLink {
+      color: ${(props) => props.theme.colorLink};
+      cursor: pointer;
+
+      :hover {
+        color: ${(props) => props.theme.colorLinkHover};
+      }
+    }
+  }
+
+  .youMark {
+    flex-shrink: 0;
+    font-weight: 500;
+    font-size: 16px;
   }
 
   .connectionStatus {
@@ -117,6 +148,10 @@ interface AgentCardProps {
   displayMode?: boolean;
   sceneAgentConfig?: SceneAgentConfig;
   sceneAgentMeta?: SceneAgentMetadata;
+  showConnectionStatus?: boolean;
+  joinLink?: string;
+  connected?: boolean;
+  youMark?: boolean;
   onAddNewClick?: () => void;
   onEditButtonClick?: () => void;
   onDeleteButtonClick?: () => void;
@@ -137,6 +172,8 @@ const AgentCard = (props: AgentCardProps) => {
     requiredBackendConfigs.includes(key)
   );
 
+  const isHuman = !!props.sceneAgentMeta?.is_human;
+
   return (
     <Card
       hoverable={props.role === 'agent'}
@@ -145,7 +182,13 @@ const AgentCard = (props: AgentCardProps) => {
           ? {
               borderStyle: 'dashed',
             }
-          : {}
+          : props.youMark
+            ? props.sceneAgentConfig?.config_data.chart_major_color
+              ? {
+                  borderColor: props.sceneAgentConfig.config_data.chart_major_color,
+                }
+              : {}
+            : {}
       }
       bodyStyle={{
         width: 180,
@@ -175,9 +218,22 @@ const AgentCard = (props: AgentCardProps) => {
                 : {}
             }
           >
-            <RiRobot2Fill size={'1em'} />
+            {isHuman ? <IoMdPerson size={'1.1em'} /> : <RiRobot2Fill size={'1em'} />}
           </div>
-          <div className="name">{props.sceneAgentConfig?.config_data.profile.name}</div>
+          <div
+            className="name"
+            style={
+              props.youMark
+                ? props.sceneAgentConfig?.config_data.chart_major_color
+                  ? {
+                      color: props.sceneAgentConfig.config_data.chart_major_color,
+                    }
+                  : {}
+                : {}
+            }
+          >
+            {props.sceneAgentConfig?.config_data.profile.name}
+          </div>
           <div className="infoArea">
             <div
               style={{
@@ -213,33 +269,71 @@ const AgentCard = (props: AgentCardProps) => {
               );
             })}
           </div>
-          {!displayMode && (
-            <div className="connectionStatus">
-              <FaCheck
-                style={{
-                  color: theme.colorSuccess,
-                }}
-              />
+          {props.joinLink && !props.connected && (
+            <div className="gameLinkArea">
+              <Link rel="stylesheet" href={props.joinLink} target={'_blank'}>
+                Join Game
+              </Link>
               <div
-                style={{
-                  marginLeft: '3px',
-                  color: theme.colorSuccess,
-                  fontWeight: 500,
+                className="copyLink"
+                onClick={() => {
+                  copyToClipboard(props.joinLink!);
                 }}
               >
-                Connected
+                （ Copy Link ）
               </div>
             </div>
           )}
-          <div
-            className="editButton"
-            onClick={() => {
-              props.onEditButtonClick?.();
-            }}
-          >
-            <MdOutlineSettings size={'1em'} />
-          </div>
-          {!displayMode && (
+          {props.youMark && <div className="youMark">You</div>}
+          {!displayMode && props.showConnectionStatus && (
+            <div className="connectionStatus">
+              {!isHuman || props.connected ? (
+                <FaCheck
+                  style={{
+                    color: theme.colorSuccess,
+                  }}
+                />
+              ) : (
+                <MdOutlineErrorOutline
+                  style={{
+                    color: theme.colorError,
+                  }}
+                />
+              )}
+              <div
+                style={{
+                  marginLeft: '3px',
+                  color: !isHuman || props.connected ? theme.colorSuccess : theme.colorError,
+                  fontWeight: 500,
+                }}
+              >
+                {!isHuman || props.connected ? 'Connected' : 'Waiting...'}
+              </div>
+            </div>
+          )}
+          {!displayMode && !props.showConnectionStatus && (
+            <div className="connectionStatus">
+              <div
+                style={{
+                  marginLeft: '3px',
+                  fontWeight: 500,
+                }}
+              >
+                {isHuman ? 'Human' : 'AI'}
+              </div>
+            </div>
+          )}
+          {!props.showConnectionStatus && (
+            <div
+              className="editButton"
+              onClick={() => {
+                props.onEditButtonClick?.();
+              }}
+            >
+              <MdOutlineSettings size={'1em'} />
+            </div>
+          )}
+          {!displayMode && !props.showConnectionStatus && (
             <div
               className="deleteButton"
               onClick={() => {

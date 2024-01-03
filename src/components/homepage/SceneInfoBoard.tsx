@@ -62,6 +62,7 @@ const Container = styled.div`
 
 interface SceneInfoBoardProps {
   scene?: Scene;
+  displayMode?: boolean;
   onStartClick: () => Promise<void>;
 }
 
@@ -85,22 +86,24 @@ const SceneInfoBoard = (props: SceneInfoBoardProps) => {
               <div className="desc">{props.scene.scene_metadata.scene_definition.description}</div>
             )}
           </div>
-          <Footer>
-            <Button
-              size={'large'}
-              type={'primary'}
-              style={{
-                minWidth: '120px',
-                fontSize: '18px',
-                lineHeight: '1.2',
-              }}
-              onClick={async () => {
-                await props.onStartClick();
-              }}
-            >
-              I Choose You!
-            </Button>
-          </Footer>
+          {!props.displayMode && (
+            <Footer>
+              <Button
+                size={'large'}
+                type={'primary'}
+                style={{
+                  minWidth: '120px',
+                  fontSize: '18px',
+                  lineHeight: '1.2',
+                }}
+                onClick={async () => {
+                  await props.onStartClick();
+                }}
+              >
+                I Choose You!
+              </Button>
+            </Footer>
+          )}
         </>
       )}
     </Container>

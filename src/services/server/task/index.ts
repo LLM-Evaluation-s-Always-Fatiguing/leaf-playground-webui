@@ -60,6 +60,15 @@ const sceneTaskAPI = {
       })
     ).data;
   },
+  async getAgentConnectedStatus(serverUrl: string): Promise<Record<string, boolean>> {
+    return (
+      await localRequest.get(`/server/task/agents_connected`, {
+        params: {
+          serverUrl,
+        },
+      })
+    ).data;
+  },
 };
 
 export default sceneTaskAPI;

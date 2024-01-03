@@ -15,7 +15,7 @@ export function getSceneLogMessageDisplayContent(message: SceneLogMessage, markd
     case SceneLogMediaType.TEXT: {
       const content = message.content as SceneLogTextContent;
       const displayContent = content.display_text || content.text;
-      return markdown ? <Markdown content={displayContent} /> : displayContent;
+      return markdown ? <Markdown content={displayContent} useLocalAssets={true} /> : displayContent;
     }
     case SceneLogMediaType.AUDIO:
       return 'Audio';

@@ -4,28 +4,21 @@ import React, { PropsWithChildren, useEffect, useRef, useState } from 'react';
 import { Typography, message } from 'antd';
 import { useTheme } from 'antd-style';
 import styled from '@emotion/styled';
-import copy from 'copy-to-clipboard';
 import 'katex/dist/katex.min.css';
 import mermaid from 'mermaid';
 import ReactMarkdown from 'react-markdown';
 import rehypeColorChips from 'rehype-color-chips';
+import rehypeFigure from 'rehype-figure';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeKatex from 'rehype-katex';
+import rehypeRaw from 'rehype-raw';
 import remarkBreaks from 'remark-breaks';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import remarkRemoveComments from 'remark-remove-comments';
 import remarkUnwrapImages from 'remark-unwrap-images';
 import LocalAPI from '@/services/local';
-
-export function copyToClipboard(text: string) {
-  const result = copy(text);
-  if (result) {
-    message.success('Copied');
-  } else {
-    message.error('Copy failed');
-  }
-}
+import { copyToClipboard } from '@/utils/clipboard';
 
 export function Mermaid(props: { code: string; onError: () => void }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -168,10 +161,10 @@ export const PreCode: React.FunctionComponent<{ children: any }> = (props) => {
 
 export const LocalImage = (
   props: {
-    src?: string;
-    alt?: string;
     localAssetsBasePath?: string;
-  } & PropsWithChildren
+  } & PropsWithChildren &
+    React.HTMLProps<HTMLImageElement> &
+    Record<string, any>
 ) => {
   const [realSrc, setRealSrc] = useState('');
   useEffect(() => {
@@ -189,7 +182,30 @@ export const LocalImage = (
     };
     process();
   }, [props.localAssetsBasePath, props.src]);
-  return <img src={realSrc} alt={props.alt} />;
+  const imageProps = { ...props };
+  delete imageProps.localAssetsBasePath;
+  delete imageProps.node;
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img width={'100%'} alt={''} {...imageProps} src={realSrc} />;
+};
+
+export const _Image = (
+  props: {
+    localAssetsBasePath?: string;
+  } & PropsWithChildren &
+    React.HTMLProps<HTMLImageElement> &
+    Record<string, any>
+) => {
+  const localImage = !props.src?.startsWith('http');
+  const imageProps = { ...props };
+  delete imageProps.localAssetsBasePath;
+  delete imageProps.node;
+  return localImage ? (
+    <LocalImage {...props} />
+  ) : (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img alt={''} {...imageProps} />
+  );
 };
 
 interface MarkdownContentProps {
@@ -210,6 +226,8 @@ function _MarkDownContent(props: MarkdownContentProps) {
         ...(props.removeComments ? [remarkRemoveComments] : []),
       ]}
       rehypePlugins={[
+        rehypeFigure,
+        rehypeRaw,
         rehypeKatex,
         rehypeColorChips,
         [
@@ -220,6 +238,9 @@ function _MarkDownContent(props: MarkdownContentProps) {
           },
         ],
       ]}
+      remarkRehypeOptions={{
+        allowDangerousHtml: true,
+      }}
       components={{
         a: (aProps: any) => {
           const href = aProps.href || '';
@@ -227,11 +248,15 @@ function _MarkDownContent(props: MarkdownContentProps) {
           const target = isInternal ? '_self' : aProps.target ?? '_blank';
           return <a {...aProps} target={target} />;
         },
+        div: (aProps: any) => {
+          console.log(aProps);
+          return <div {...aProps} />;
+        },
         pre: PreCode as any,
         ...(props.useLocalAssets
           ? {
               img: (imgProps) => {
-                return <LocalImage {...imgProps} localAssetsBasePath={props.localAssetsBasePath} />;
+                return <_Image {...imgProps} localAssetsBasePath={props.localAssetsBasePath} />;
               },
             }
           : {}),

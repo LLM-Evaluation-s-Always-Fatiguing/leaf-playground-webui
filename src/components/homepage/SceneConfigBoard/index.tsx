@@ -700,6 +700,17 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
                       agents_config: roleAgentConfigsMap[role.name],
                     };
                   });
+                  let hasHumanAgent = false;
+                  Object.entries(roleAgentConfigsMap).forEach(([roleName, agentsConfig]) => {
+                    agentsConfig.forEach((agentConfig) => {
+                      const agentMeta = scene.agents_metadata[roleName].find(
+                        (agent) => agent.obj_for_import.obj === agentConfig.obj_for_import.obj
+                      );
+                      if (agentMeta?.is_human) {
+                        hasHumanAgent = true;
+                      }
+                    });
+                  });
                   const evaluators = useMetricEvaluators
                     ? Object.keys(evaluatorConfigMap)
                         .filter((evaluatorClsName) => enabledEvaluatorNames.includes(evaluatorClsName))
@@ -735,11 +746,21 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
                   const serverUrl = `${host}:${port}`;
                   await LocalAPI.taskBundle.webui.save(save_dir, task_id, serverUrl, scene, createSceneParams);
                   globalStore.updateInfoAfterSceneTaskCreated(save_dir, task_id, scene, createSceneParams);
-                  router.push(
-                    `/processing/${task_id}?serverUrl=${encodeURIComponent(serverUrl)}&bundlePath=${encodeURIComponent(
-                      save_dir
-                    )}`
-                  );
+                  if (hasHumanAgent) {
+                    const localIP = await LocalAPI.network.getLocalIP();
+                    const hostBaseUrl = `${window.location.protocol}//${localIP}:${window.location.port}`;
+                    router.push(
+                      `/prepare/${task_id}?serverUrl=${encodeURIComponent(serverUrl)}&bundlePath=${encodeURIComponent(
+                        save_dir
+                      )}&hostBaseUrl=${encodeURIComponent(hostBaseUrl)}`
+                    );
+                  } else {
+                    router.push(
+                      `/processing/${task_id}?serverUrl=${encodeURIComponent(
+                        serverUrl
+                      )}&bundlePath=${encodeURIComponent(save_dir)}`
+                    );
+                  }
                 } catch (e) {
                   console.error(e);
                   message.error('Create scene task failed.');

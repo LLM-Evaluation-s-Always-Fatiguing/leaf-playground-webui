@@ -7,6 +7,7 @@ export interface ServerSceneAgentMetadata {
   description: string;
   config_schema?: SampleJSONSchema;
   obj_for_import: DynamicObject;
+  is_human: boolean;
 }
 
 export default interface SceneAgentMetadata extends ServerSceneAgentMetadata {
