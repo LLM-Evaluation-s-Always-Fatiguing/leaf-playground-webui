@@ -570,6 +570,16 @@ const WhoIsTheSpyVisualization = (props: WhoIsTheSpyVisualizationProps) => {
   const currentRoundLogs = useMemo(() => {
     return splitRoundLogs[currentRound - 1] || [];
   }, [splitRoundLogs, currentRound]);
+  const displayLogs = useMemo(() => {
+    if (!props.targetAgentId) {
+      return currentRoundLogs;
+    }
+    return currentRoundLogs.filter(
+      (log) =>
+        log.response.sender.id === props.targetAgentId ||
+        log.response.receivers.map((r) => r.id).includes(props.targetAgentId || '')
+    );
+  }, [currentRoundLogs, props.targetAgentId]);
   const currentGameInfo = useMemo(() => {
     return calculateGameAgentsInfo(splitRoundLogs.slice(0, currentRound).flat(), allAgents);
   }, [splitRoundLogs, currentRound, allAgents]);
@@ -785,14 +795,16 @@ const WhoIsTheSpyVisualization = (props: WhoIsTheSpyVisualizationProps) => {
                 );
               })}
             </div>
-            <div className="godViewButton">
-              <GodViewButton
-                godView={godView}
-                onGodViewChange={(newValue) => {
-                  setGodView(newValue);
-                }}
-              />
-            </div>
+            {!props.playerMode && (
+              <div className="godViewButton">
+                <GodViewButton
+                  godView={godView}
+                  onGodViewChange={(newValue) => {
+                    setGodView(newValue);
+                  }}
+                />
+              </div>
+            )}
           </StatusArea>
           <ChatsArea
             ref={chatScrollAreaRef}
@@ -800,7 +812,7 @@ const WhoIsTheSpyVisualization = (props: WhoIsTheSpyVisualizationProps) => {
               setAutoPlay(false);
             }}
           >
-            {currentRoundLogs.map((log, index) => {
+            {displayLogs.map((log, index) => {
               const isPlayer = log.action_belonged_chain?.startsWith('player');
               const agentInstance = agentMapKeyById[log.response.sender.id];
               const avatarColor = isPlayer ? agentInstance?.config.config_data.chart_major_color : theme.colorPrimary;
@@ -814,11 +826,7 @@ const WhoIsTheSpyVisualization = (props: WhoIsTheSpyVisualizationProps) => {
                       color: avatarColor,
                     }}
                   >
-                    {isPlayer ? (
-                      <RoleAvatar role={godView ? role : undefined} />
-                    ) : (
-                      <PresenterIcon />
-                    )}
+                    {isPlayer ? <RoleAvatar role={godView ? role : undefined} /> : <PresenterIcon />}
                   </SampleAvatar>
                   <div className="card">
                     <div className="header">

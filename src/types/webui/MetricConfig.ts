@@ -1,4 +1,4 @@
-import { CreateSceneParams, getRoleAgentConfigsMapFromCreateSceneParams } from '@/types/server/CreateSceneParams';
+import { CreateSceneParams } from '@/types/server/CreateSceneParams';
 import Scene from '@/types/server/meta/Scene';
 
 export interface WebUIMetricConfig {
