@@ -6,5 +6,7 @@ export interface DefaultProcessingVisualizationComponentProps {
   scene: Scene;
   createSceneParams: CreateSceneParams;
   logs: SceneActionLog[];
+  targetAgentId?: string;
+  playerMode: boolean;
   needScrollToLog?: (logId: string) => void;
 }

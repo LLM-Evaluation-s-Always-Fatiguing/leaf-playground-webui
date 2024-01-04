@@ -162,6 +162,7 @@ const AgentCard = (props: AgentCardProps) => {
 
   const isAddCard = props.role === 'add';
   const displayMode = !!props.displayMode;
+  const isHuman = !!props.sceneAgentMeta?.is_human;
 
   const requiredBackendConfigs = useMemo(() => {
     if (!props.sceneAgentConfig) return [];
@@ -171,8 +172,6 @@ const AgentCard = (props: AgentCardProps) => {
   const displayKV = Object.entries(props.sceneAgentConfig?.config_data.ai_backend_config || {}).filter(([key]) =>
     requiredBackendConfigs.includes(key)
   );
-
-  const isHuman = !!props.sceneAgentMeta?.is_human;
 
   return (
     <Card

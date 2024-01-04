@@ -4,10 +4,18 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import SceneLog, { SceneActionLog, SceneLogType, SceneSystemLog, SceneSystemLogEvent } from '@/types/server/Log';
 import { SceneTaskStatus } from '@/types/server/SceneTask';
-import { WebsocketMessage, WebsocketMessageOperation } from '@/types/server/WebsocketMessage';
+import {
+  WebsocketDataMessage,
+  WebsocketEvent,
+  WebsocketEventMessage,
+  WebsocketMessage,
+  WebsocketMessageOperation,
+  WebsocketMessageType,
+} from '@/types/server/WebsocketMessage';
 import { SceneMetricConfig } from '@/types/server/config/Metric';
 import { SceneMetricDefinition } from '@/types/server/meta/Scene';
 import { Button, message } from 'antd';
+import { Input } from '@formily/antd-v5';
 import styled from '@emotion/styled';
 import { MdClose, MdPerson3 } from 'react-icons/md';
 import JSONViewModal from '@/components/common/JSONViewModal';
@@ -118,6 +126,22 @@ const ConsoleArea = styled.div`
 
     z-index: 5;
   }
+
+  .inputBar {
+    flex-shrink: 0;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+    background: ${(props) => (props.theme.isDarkMode ? 'rgba(255,255,255,0.15)' : 'white')};
+
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 12px 16px;
+
+    position: relative;
+
+    z-index: 5;
+  }
 `;
 
 const ProcessingPage = ({
@@ -134,12 +158,15 @@ const ProcessingPage = ({
   const bundlePath = searchParams.get('bundlePath');
   const agentId = searchParams.get('agentId');
 
+  const playerMode = !!agentId;
+
   const globalStore = useGlobalStore();
 
   const [loading, setLoading] = useState(true);
   const [loadingTip, setLoadingTip] = useState('Loading...');
 
   const [tryVisualizationName, setTryVisualizationName] = useState<string>();
+  const [targetAgentId, setTargetAgentId] = useState<string>(agentId || '');
 
   const consoleRef = useRef<ProcessingConsoleMethods>(null);
 
@@ -152,7 +179,7 @@ const ProcessingPage = ({
   const [simulationFinished, setSimulationFinished] = useState(false);
   const [evaluationFinished, setEvaluationFinished] = useState(false);
   const allFinished = simulationFinished && evaluationFinished;
-  const controlBarDisplay = allFinished;
+  const controlBarDisplay = !playerMode && allFinished;
 
   const [operatingLog, setOperatingLog] = useState<SceneLog>();
   const [jsonViewModalData, setJSONViewModalData] = useState<any>();
@@ -164,6 +191,14 @@ const ProcessingPage = ({
     metricsConfig: Record<string, SceneMetricConfig>;
     humanOnlyEvaluationMode: boolean;
   }>();
+
+  const needInputRef = useRef(false);
+  const [needInput, setNeedInput] = useState(false);
+  const [inputText, setInputText] = useState<string>();
+
+  const showTaskFinishedForPlayer = () => {
+    if (!playerMode) return;
+  };
 
   const checkTaskStatus = async () => {
     try {
@@ -232,7 +267,9 @@ const ProcessingPage = ({
 
       setLoadingTip('Connecting to server...');
       if (!wsRef.current) {
-        wsRef.current = new WebSocket(`ws://${serverUrl.replace(/^(http:\/\/|https:\/\/)/, '')}/ws`);
+        wsRef.current = new WebSocket(
+          `ws://${serverUrl.replace(/^(http:\/\/|https:\/\/)/, '')}/ws${agentId ? `/human/${agentId}` : ''}`
+        );
 
         wsRef.current.onopen = function () {
           wsOpenRef.current = true;
@@ -243,62 +280,84 @@ const ProcessingPage = ({
 
         wsRef.current.onmessage = async (event) => {
           const wsMessage: WebsocketMessage = JSON.parse(JSON.parse(event.data));
-          console.info('WebSocket Received Message:', wsMessage);
-          const log = wsMessage.data;
-          switch (wsMessage.operation) {
-            case WebsocketMessageOperation.CREATE:
-              switch (log.log_type) {
-                case SceneLogType.ACTION:
-                  const actionLog = log as SceneActionLog;
-                  setLogs((prev) => {
-                    return [...prev, actionLog];
-                  });
-                  break;
-                case SceneLogType.SYSTEM:
-                  const systemLog = log as SceneSystemLog;
-                  switch (systemLog.system_event) {
-                    case SceneSystemLogEvent.SIMULATION_START:
+          switch (wsMessage.type) {
+            case WebsocketMessageType.DATA:
+              const wsDataMessage = wsMessage as WebsocketDataMessage;
+              console.info('WebSocket Received Data Message:', wsDataMessage);
+              const log = wsDataMessage.data;
+              switch (wsDataMessage.operation) {
+                case WebsocketMessageOperation.CREATE:
+                  switch (log.log_type) {
+                    case SceneLogType.ACTION:
+                      const actionLog = log as SceneActionLog;
+                      if (needInputRef.current && actionLog.response.sender.id === agentId) {
+                        needInputRef.current = false;
+                        setNeedInput(false);
+                        message.warning('Input has exceeded the time limit!');
+                      }
+                      setLogs((prev) => {
+                        return [...prev, actionLog];
+                      });
                       break;
-                    case SceneSystemLogEvent.SIMULATION_FINISHED:
-                      setSimulationFinished(true);
+                    case SceneLogType.SYSTEM:
+                      const systemLog = log as SceneSystemLog;
+                      switch (systemLog.system_event) {
+                        case SceneSystemLogEvent.SIMULATION_START:
+                          break;
+                        case SceneSystemLogEvent.SIMULATION_FINISHED:
+                          setSimulationFinished(true);
+                          break;
+                        case SceneSystemLogEvent.EVALUATION_FINISHED:
+                          setEvaluationFinished(true);
+                          break;
+                        case SceneSystemLogEvent.EVERYTHING_DONE:
+                          message.success('Task Finished!');
+                          setSimulationFinished(true);
+                          setEvaluationFinished(true);
+                          break;
+                      }
                       break;
-                    case SceneSystemLogEvent.EVALUATION_FINISHED:
-                      setEvaluationFinished(true);
-                      break;
-                    case SceneSystemLogEvent.EVERYTHING_DONE:
-                      message.success('Task Finished!');
-                      setSimulationFinished(true);
-                      setEvaluationFinished(true);
+                    default:
                       break;
                   }
                   break;
-                default:
+                case WebsocketMessageOperation.UPDATE:
+                  switch (log.log_type) {
+                    case SceneLogType.ACTION:
+                      const actionLog = log as SceneActionLog;
+                      setLogs((prev) => {
+                        return prev.map((oldLog) => {
+                          if (oldLog.id === actionLog.id) {
+                            return actionLog;
+                          }
+                          return oldLog;
+                        });
+                      });
+                      setLogMetricDetailModalData((prev) => {
+                        if (prev && prev.log.id === actionLog.id) {
+                          return {
+                            ...prev,
+                            log: actionLog,
+                          };
+                        }
+                        return prev;
+                      });
+                      break;
+                    case SceneLogType.SYSTEM:
+                      break;
+                    default:
+                      break;
+                  }
                   break;
               }
               break;
-            case WebsocketMessageOperation.UPDATE:
-              switch (log.log_type) {
-                case SceneLogType.ACTION:
-                  const actionLog = log as SceneActionLog;
-                  setLogs((prev) => {
-                    return prev.map((oldLog) => {
-                      if (oldLog.id === actionLog.id) {
-                        return actionLog;
-                      }
-                      return oldLog;
-                    });
-                  });
-                  setLogMetricDetailModalData((prev) => {
-                    if (prev && prev.log.id === actionLog.id) {
-                      return {
-                        ...prev,
-                        log: actionLog,
-                      };
-                    }
-                    return prev;
-                  });
-                  break;
-                case SceneLogType.SYSTEM:
+            case WebsocketMessageType.EVENT:
+              const wsEventMessage = wsMessage as WebsocketEventMessage;
+              switch (wsEventMessage.event) {
+                case WebsocketEvent.WAIT_HUMAN_INPUT:
+                  console.info('WebSocket Received Event Message:', wsEventMessage);
+                  setNeedInput(true);
+                  needInputRef.current = true;
                   break;
                 default:
                   break;
@@ -386,6 +445,8 @@ const ProcessingPage = ({
               scene={globalStore.currentScene}
               createSceneParams={globalStore.createSceneParams}
               logs={logs}
+              targetAgentId={targetAgentId}
+              playerMode={playerMode}
               needScrollToLog={(logId) => {
                 consoleRef.current?.scrollToLog(logId);
               }}
@@ -403,7 +464,11 @@ const ProcessingPage = ({
             scene={globalStore.currentScene}
             createSceneParams={globalStore.createSceneParams}
             logs={logs}
-            targetAgentId={agentId as string}
+            targetAgentId={targetAgentId}
+            playerMode={playerMode}
+            onTargetAgentChange={(newId) => {
+              setTargetAgentId(newId);
+            }}
             onOpenJSONDetail={(log) => {
               setOperatingLog(log);
               setJSONViewModalOpen(true);
@@ -436,6 +501,37 @@ const ProcessingPage = ({
                 Complete evaluation and generate report
               </Button>
             )}
+          </div>
+        )}
+        {needInput && (
+          <div className="inputBar">
+            <Input.TextArea
+              autoSize={{
+                minRows: 1,
+                maxRows: 3,
+              }}
+              value={inputText}
+              onChange={(e) => {
+                setInputText(e.target.value);
+              }}
+            />
+            <Button
+              style={{
+                alignSelf: 'flex-end',
+                marginLeft: '12px'
+              }}
+              type={"primary"}
+              onClick={() => {
+                if (wsRef.current && inputText) {
+                  wsRef.current?.send(inputText);
+                  needInputRef.current = false;
+                  setNeedInput(false);
+                  setInputText(undefined);
+                }
+              }}
+            >
+              Send
+            </Button>
           </div>
         )}
       </ConsoleArea>

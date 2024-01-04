@@ -1,3 +1,4 @@
+import WebUIAgentInstance from '@/types/api-router/webui/AgentInstance';
 import SceneAgentConfig from '@/types/server/config/Agent';
 import { Card } from 'antd';
 import styled from '@emotion/styled';
@@ -53,7 +54,7 @@ const Content = styled.div`
 `;
 
 interface PlayerCardProps {
-  agent: SceneAgentConfig;
+  agent: WebUIAgentInstance;
   godView: boolean;
   live: boolean;
   win: boolean;
@@ -80,7 +81,7 @@ const PlayerCard = (props: PlayerCardProps) => {
         <div
           className="avatar"
           style={{
-            color: props.agent.config_data.chart_major_color,
+            color: props.agent.config.config_data.chart_major_color,
           }}
         >
           <RoleAvatar role={props.godView ? props.role : undefined} />
@@ -90,7 +91,7 @@ const PlayerCard = (props: PlayerCardProps) => {
             </div>
           )}
         </div>
-        <div className="name">{props.agent.config_data.profile.name}</div>
+        <div className="name">{props.agent.config.config_data.profile.name}</div>
         {props.godView ? (
           <>
             <div className="role">{props.role}</div>

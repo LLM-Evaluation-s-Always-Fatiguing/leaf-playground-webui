@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getRoleAgentConfigsMapFromCreateSceneParams } from '@/types/server/CreateSceneParams';
+import { SceneTaskStatus } from '@/types/server/SceneTask';
 import { WebsocketMessage } from '@/types/server/WebsocketMessage';
 import { Card, Collapse, Flex, Space, message } from 'antd';
 import styled from '@emotion/styled';
@@ -104,28 +105,37 @@ const ProcessingPage = ({
   const wsOpenRef = useRef(false);
   const [wsConnected, setWSConnected] = useState(false);
 
-  const pageFinished = useRef(false);
+  const pageFinishedRef = useRef(false);
+  const [pageFinished, setPageFinished] = useState(false);
 
   const checkAgentsStatus = async () => {
     try {
       let wait = true;
       while (wait) {
-        if (pageFinished.current || !pageVisible.current) {
+        if (pageFinishedRef.current || !pageVisible.current) {
           wait = false;
           return;
         }
-        const agentConnectedStatusResp = await ServerAPI.sceneTask.getAgentConnectedStatus(serverUrl || '');
-        setAgentConnectedMap(agentConnectedStatusResp);
-        const allConnected = Object.entries(agentConnectedStatusResp).every(([agentId, connected]) => connected);
+        const taskStatus = await ServerAPI.sceneTask.getStatus(taskId);
+        let allConnected = taskStatus.status !== SceneTaskStatus.PENDING;
+        if (!allConnected) {
+          const agentConnectedStatusResp = await ServerAPI.sceneTask.getAgentConnectedStatus(serverUrl || '');
+          setAgentConnectedMap(agentConnectedStatusResp);
+          allConnected = Object.entries(agentConnectedStatusResp).every(([agentId, connected]) => connected);
+        } else {
+          setAgentConnectedMap({});
+        }
         if (!allConnected) {
           await new Promise((resolve) => setTimeout(resolve, 1500));
         } else {
+          pageFinishedRef.current = true;
+          setPageFinished(true);
           router.push(
             `/processing/${taskId}?serverUrl=${encodeURIComponent(serverUrl!)}&bundlePath=${encodeURIComponent(
               bundlePath!
             )}${agentId ? `&agentId=${encodeURIComponent(agentId)}` : ''}`
           );
-          pageFinished.current = true;
+          wait = false;
         }
       }
     } catch (e) {
@@ -184,8 +194,8 @@ const ProcessingPage = ({
             wsOpenRef.current = false;
             setWSConnected(false);
             console.info('WebSocket closed.');
-            if (pageFinished.current) return;
-            pageFinished.current = true;
+            if (pageFinishedRef.current) return;
+            pageFinishedRef.current = true;
             message.error(
               "The connection to the server has failed. It's possible that it's currently in use. Please refresh your page and give it another shot.",
               5
@@ -284,7 +294,10 @@ const ProcessingPage = ({
                                   role={'agent'}
                                   showConnectionStatus={true}
                                   joinLink={sceneAgentMeta?.is_human ? joinLink : undefined}
-                                  connected={you ? wsConnected : agentConnectedMap[agentConfig.config_data.profile.id]}
+                                  connected={
+                                    pageFinished ||
+                                    (you ? wsConnected : agentConnectedMap[agentConfig.config_data.profile.id])
+                                  }
                                   youMark={you}
                                   sceneAgentMeta={sceneAgentMeta}
                                   sceneAgentConfig={agentConfig}

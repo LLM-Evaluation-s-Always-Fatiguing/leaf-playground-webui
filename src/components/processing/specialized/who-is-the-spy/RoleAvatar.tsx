@@ -1,3 +1,4 @@
+import { IoMdPerson } from 'react-icons/io';
 import { RiRobot2Fill } from 'react-icons/ri';
 import { BlankAvatar } from '@/components/processing/specialized/who-is-the-spy/icons/BlankAvatar';
 import { CivilianAvatar } from '@/components/processing/specialized/who-is-the-spy/icons/CivilianAvatar';

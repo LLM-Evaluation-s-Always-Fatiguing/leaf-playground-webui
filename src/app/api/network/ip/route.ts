@@ -1,28 +1,31 @@
-import os from 'os';
+import * as dgram from 'dgram';
 
-const getLocalIpAddress = () => {
-  const networkInterfaces = os.networkInterfaces();
+const getLocalIpAddress = (): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const socket = dgram.createSocket('udp4');
 
-  for (const interfaceName in networkInterfaces) {
-    const networkInterface = networkInterfaces[interfaceName];
+    socket.on('error', (err) => {
+      socket.close();
+      reject(`Error: ${err}`);
+    });
 
-    if (networkInterface) {
-      for (const interfaceInfo of networkInterface) {
-        const { family, address, internal } = interfaceInfo;
-        if (family === 'IPv4' && address !== '127.0.0.1' && !internal) {
-          return address;
-        }
+    socket.connect(80, "8.8.8.8", () => {
+      try {
+        const localIp = socket.address().address;
+        socket.close();
+        resolve(localIp);
+      } catch (err) {
+        socket.close();
+        reject(`Error: ${err}`);
       }
-    }
-  }
-
-  return '127.0.0.1';
+    });
+  });
 };
 
 
 export async function GET() {
   try {
-    return new Response(getLocalIpAddress(), { status: 200, headers: { 'Content-Type': 'text/plain' } });
+    return new Response(await getLocalIpAddress(), { status: 200, headers: { 'Content-Type': 'text/plain' } });
   } catch (err) {
     console.error(err);
     return new Response(JSON.stringify({ error: 'Error get IP' }), {
@@ -31,3 +34,5 @@ export async function GET() {
     });
   }
 }
+
+export const dynamic = 'force-dynamic'

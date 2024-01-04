@@ -249,8 +249,8 @@ const MetricDetail = styled.div`
         display: flex;
         flex-direction: row;
         justify-content: flex-start;
-        align-items: center;
-        height: 36px;
+        align-items: flex-start;
+        min-height: 36px;
       }
     }
 

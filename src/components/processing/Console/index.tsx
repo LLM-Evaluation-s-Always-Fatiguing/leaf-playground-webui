@@ -1,7 +1,7 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { getAllAgentInstanceFrom } from '@/types/api-router/webui/AgentInstance';
 import { CreateSceneParams, getEnabledMetricsFromCreateSceneParams } from '@/types/server/CreateSceneParams';
 import { SceneActionLog } from '@/types/server/Log';
-import SceneAgentConfig from '@/types/server/config/Agent';
 import { SceneMetricConfig } from '@/types/server/config/Metric';
 import Scene, { SceneMetricDefinition } from '@/types/server/meta/Scene';
 import { Segmented, Space, Tabs } from 'antd';
@@ -15,7 +15,6 @@ import { TruncatableParagraphEllipsisStatus } from '@/components/processing/Cons
 import HumanEvaluationModeIcon from '@/components/processing/common/icons/HumanEvaluationModeIcon';
 import NoneEvaluationModeIcon from '@/components/processing/common/icons/NoneEvaluationModeIcon';
 import StandardEvaluationModeIcon from '@/components/processing/common/icons/StandardEvaluationModeIcon';
-import useGlobalStore from '@/stores/global';
 
 const Container = styled.div`
   width: 100%;
@@ -167,7 +166,9 @@ interface ProcessingConsoleProps {
   scene: Scene;
   createSceneParams: CreateSceneParams;
   logs: SceneActionLog[];
-  targetAgentId?: string;
+  targetAgentId: string;
+  playerMode: boolean;
+  onTargetAgentChange: (agentId: string) => void;
   onOpenJSONDetail: (log: SceneActionLog) => void;
   onOpenMetricDetail: (
     log: SceneActionLog,
@@ -183,7 +184,6 @@ export type ProcessingConsoleMethods = {
 
 const ProcessingConsole = forwardRef<ProcessingConsoleMethods, ProcessingConsoleProps>((props, ref) => {
   const theme = useTheme();
-  const globalStore = useGlobalStore();
 
   const logListMeasurerCache = useMemo(() => {
     return new CellMeasurerCache({
@@ -191,23 +191,28 @@ const ProcessingConsole = forwardRef<ProcessingConsoleMethods, ProcessingConsole
       defaultHeight: 120,
     });
   }, []);
+  useEffect(() => {
+    logListMeasurerCache.clearAll();
+  }, [props.targetAgentId]);
   const listRef = useRef<List>(null);
 
-  const [activeKey, setActiveKey] = React.useState<string>('');
   const [autoPlay, setAutoPlay] = useState(true);
   const [evaluationMode, setEvaluationMode] = useState(false);
   const [humanOnlyEvaluationMode, setHumanOnlyEvaluationMode] = useState(false);
-  const hasEnabledMetric = !props.targetAgentId && getEnabledMetricsFromCreateSceneParams(props.createSceneParams).length > 0;
+  const hasEnabledMetric =
+    !props.targetAgentId && getEnabledMetricsFromCreateSceneParams(props.createSceneParams).length > 0;
   const [highlightedLogId, setHighlightedLogId] = useState<string>();
 
   const displayLogs = useMemo(() => {
-    if (!activeKey) {
+    if (!props.targetAgentId) {
       return props.logs;
     }
     return props.logs.filter(
-      (log) => log.response.sender.id === activeKey || log.response.receivers.map((r) => r.id).includes(activeKey)
+      (log) =>
+        log.response.sender.id === props.targetAgentId ||
+        log.response.receivers.map((r) => r.id).includes(props.targetAgentId || '')
     );
-  }, [props.logs, activeKey]);
+  }, [props.logs, props.targetAgentId]);
 
   const [logItemEllipsisCache, setLogItemEllipsisCache] = React.useState<
     Record<string, TruncatableParagraphEllipsisStatus>
@@ -285,7 +290,7 @@ const ProcessingConsole = forwardRef<ProcessingConsoleMethods, ProcessingConsole
     if (autoPlay && listRef.current) {
       listRef.current.scrollToRow(props.logs.length - 1);
     }
-  }, [props.logs, autoPlay, activeKey]);
+  }, [props.logs, autoPlay, props.targetAgentId]);
 
   const logsAreaMouseDownRef = useRef(false);
 
@@ -301,11 +306,9 @@ const ProcessingConsole = forwardRef<ProcessingConsoleMethods, ProcessingConsole
     };
   }, []);
 
-  const allAgents = Object.entries(
-    globalStore.createSceneParams?.scene_obj_config.scene_config_data.roles_config || {}
-  ).reduce((total, [roleName, roleConfig]) => {
-    return [...total, ...(roleConfig.agents_config || [])];
-  }, [] as SceneAgentConfig[]);
+  const allAgents = useMemo(() => {
+    return getAllAgentInstanceFrom(props.scene, props.createSceneParams);
+  }, [props.scene, props.createSceneParams]);
 
   const processStatusStr = props.wsConnected
     ? props.simulationFinished && props.evaluationFinished
@@ -435,12 +438,12 @@ const ProcessingConsole = forwardRef<ProcessingConsoleMethods, ProcessingConsole
       </Header>
       <Tabs
         type="card"
-        activeKey={props.targetAgentId || activeKey}
+        activeKey={props.targetAgentId}
         onChange={(newActiveKey) => {
-          setActiveKey(newActiveKey);
+          props.onTargetAgentChange(newActiveKey === 'All' ? '' : newActiveKey);
         }}
         items={[
-          ...(props.targetAgentId
+          ...(props.playerMode
             ? []
             : [
                 {
@@ -448,29 +451,31 @@ const ProcessingConsole = forwardRef<ProcessingConsoleMethods, ProcessingConsole
                   key: '',
                 },
               ]),
-          ...allAgents.filter((agent)=>{
-            if (props.targetAgentId) {
-              return agent.config_data.profile.id === props.targetAgentId
-            }
-            return true;
-          }).map((a) => {
-            return {
-              label: (
-                <Space>
-                  <div
-                    style={{
-                      width: '10px',
-                      height: '10px',
-                      borderRadius: '50%',
-                      background: a.config_data.chart_major_color,
-                    }}
-                  />
-                  {a.config_data.profile.name}
-                </Space>
-              ),
-              key: a.config_data.profile.id,
-            };
-          }),
+          ...allAgents
+            .filter((agent) => {
+              if (props.playerMode) {
+                return agent.config.config_data.profile.id === props.targetAgentId;
+              }
+              return true;
+            })
+            .map((a) => {
+              return {
+                label: (
+                  <Space>
+                    <div
+                      style={{
+                        width: '10px',
+                        height: '10px',
+                        borderRadius: '50%',
+                        background: a.config.config_data.chart_major_color,
+                      }}
+                    />
+                    {`${a.config.config_data.profile.name}`}
+                  </Space>
+                ),
+                key: a.config.config_data.profile.id,
+              };
+            }),
         ]}
       />
       <LogsArea

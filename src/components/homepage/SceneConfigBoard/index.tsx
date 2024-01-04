@@ -847,10 +847,10 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
           operatingRoleName && operatingAgent ? roleAgentConfigsMap[operatingRoleName][operatingAgent.index] : undefined
         }
         operatingAgentMetadata={operatingAgentMetadata}
-        otherAgentNames={Object.entries(roleAgentConfigsMap).reduce((total, [key, agents]) => {
+        allAgentNames={Object.entries(roleAgentConfigsMap).reduce((total, [key, agents]) => {
           return [...total, ...agents.map((agent) => agent.config_data.profile.name)];
         }, [] as string[])}
-        otherAgentColors={Object.entries(roleAgentConfigsMap).reduce((total, [key, agents]) => {
+        allAgentColors={Object.entries(roleAgentConfigsMap).reduce((total, [key, agents]) => {
           return [...total, ...agents.map((agent) => agent.config_data.chart_major_color!)];
         }, [] as string[])}
         onSubmit={(agentConfig) => {

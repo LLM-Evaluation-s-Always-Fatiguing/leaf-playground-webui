@@ -6,6 +6,7 @@ import SceneAgentMetadata from '@/types/server/meta/Agent';
 import { Spin, message } from 'antd';
 import { Form } from '@formily/antd-v5';
 import { createForm, onFormValuesChange } from '@formily/core';
+import cloneDeep from 'lodash/cloneDeep';
 import CustomScrollableAntdModal from '@/components/basic/CustomScrollableAntdModal';
 import FormilyDefaultSchemaField from '@/components/formily/FormilyDefaultSchemaField';
 import { getRandomAgentColor } from '@/utils/color';
@@ -16,8 +17,8 @@ interface CreateOrUpdateAgentModalProps {
   open: boolean;
   sceneAgentConfig?: SceneAgentConfig;
   operatingAgentMetadata?: SceneAgentMetadata;
-  otherAgentNames: string[];
-  otherAgentColors: string[];
+  allAgentNames: string[];
+  allAgentColors: string[];
   onSubmit: (sceneAgent: SceneAgentConfig) => void;
   onNeedClose: () => void;
 }
@@ -26,8 +27,8 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
   open,
   sceneAgentConfig,
   operatingAgentMetadata,
-  otherAgentNames,
-  otherAgentColors,
+  allAgentNames,
+  allAgentColors,
   onSubmit,
   onNeedClose,
 }) => {
@@ -48,7 +49,7 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
           profile: {
             id: `agent_${nanoid()}`,
           },
-          chart_major_color: getRandomAgentColor(otherAgentColors),
+          chart_major_color: getRandomAgentColor(allAgentColors),
         } as any),
       effects() {
         onFormValuesChange((form) => {
@@ -76,13 +77,16 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
     if (!operatingAgentMetadata) return;
     try {
       await form.validate();
-      if (otherAgentNames.includes(form.values.profile.name.trim())) {
+      const newName = form.values.profile.name.trim();
+      const formData = cloneDeep(form.values);
+      formData.profile.name = newName;
+      if (sceneAgentConfig?.config_data.profile.name !== newName && allAgentNames.includes(newName)) {
         message.error('Agent name already exists');
         return;
       }
       onSubmit({
         obj_for_import: operatingAgentMetadata?.obj_for_import,
-        config_data: form.values,
+        config_data: formData,
       });
     } catch (e) {
       console.error(e);

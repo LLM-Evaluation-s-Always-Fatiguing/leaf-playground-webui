@@ -2,8 +2,8 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
+import WebUIAgentInstance, { getAllAgentInstanceFrom } from '@/types/api-router/webui/AgentInstance';
 import { SceneActionLog } from '@/types/server/Log';
-import SceneAgentConfig from '@/types/server/config/Agent';
 import { Button, Slider, Tabs } from 'antd';
 import { useTheme } from 'antd-style';
 import styled from '@emotion/styled';
@@ -302,7 +302,7 @@ interface GameAgentsInfo {
   winners: string[];
 }
 
-function calculateGameAgentsInfo(gameLogs: SceneActionLog[], allAgent: SceneAgentConfig[]) {
+function calculateGameAgentsInfo(gameLogs: SceneActionLog[], allAgent: WebUIAgentInstance[]) {
   const info: GameAgentsInfo = {
     agentRoleMap: {},
     keys: {
@@ -311,7 +311,7 @@ function calculateGameAgentsInfo(gameLogs: SceneActionLog[], allAgent: SceneAgen
     },
     agentLiveStatus: allAgent.reduce(
       (acc, agent) => {
-        acc[agent.config_data.profile.name] = true;
+        acc[agent.config.config_data.profile.name] = true;
         return acc;
       },
       {} as Record<string, boolean>
@@ -517,18 +517,13 @@ const WhoIsTheSpyVisualization = (props: WhoIsTheSpyVisualizationProps) => {
   const [autoPlay, setAutoPlay] = useState<boolean>(true);
   const chatScrollAreaRef = useRef<HTMLDivElement>(null);
 
-  const { allAgents, deskSeatAgentsMap } = useMemo(() => {
-    const agents: SceneAgentConfig[] = [];
-    Object.entries(props.createSceneParams.scene_obj_config.scene_config_data.roles_config).forEach(
-      ([roleName, roleConfig]) => {
-        agents.push(...(roleConfig.agents_config || []));
-      }
-    );
+  const { allAgents, agentMapKeyById, deskSeatAgentsMap } = useMemo(() => {
+    const agents = getAllAgentInstanceFrom(props.scene, props.createSceneParams);
     const seatsIndex = assignSeats(agents.length);
-    const topSeatAgents: SceneAgentConfig[] = [];
-    const rightSeatAgents: SceneAgentConfig[] = [];
-    const bottomSeatAgents: SceneAgentConfig[] = [];
-    const leftSeatAgents: SceneAgentConfig[] = [];
+    const topSeatAgents: WebUIAgentInstance[] = [];
+    const rightSeatAgents: WebUIAgentInstance[] = [];
+    const bottomSeatAgents: WebUIAgentInstance[] = [];
+    const leftSeatAgents: WebUIAgentInstance[] = [];
     agents.forEach((agent, index) => {
       const seatIndex = seatsIndex[index];
       if (seatIndex < 5) {
@@ -543,14 +538,15 @@ const WhoIsTheSpyVisualization = (props: WhoIsTheSpyVisualizationProps) => {
     });
     return {
       allAgents: agents,
+      agentMapKeyById: keyBy(agents, (c) => c.config.config_data.profile.id),
       deskSeatAgentsMap: {
         top: topSeatAgents,
         right: rightSeatAgents,
         bottom: bottomSeatAgents,
         left: leftSeatAgents,
-      } as Record<string, SceneAgentConfig[]>,
+      } as Record<string, WebUIAgentInstance[]>,
     };
-  }, [props.createSceneParams]);
+  }, [props.scene, props.createSceneParams]);
 
   const splitGamesLogs = useMemo(() => {
     return splitLogs(props.logs, 'game');
@@ -619,10 +615,10 @@ const WhoIsTheSpyVisualization = (props: WhoIsTheSpyVisualizationProps) => {
   }, [roundProgress, allAgents]);
   const sortedAllAgents = useMemo(() => {
     return [...allAgents].sort((a, b) => {
-      const aLive = currentGameInfo.agentLiveStatus[a.config_data.profile.name];
-      const bLive = currentGameInfo.agentLiveStatus[b.config_data.profile.name];
-      const aWin = currentGameInfo.winners.includes(a.config_data.profile.name);
-      const bWin = currentGameInfo.winners.includes(b.config_data.profile.name);
+      const aLive = currentGameInfo.agentLiveStatus[a.config.config_data.profile.name];
+      const bLive = currentGameInfo.agentLiveStatus[b.config.config_data.profile.name];
+      const aWin = currentGameInfo.winners.includes(a.config.config_data.profile.name);
+      const bWin = currentGameInfo.winners.includes(b.config.config_data.profile.name);
       if (aWin && !bWin) return -1;
       else if (!aWin && bWin) return 1;
       if (aLive && !bLive) return -1;
@@ -713,7 +709,7 @@ const WhoIsTheSpyVisualization = (props: WhoIsTheSpyVisualizationProps) => {
                 return (
                   <div key={seatSide} className={`${seatSide}Seats`}>
                     {deskSeatAgentsMap[seatSide].map((agent, index) => {
-                      const agentName = agent.config_data.profile.name;
+                      const agentName = agent.config.config_data.profile.name;
                       let agentStatus: 'silence' | 'speaking' | 'done' = 'silence';
                       if (currentRound !== 1) {
                         switch (roundProgress.progress) {
@@ -729,7 +725,9 @@ const WhoIsTheSpyVisualization = (props: WhoIsTheSpyVisualizationProps) => {
                               const spokenIds = roundProgress[roundProgress.progress].logs[
                                 roundProgress[roundProgress.progress].logs.length - 1
                               ].map((log) => log.response.sender.id);
-                              agentStatus = spokenIds.includes(agent.config_data.profile.id) ? 'done' : 'speaking';
+                              agentStatus = spokenIds.includes(agent.config.config_data.profile.id)
+                                ? 'done'
+                                : 'speaking';
                             }
                             break;
                           default:
@@ -741,10 +739,10 @@ const WhoIsTheSpyVisualization = (props: WhoIsTheSpyVisualizationProps) => {
                       const role = currentGameInfo.agentRoleMap[agentName];
                       return (
                         <SampleStatusAvatar
-                          key={agent.config_data.profile.id}
+                          key={agent.config.config_data.profile.id}
                           status={agentStatus}
                           style={{
-                            color: agent.config_data.chart_major_color,
+                            color: agent.config.config_data.chart_major_color,
                             ...(live ? {} : { opacity: 0.35, filter: 'grayscale(60%)' }),
                           }}
                         >
@@ -769,14 +767,14 @@ const WhoIsTheSpyVisualization = (props: WhoIsTheSpyVisualizationProps) => {
             </div>
             <div className="playersArea">
               {sortedAllAgents.map((agent) => {
-                const agentName = agent.config_data.profile.name;
+                const agentName = agent.config.config_data.profile.name;
                 const live = currentGameInfo.agentLiveStatus[agentName];
                 const win = currentGameInfo.winners.includes(agentName);
                 const role = currentGameInfo.agentRoleMap[agentName];
                 const gameKey = role !== 'blank' ? currentGameInfo.keys[role] : '';
                 return (
                   <PlayerCard
-                    key={agent.config_data.profile.id}
+                    key={agent.config.config_data.profile.id}
                     godView={godView}
                     live={live}
                     win={win}
@@ -804,12 +802,10 @@ const WhoIsTheSpyVisualization = (props: WhoIsTheSpyVisualizationProps) => {
           >
             {currentRoundLogs.map((log, index) => {
               const isPlayer = log.action_belonged_chain?.startsWith('player');
-              const agentMap = keyBy(allAgents, (c) => c.config_data.profile.id);
-              const avatarColor = isPlayer
-                ? agentMap[log.response.sender.id]?.config_data.chart_major_color
-                : theme.colorPrimary;
+              const agentInstance = agentMapKeyById[log.response.sender.id];
+              const avatarColor = isPlayer ? agentInstance?.config.config_data.chart_major_color : theme.colorPrimary;
               const role = isPlayer
-                ? currentGameInfo.agentRoleMap[agentMap[log.response.sender.id]?.config_data.profile.name]
+                ? currentGameInfo.agentRoleMap[agentInstance?.config.config_data.profile.name]
                 : undefined;
               return (
                 <div key={index} className={isPlayer ? 'player' : 'moderator'}>
@@ -818,7 +814,11 @@ const WhoIsTheSpyVisualization = (props: WhoIsTheSpyVisualizationProps) => {
                       color: avatarColor,
                     }}
                   >
-                    {isPlayer ? <RoleAvatar role={godView ? role : undefined} /> : <PresenterIcon />}
+                    {isPlayer ? (
+                      <RoleAvatar role={godView ? role : undefined} />
+                    ) : (
+                      <PresenterIcon />
+                    )}
                   </SampleAvatar>
                   <div className="card">
                     <div className="header">

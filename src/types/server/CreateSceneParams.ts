@@ -2,7 +2,6 @@ import SceneAgentConfig from '@/types/server/config/Agent';
 import { MetricEvaluatorObjsConfig } from '@/types/server/config/Evaluator';
 import { SceneReporterConfig } from '@/types/server/config/Reporter';
 import { SceneObjConfig } from '@/types/server/config/Scene';
-import Scene, { SceneMetricDefinition } from '@/types/server/meta/Scene';
 
 export interface CreateSceneParams {
   scene_obj_config: SceneObjConfig;
