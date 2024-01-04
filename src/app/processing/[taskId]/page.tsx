@@ -290,12 +290,6 @@ const ProcessingPage = ({
                   switch (log.log_type) {
                     case SceneLogType.ACTION:
                       const actionLog = log as SceneActionLog;
-                      if (needInputRef.current && actionLog.response.sender.id === agentId) {
-                        needInputRef.current = false;
-                        setNeedInput(false);
-                        setInputText(undefined);
-                        message.warning('Input has exceeded the time limit!', 3);
-                      }
                       setLogs((prev) => {
                         return [...prev, actionLog];
                       });
@@ -359,6 +353,15 @@ const ProcessingPage = ({
                   console.info('WebSocket Received Event Message:', wsEventMessage);
                   setNeedInput(true);
                   needInputRef.current = true;
+                  break;
+                case WebsocketEvent.DISABLE_HUMAN_INPUT:
+                  console.info('WebSocket Received Event Message:', wsEventMessage);
+                  if (needInputRef.current) {
+                    needInputRef.current = false;
+                    setNeedInput(false);
+                    setInputText(undefined);
+                    message.warning('Input has exceeded the time limit!', 3);
+                  }
                   break;
                 default:
                   break;
