@@ -293,7 +293,8 @@ const ProcessingPage = ({
                       if (needInputRef.current && actionLog.response.sender.id === agentId) {
                         needInputRef.current = false;
                         setNeedInput(false);
-                        message.warning('Input has exceeded the time limit!');
+                        setInputText(undefined);
+                        message.warning('Input has exceeded the time limit!', 3);
                       }
                       setLogs((prev) => {
                         return [...prev, actionLog];
@@ -518,9 +519,9 @@ const ProcessingPage = ({
             <Button
               style={{
                 alignSelf: 'flex-end',
-                marginLeft: '12px'
+                marginLeft: '12px',
               }}
-              type={"primary"}
+              type={'primary'}
               onClick={() => {
                 if (wsRef.current && inputText) {
                   wsRef.current?.send(inputText);

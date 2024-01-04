@@ -109,6 +109,7 @@ const ReferencesArea = styled.div`
     align-items: stretch;
     overflow: hidden auto;
     padding: 9px 16px;
+    gap: 10px;
   }
 `;
 
@@ -214,6 +215,7 @@ const MetricDetail = styled.div`
     flex-direction: column;
     justify-content: flex-start;
     align-items: stretch;
+    flex-shrink: 0;
 
     .evaluatorArea {
       display: flex;
@@ -235,6 +237,7 @@ const MetricDetail = styled.div`
         justify-content: flex-end;
         align-items: center;
         margin-right: 10px;
+        flex-shrink: 0;
       }
 
       .value {
@@ -242,9 +245,11 @@ const MetricDetail = styled.div`
         flex-direction: row;
         justify-content: flex-start;
         align-items: center;
+        flex-shrink: 0;
       }
 
       .reason {
+        margin-top: 6px;
         width: 100%;
         display: flex;
         flex-direction: row;
@@ -496,15 +501,15 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
           </TopArea>
         </Resizable>
         <BottomArea>
-          <GroundTruthArea>
-            <PartHeader>
-              <div className="title">Ground Truth</div>
-            </PartHeader>
-            <div className="content">
-              <ContentItem>
-                <div className={'head'}>
-                  <div />
-                  {props.log?.ground_truth && (
+          {props.log?.ground_truth && (
+            <GroundTruthArea>
+              <PartHeader>
+                <div className="title">Ground Truth</div>
+              </PartHeader>
+              <div className="content">
+                <ContentItem>
+                  <div className={'head'}>
+                    <div />
                     <Button
                       size="small"
                       type="text"
@@ -522,17 +527,21 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
                         props.onOpenJSONDetail(props.log.ground_truth);
                       }}
                     />
-                  )}
-                </div>
-                {props.log && (
-                  <div className={'body'}>
-                    {props.log.ground_truth ? getSceneLogGroundTruthDisplayContent(props.log.ground_truth, true) : ''}
                   </div>
-                )}
-              </ContentItem>
-            </div>
-          </GroundTruthArea>
-          <MetricsArea>
+                  <div className={'body'}>{getSceneLogGroundTruthDisplayContent(props.log.ground_truth, true)}</div>
+                </ContentItem>
+              </div>
+            </GroundTruthArea>
+          )}
+          <MetricsArea
+            style={
+              props.log?.ground_truth
+                ? {}
+                : {
+                    width: '100%',
+                  }
+            }
+          >
             <Tabs
               defaultActiveKey={enabledMetrics[0]?.name}
               size={'small'}
@@ -674,9 +683,11 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
                                           }}
                                         >
                                           <div className="label">Value:</div>
-                                          {props.humanOnlyEvaluationMode ? '******' : (metric.record_display_type
-                                            ? getMetricDisplayComponent(metric.record_display_type, record.value)
-                                            : record.value.toString())}
+                                          {props.humanOnlyEvaluationMode
+                                            ? '******'
+                                            : metric.record_display_type
+                                              ? getMetricDisplayComponent(metric.record_display_type, record.value)
+                                              : record.value.toString()}
                                         </div>
                                         <div className="reason">
                                           <div className="label">Reason:</div>
