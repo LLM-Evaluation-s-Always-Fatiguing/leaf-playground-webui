@@ -750,7 +750,7 @@ const WhoIsTheSpyVisualization = (props: WhoIsTheSpyVisualizationProps) => {
                       return (
                         <SampleStatusAvatar
                           key={agent.config.config_data.profile.id}
-                          status={agentStatus}
+                          status={live ? agentStatus : 'silence'}
                           style={{
                             color: agent.config.config_data.chart_major_color,
                             ...(live ? {} : { opacity: 0.35, filter: 'grayscale(60%)' }),
