@@ -51,6 +51,11 @@ const Content = styled.div`
     width: 100%;
     height: 60px;
   }
+
+  .youMark {
+    margin-top: 4px;
+    font-weight: 500;
+  }
 `;
 
 interface PlayerCardProps {
@@ -60,6 +65,7 @@ interface PlayerCardProps {
   win: boolean;
   role: 'civilian' | 'spy' | 'blank';
   gameKey: string;
+  you: boolean;
 }
 
 const PlayerCard = (props: PlayerCardProps) => {
@@ -70,6 +76,11 @@ const PlayerCard = (props: PlayerCardProps) => {
         margin: 6,
         cursor: 'default',
         ...(props.live ? {} : { opacity: 0.35, filter: 'grayscale(60%)' }),
+        ...(props.you
+          ? {
+              borderColor: props.agent.config.config_data.chart_major_color,
+            }
+          : {}),
       }}
       bodyStyle={{
         width: 100,
@@ -92,14 +103,11 @@ const PlayerCard = (props: PlayerCardProps) => {
           )}
         </div>
         <div className="name">{props.agent.config.config_data.profile.name}</div>
-        {props.godView ? (
-          <>
-            <div className="role">{props.role}</div>
-            <div className="key">{<Markdown content={props.gameKey} useLocalAssets={true} limitHeight={true} />}</div>
-          </>
-        ) : (
-          <></>
+        {props.godView && <div className="role">{props.role}</div>}
+        {(props.you || props.godView) && (
+          <div className="key">{<Markdown content={props.gameKey} useLocalAssets={true} limitHeight={true} />}</div>
         )}
+        {props.you && <div className="youMark">You</div>}
       </Content>
     </Card>
   );

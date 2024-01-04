@@ -59,6 +59,7 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
     >
       <LoadingOverlay spinning={loading} tip={'Operating...'} />
       <Table
+        rowKey={"id"}
         scroll={{
           y: '65vh',
         }}

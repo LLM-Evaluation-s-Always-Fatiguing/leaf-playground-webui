@@ -1,7 +1,7 @@
 'use client';
 
 import React, { PropsWithChildren, useEffect, useRef, useState } from 'react';
-import { Typography, message } from 'antd';
+import { Typography, Image } from 'antd';
 import { useTheme } from 'antd-style';
 import styled from '@emotion/styled';
 import 'katex/dist/katex.min.css';
@@ -187,14 +187,14 @@ export const LocalImage = (
   delete imageProps.node;
   // eslint-disable-next-line @next/next/no-img-element
   return (
-    <img
+    <Image
       width={'100%'}
       height={'100%'}
       style={{
         objectFit: 'contain',
       }}
       alt={''}
-      {...imageProps}
+      {...imageProps as any}
       src={realSrc}
     />
   );

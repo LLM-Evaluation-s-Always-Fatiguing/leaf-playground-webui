@@ -791,6 +791,7 @@ const WhoIsTheSpyVisualization = (props: WhoIsTheSpyVisualizationProps) => {
                     role={role}
                     gameKey={gameKey}
                     agent={agent}
+                    you={props.playerMode && props.targetAgentId === agent.config.config_data.profile.id}
                   />
                 );
               })}
