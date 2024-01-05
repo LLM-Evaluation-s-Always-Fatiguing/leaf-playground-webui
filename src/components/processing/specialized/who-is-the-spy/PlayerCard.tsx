@@ -50,6 +50,7 @@ const Content = styled.div`
   .key {
     width: 100%;
     height: 60px;
+    text-align: center;
   }
 
   .youMark {
