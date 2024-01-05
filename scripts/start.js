@@ -1,7 +1,8 @@
+const net = require('net');
 const path = require('path');
+const { spawn } = require('child_process');
 
 const args = process.argv.slice(2);
-
 let hostname = '0.0.0.0'; // Default hostname
 let currentPort = 3000; // Default port
 let serverUrl = 'http://127.0.0.1:8000'; // Default server URL
@@ -14,7 +15,7 @@ args.forEach((arg) => {
       hostname = value;
       break;
     case '--port':
-      currentPort = value;
+      currentPort = parseInt(value, 10);
       break;
     case '--server':
       serverUrl = value;
@@ -22,19 +23,45 @@ args.forEach((arg) => {
   }
 });
 
-// Setting environment variables
-process.env.HOSTNAME = hostname;
-process.env.PORT = currentPort;
-process.env.PLAYGROUND_SERVER_BASE_URL = serverUrl;
+// Function to check if the port is in use
+const checkPort = (port) => {
+  return new Promise((resolve, reject) => {
+    const server = net.createServer();
+    server.listen(port, hostname);
 
-// Log current status
-console.log(
-  `Environment settings:\n - Hostname: ${hostname}\n - Port: ${currentPort}\n - Server URL: ${serverUrl}\n\n`
-);
+    server.on('listening', () => {
+      server.close();
+      resolve(port); // Port is available
+    });
 
-const { spawn } = require('child_process');
-const server = spawn('node', [path.resolve(__dirname, 'server.js')], { stdio: 'inherit' });
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.log(`Port ${port} is already in use. Trying port ${port + 1}`);
+        resolve(checkPort(port + 1)); // If port is in use, try the next port
+      } else {
+        reject(err);
+      }
+    });
+  });
+};
 
-server.on('close', (code) => {
-  console.log(`server.js process exited with exit code ${code}`);
-});
+// Function to start the server
+const startServer = async () => {
+  try {
+    const port = await checkPort(currentPort); // Wait for a free port
+    process.env.HOSTNAME = hostname;
+    process.env.PORT = port;
+    process.env.SERVER_URL = serverUrl;
+
+    console.log(`Starting server at ${hostname}:${port}`);
+    const serverProcess = spawn('node', [path.resolve(__dirname, 'server.js')], { stdio: 'inherit' });
+
+    serverProcess.on('close', (code) => {
+      console.log(`server.js process exited with exit code ${code}`);
+    });
+  } catch (err) {
+    console.error('Error starting server:', err);
+  }
+};
+
+startServer();
