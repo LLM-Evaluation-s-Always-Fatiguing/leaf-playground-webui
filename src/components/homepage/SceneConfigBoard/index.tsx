@@ -746,11 +746,20 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
                   const serverUrl = `${window.location.protocol}//${host}:${port}`;
                   await LocalAPI.taskBundle.webui.save(save_dir, task_id, serverUrl, scene, createSceneParams);
                   globalStore.updateInfoAfterSceneTaskCreated(save_dir, task_id, scene, createSceneParams);
-                  await new Promise((resolve) => {
-                    setTimeout(() => {
-                      resolve(null);
-                    }, 2000);
-                  });
+                  let serverAccessible = false;
+                  while (!serverAccessible) {
+                    try {
+                      await new Promise((resolve) => {
+                        setTimeout(() => {
+                          resolve(null);
+                        }, 1000);
+                      });
+                      await ServerAPI.sceneTask.getAgentConnectedStatus(serverUrl);
+                      serverAccessible = true;
+                    } catch {
+                      console.info('Server not ready, retrying...');
+                    }
+                  }
                   if (hasHumanAgent) {
                     const localIP = await LocalAPI.network.getLocalIP();
                     const hostBaseUrl = `${window.location.protocol}//${localIP}:${window.location.port}`;
