@@ -1,7 +1,7 @@
 'use client';
 
 import React, { PropsWithChildren, useEffect, useRef, useState } from 'react';
-import { Typography, Image } from 'antd';
+import { Image, Typography } from 'antd';
 import { useTheme } from 'antd-style';
 import styled from '@emotion/styled';
 import 'katex/dist/katex.min.css';
@@ -177,7 +177,7 @@ export const LocalImage = (
           setRealSrc('');
         }
       } catch (e) {
-        console.log(e);
+        console.error(e);
       }
     };
     process();
@@ -194,7 +194,7 @@ export const LocalImage = (
         objectFit: 'contain',
       }}
       alt={''}
-      {...imageProps as any}
+      {...(imageProps as any)}
       src={realSrc}
     />
   );
@@ -276,6 +276,10 @@ function _MarkDownContent(props: MarkdownContentProps) {
         eos: () => {
           return '<EOS>';
         },
+      }}
+      urlTransform={(url, key, node) => {
+        // By default, the defaultUrlTransform function in Windows environments treats local paths, such as those starting with C:/, as unsafe and replaces them with an empty string. Hence, in this case, it simply returns the URL that it has identified without any modification.
+        return url;
       }}
     >
       {props.content}
