@@ -130,12 +130,16 @@ const ProcessingPage = ({
         } else {
           pageFinishedRef.current = true;
           setPageFinished(true);
+          wait = false;
+          setLoadingTip('Joining the scene...');
+          setLoading(true);
+          wsRef.current?.close();
+          await new Promise((resolve) => setTimeout(resolve, 1500));
           router.push(
             `/processing/${taskId}?serverUrl=${encodeURIComponent(serverUrl!)}&bundlePath=${encodeURIComponent(
               bundlePath!
             )}${agentId ? `&agentId=${encodeURIComponent(agentId)}` : ''}`
           );
-          wait = false;
         }
       }
     } catch (e) {
