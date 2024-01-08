@@ -18,7 +18,6 @@ import HumanEvaluationModeIcon from '@/components/processing/common/icons/HumanE
 import NoneEvaluationModeIcon from '@/components/processing/common/icons/NoneEvaluationModeIcon';
 import StandardEvaluationModeIcon from '@/components/processing/common/icons/StandardEvaluationModeIcon';
 
-
 const Container = styled.div`
   width: 100%;
   flex-grow: 1;
@@ -337,19 +336,19 @@ const ProcessingConsole = forwardRef<ProcessingConsoleMethods, ProcessingConsole
         : 'Simulating...'
     : '';
 
-  const statusTip = useMemo(()=>{
+  const statusTip = useMemo(() => {
     switch (props.taskStatus) {
       case SceneTaskStatus.FAILED:
-        return "Task Failed"
+        return 'Task Failed';
       case SceneTaskStatus.PAUSED:
-        return "Task Paused"
+        return 'Task Paused';
       case SceneTaskStatus.INTERRUPTED:
-        return "Task Closed"
+        return 'Task Closed';
       default:
         break;
     }
-    return ''
-  }, [props.taskStatus])
+    return '';
+  }, [props.taskStatus]);
 
   const cancelHighlightTimer = useRef<NodeJS.Timeout>();
   const scrollToLog = (logId: string) => {
@@ -388,38 +387,43 @@ const ProcessingConsole = forwardRef<ProcessingConsoleMethods, ProcessingConsole
               background: props.wsConnected ? theme.colorSuccess : theme.colorError,
             }}
           />
-          {props.wsConnected ? <span>Server Connected( {statusTip || processStatusStr} )</span> : <span>Server Disconnected</span>}
-          {(props.taskStatus === SceneTaskStatus.RUNNING || props.taskStatus === SceneTaskStatus.PAUSED) && (
-            <>
-              <div
-                className={'controlButton'}
-                style={{
-                  color: theme.colorPrimary,
-                }}
-                onClick={() => {
-                  if (props.taskStatus === SceneTaskStatus.PAUSED) {
-                    props.onResume();
-                  } else {
-                    props.onPause();
-                  }
-                }}
-              >
-                {props.taskStatus === SceneTaskStatus.PAUSED ? (
-                  <IoPlayCircleSharp size={'1em'} />
-                ) : (
-                  <IoPauseCircleSharp size={'1em'} />
-                )}
-              </div>
-              <div
-                className={'controlButton'}
-                onClick={() => {
-                  props.onInterrupt();
-                }}
-              >
-                <IoStopCircleSharp size={'1em'} style={{ color: theme.colorError }} />
-              </div>
-            </>
+          {props.wsConnected ? (
+            <span>Server Connected( {statusTip || processStatusStr} )</span>
+          ) : (
+            <span>Server Disconnected</span>
           )}
+          {!props.playerMode &&
+            (props.taskStatus === SceneTaskStatus.RUNNING || props.taskStatus === SceneTaskStatus.PAUSED) && (
+              <>
+                <div
+                  className={'controlButton'}
+                  style={{
+                    color: theme.colorPrimary,
+                  }}
+                  onClick={() => {
+                    if (props.taskStatus === SceneTaskStatus.PAUSED) {
+                      props.onResume();
+                    } else {
+                      props.onPause();
+                    }
+                  }}
+                >
+                  {props.taskStatus === SceneTaskStatus.PAUSED ? (
+                    <IoPlayCircleSharp size={'1em'} />
+                  ) : (
+                    <IoPauseCircleSharp size={'1em'} />
+                  )}
+                </div>
+                <div
+                  className={'controlButton'}
+                  onClick={() => {
+                    props.onInterrupt();
+                  }}
+                >
+                  <IoStopCircleSharp size={'1em'} style={{ color: theme.colorError }} />
+                </div>
+              </>
+            )}
         </div>
         <div className={'titleArea'}>
           <span>Console</span>

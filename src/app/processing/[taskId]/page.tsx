@@ -311,7 +311,9 @@ const ProcessingPage = ({
 
       globalStore.updatePageTitle(globalStore.currentScene?.scene_metadata.scene_definition.name || '');
 
-      setLoadingTip('Connecting to server...');
+      if (taskStatusRef.current === SceneTaskStatus.RUNNING) {
+        setLoadingTip('Connecting to server...');
+      }
       if (!wsRef.current) {
         wsRef.current = new WebSocket(
           `ws://${serverUrl.replace(/^(http:\/\/|https:\/\/)/, '')}/ws${agentId ? `/human/${agentId}` : ''}`
@@ -321,7 +323,9 @@ const ProcessingPage = ({
           wsOpenRef.current = true;
           setWSConnected(true);
           console.info('WebSocket opened');
-          setLoading(false);
+          if (taskStatusRef.current === SceneTaskStatus.RUNNING) {
+            setLoading(false);
+          }
         };
 
         wsRef.current.onmessage = async (event) => {
@@ -466,7 +470,7 @@ const ProcessingPage = ({
         }
         break;
       case SceneTaskStatus.INTERRUPTED:
-        setLoadingTip('Task Interrupted!');
+        setLoadingTip('Task Closed!');
       case SceneTaskStatus.FAILED:
         if (taskStatus === SceneTaskStatus.FAILED) {
           setLoadingTip('Task Failed!');
