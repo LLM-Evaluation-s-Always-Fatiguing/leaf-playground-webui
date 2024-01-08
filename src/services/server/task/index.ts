@@ -19,6 +19,38 @@ const sceneTaskAPI = {
   }> {
     return (await request.get(`/task/status/${taskId}`)).data;
   },
+  async status(serverUrl: string): Promise<{
+    status: SceneTaskStatus;
+  }> {
+    return (
+      await localRequest.get(`/server/task/status`, {
+        params:{
+          serverUrl
+        },
+      })
+    ).data;
+  },
+  async pause(serverUrl: string) {
+    return (
+      await localRequest.post(`/server/task/pause`, {
+        serverUrl,
+      })
+    ).data;
+  },
+  async resume(serverUrl: string) {
+    return (
+      await localRequest.post(`/server/task/resume`, {
+        serverUrl,
+      })
+    ).data;
+  },
+  async interrupt(serverUrl: string) {
+    return (
+      await localRequest.post(`/server/task/interrupt`, {
+        serverUrl,
+      })
+    ).data;
+  },
   async save(serverUrl: string) {
     return (
       await localRequest.post(`/server/task/save`, {

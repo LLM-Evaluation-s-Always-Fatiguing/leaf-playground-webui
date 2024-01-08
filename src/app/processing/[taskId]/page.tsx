@@ -14,7 +14,7 @@ import {
 } from '@/types/server/WebsocketMessage';
 import { SceneMetricConfig } from '@/types/server/config/Metric';
 import { SceneMetricDefinition } from '@/types/server/meta/Scene';
-import { Button, message } from 'antd';
+import { Button, Modal, message } from 'antd';
 import { Input } from '@formily/antd-v5';
 import styled from '@emotion/styled';
 import { MdClose, MdPerson3 } from 'react-icons/md';
@@ -165,6 +165,10 @@ const ProcessingPage = ({
   const [loading, setLoading] = useState(true);
   const [loadingTip, setLoadingTip] = useState('Loading...');
 
+  const taskStatusRef = useRef<SceneTaskStatus>(SceneTaskStatus.PENDING);
+  const [taskStatus, setTaskStatus] = useState<SceneTaskStatus>(SceneTaskStatus.PENDING);
+  const [startStatusCheckFinished, setStartStatusCheckFinished] = useState(false);
+
   const [tryVisualizationName, setTryVisualizationName] = useState<string>();
   const [targetAgentId, setTargetAgentId] = useState<string>(agentId || '');
 
@@ -179,7 +183,7 @@ const ProcessingPage = ({
   const [simulationFinished, setSimulationFinished] = useState(false);
   const [evaluationFinished, setEvaluationFinished] = useState(false);
   const allFinished = simulationFinished && evaluationFinished;
-  const controlBarDisplay = !playerMode && allFinished;
+  const controlBarDisplay = !playerMode && allFinished && taskStatus === SceneTaskStatus.FINISHED;
 
   const [operatingLog, setOperatingLog] = useState<SceneLog>();
   const [jsonViewModalData, setJSONViewModalData] = useState<any>();
@@ -198,16 +202,48 @@ const ProcessingPage = ({
 
   const showTaskFinishedForPlayer = () => {
     if (!playerMode) return;
+    Modal.success({
+      title: 'Task finished',
+      content: 'The task has been finished. Now you can close the window.',
+    });
   };
 
-  const checkTaskStatus = async () => {
+  const statusPollingTimerRef = useRef<NodeJS.Timeout>();
+  const startStatusPolling = () => {
+    if (statusPollingTimerRef.current) {
+      clearInterval(statusPollingTimerRef.current);
+      statusPollingTimerRef.current = undefined;
+    }
+    statusPollingTimerRef.current = setInterval(async () => {
+      let taskStatusResp = (await ServerAPI.sceneTask.getStatus(taskId)).status;
+      try {
+        taskStatusResp = (await ServerAPI.sceneTask.status(serverUrl)).status;
+      } catch {}
+      setTaskStatus(taskStatusResp);
+      taskStatusRef.current = taskStatusResp;
+    }, 1000);
+  };
+
+  const stopStatusPolling = () => {
+    if (statusPollingTimerRef.current) {
+      clearInterval(statusPollingTimerRef.current);
+      statusPollingTimerRef.current = undefined;
+    }
+  };
+
+  const checkTaskStatusOnStart = async () => {
     try {
       setLoadingTip('Checking task status...');
-      const taskStatusResp = await ServerAPI.sceneTask.getStatus(taskId);
-      switch (taskStatusResp.status) {
+      let taskStatusResp = (await ServerAPI.sceneTask.getStatus(taskId)).status;
+      try {
+        taskStatusResp = (await ServerAPI.sceneTask.status(serverUrl)).status;
+      } catch {}
+      setTaskStatus(taskStatusResp);
+      taskStatusRef.current = taskStatusResp;
+      switch (taskStatusResp) {
         case SceneTaskStatus.PENDING:
           let wait = true;
-          let finalStatus: SceneTaskStatus = taskStatusResp.status;
+          let finalStatus: SceneTaskStatus = taskStatusResp;
           while (wait) {
             await new Promise((resolve) => setTimeout(resolve, 1500));
             const taskStatusResp = await ServerAPI.sceneTask.getStatus(taskId);
@@ -223,11 +259,17 @@ const ProcessingPage = ({
           }
           return true;
         case SceneTaskStatus.RUNNING:
+          if (!playerMode) {
+            startStatusPolling();
+          }
         case SceneTaskStatus.PAUSED:
+          if (playerMode) {
+            startStatusPolling();
+          }
         case SceneTaskStatus.FINISHED:
           const webuiBundle = await LocalAPI.taskBundle.webui.get(bundlePath!);
           globalStore.updateInfoFromWebUITaskBundle(webuiBundle);
-          if (taskStatusResp.status === SceneTaskStatus.FINISHED) {
+          if (taskStatusResp === SceneTaskStatus.FINISHED) {
             setSimulationFinished(true);
             setEvaluationFinished(true);
             message.success('Task finished!');
@@ -237,6 +279,9 @@ const ProcessingPage = ({
             return true;
           }
         case SceneTaskStatus.INTERRUPTED:
+          setLoadingTip('Task closed!');
+          message.warning('Task closed!');
+          break;
         case SceneTaskStatus.FAILED:
           setLoadingTip('Task failed!');
           message.error('Task failed!');
@@ -258,7 +303,8 @@ const ProcessingPage = ({
         router.replace('/');
         return;
       }
-      const pass = await checkTaskStatus();
+      const pass = await checkTaskStatusOnStart();
+      setStartStatusCheckFinished(true);
       if (!pass) {
         return;
       }
@@ -301,11 +347,15 @@ const ProcessingPage = ({
                           break;
                         case SceneSystemLogEvent.SIMULATION_FINISHED:
                           setSimulationFinished(true);
+                          showTaskFinishedForPlayer();
                           break;
                         case SceneSystemLogEvent.EVALUATION_FINISHED:
                           setEvaluationFinished(true);
                           break;
                         case SceneSystemLogEvent.EVERYTHING_DONE:
+                          if (taskStatusRef.current === SceneTaskStatus.INTERRUPTED) {
+                            return;
+                          }
                           message.success('Task Finished!');
                           setSimulationFinished(true);
                           setEvaluationFinished(true);
@@ -389,8 +439,38 @@ const ProcessingPage = ({
         wsRef.current.close();
         wsRef.current = undefined;
       }
+      stopStatusPolling();
     };
   }, []);
+
+  useEffect(() => {
+    if (!startStatusCheckFinished) return;
+    switch (taskStatus) {
+      case SceneTaskStatus.PENDING:
+      case SceneTaskStatus.RUNNING:
+        setLoading(false);
+        break;
+      case SceneTaskStatus.PAUSED:
+        if (playerMode) {
+          setLoadingTip('Task Paused...');
+          setLoading(true);
+        }
+        break;
+      case SceneTaskStatus.INTERRUPTED:
+        setLoadingTip('Task Interrupted!');
+      case SceneTaskStatus.FAILED:
+        if (taskStatus === SceneTaskStatus.FAILED) {
+          setLoadingTip('Task Failed!');
+        }
+      case SceneTaskStatus.FINISHED:
+        if (taskStatus === SceneTaskStatus.FINISHED) {
+          setLoadingTip('Task Finished!');
+        }
+        setLoading(playerMode);
+        stopStatusPolling();
+        break;
+    }
+  }, [taskStatus, playerMode, startStatusCheckFinished]);
 
   const goToResult = () => {
     if (globalStore.bundlePath) {
@@ -462,6 +542,7 @@ const ProcessingPage = ({
         {globalStore.currentScene && globalStore.createSceneParams && (
           <ProcessingConsole
             ref={consoleRef}
+            taskStatus={taskStatus}
             wsConnected={wsConnected}
             simulationFinished={simulationFinished}
             evaluationFinished={evaluationFinished}
@@ -485,6 +566,50 @@ const ProcessingPage = ({
                 humanOnlyEvaluationMode,
               });
               setLogMetricDetailModalOpen(true);
+            }}
+            onPause={async () => {
+              try {
+                setLoadingTip('Pausing task...');
+                setLoading(true);
+                await ServerAPI.sceneTask.pause(serverUrl);
+                setTaskStatus(SceneTaskStatus.PAUSED);
+                taskStatusRef.current = SceneTaskStatus.PAUSED;
+              } catch (e) {
+                message.error('Failed to pause task!');
+                console.error(e);
+              } finally {
+                setLoading(false);
+              }
+            }}
+            onResume={async () => {
+              try {
+                setLoadingTip('Resuming task...');
+                setLoading(true);
+                await ServerAPI.sceneTask.resume(serverUrl);
+                setTaskStatus(SceneTaskStatus.RUNNING);
+                taskStatusRef.current = SceneTaskStatus.RUNNING;
+              } catch (e) {
+                message.error('Failed to resume task!');
+                console.error(e);
+              } finally {
+                setLoading(false);
+              }
+            }}
+            onInterrupt={() => {
+              Modal.confirm({
+                title: 'Interrupt task',
+                content: 'Once interrupted, the task will be closed and cannot be recovered.',
+                onOk: async () => {
+                  try {
+                    await ServerAPI.sceneTask.interrupt(serverUrl);
+                    setTaskStatus(SceneTaskStatus.INTERRUPTED);
+                    taskStatusRef.current = SceneTaskStatus.INTERRUPTED;
+                  } catch (e) {
+                    console.error(e);
+                  }
+                },
+                onCancel() {},
+              });
             }}
           />
         )}

@@ -754,7 +754,7 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
                           resolve(null);
                         }, 1000);
                       });
-                      await ServerAPI.sceneTask.getAgentConnectedStatus(serverUrl);
+                      await ServerAPI.sceneTask.status(serverUrl);
                       serverAccessible = true;
                     } catch {
                       console.info('Server not ready, retrying...');

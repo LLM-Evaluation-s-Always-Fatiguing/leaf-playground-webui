@@ -2,6 +2,7 @@ import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, use
 import { getAllAgentInstanceFrom } from '@/types/api-router/webui/AgentInstance';
 import { CreateSceneParams, getEnabledMetricsFromCreateSceneParams } from '@/types/server/CreateSceneParams';
 import { SceneActionLog } from '@/types/server/Log';
+import { SceneTaskStatus } from '@/types/server/SceneTask';
 import { SceneMetricConfig } from '@/types/server/config/Metric';
 import Scene, { SceneMetricDefinition } from '@/types/server/meta/Scene';
 import { Segmented, Space, Tabs } from 'antd';
@@ -10,11 +11,13 @@ import styled from '@emotion/styled';
 import { CellMeasurer, CellMeasurerCache, List } from 'react-virtualized';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { BsFillArrowUpLeftCircleFill } from 'react-icons/bs';
+import { IoPauseCircleSharp, IoPlayCircleSharp, IoStopCircleSharp } from 'react-icons/io5';
 import ConsoleLogItem from '@/components/processing/Console/LogItem';
 import { TruncatableParagraphEllipsisStatus } from '@/components/processing/Console/TruncatableParagraph';
 import HumanEvaluationModeIcon from '@/components/processing/common/icons/HumanEvaluationModeIcon';
 import NoneEvaluationModeIcon from '@/components/processing/common/icons/NoneEvaluationModeIcon';
 import StandardEvaluationModeIcon from '@/components/processing/common/icons/StandardEvaluationModeIcon';
+
 
 const Container = styled.div`
   width: 100%;
@@ -61,6 +64,17 @@ const Header = styled.div`
 
     font-size: 14px;
     font-weight: normal;
+
+    .controlButton {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      font-size: 21px;
+    }
   }
 
   .titleArea {
@@ -160,6 +174,7 @@ const LogsArea = styled.div`
 `;
 
 interface ProcessingConsoleProps {
+  taskStatus: SceneTaskStatus;
   wsConnected: boolean;
   simulationFinished: boolean;
   evaluationFinished: boolean;
@@ -176,6 +191,10 @@ interface ProcessingConsoleProps {
     metricsConfig: Record<string, SceneMetricConfig>,
     humanOnlyEvaluationMode: boolean
   ) => void;
+
+  onPause: () => void;
+  onResume: () => void;
+  onInterrupt: () => void;
 }
 
 export type ProcessingConsoleMethods = {
@@ -318,6 +337,20 @@ const ProcessingConsole = forwardRef<ProcessingConsoleMethods, ProcessingConsole
         : 'Simulating...'
     : '';
 
+  const statusTip = useMemo(()=>{
+    switch (props.taskStatus) {
+      case SceneTaskStatus.FAILED:
+        return "Task Failed"
+      case SceneTaskStatus.PAUSED:
+        return "Task Paused"
+      case SceneTaskStatus.INTERRUPTED:
+        return "Task Closed"
+      default:
+        break;
+    }
+    return ''
+  }, [props.taskStatus])
+
   const cancelHighlightTimer = useRef<NodeJS.Timeout>();
   const scrollToLog = (logId: string) => {
     setAutoPlay(false);
@@ -355,7 +388,38 @@ const ProcessingConsole = forwardRef<ProcessingConsoleMethods, ProcessingConsole
               background: props.wsConnected ? theme.colorSuccess : theme.colorError,
             }}
           />
-          {props.wsConnected ? <span>Server Connected( {processStatusStr} )</span> : <span>Server Disconnected</span>}
+          {props.wsConnected ? <span>Server Connected( {statusTip || processStatusStr} )</span> : <span>Server Disconnected</span>}
+          {(props.taskStatus === SceneTaskStatus.RUNNING || props.taskStatus === SceneTaskStatus.PAUSED) && (
+            <>
+              <div
+                className={'controlButton'}
+                style={{
+                  color: theme.colorPrimary,
+                }}
+                onClick={() => {
+                  if (props.taskStatus === SceneTaskStatus.PAUSED) {
+                    props.onResume();
+                  } else {
+                    props.onPause();
+                  }
+                }}
+              >
+                {props.taskStatus === SceneTaskStatus.PAUSED ? (
+                  <IoPlayCircleSharp size={'1em'} />
+                ) : (
+                  <IoPauseCircleSharp size={'1em'} />
+                )}
+              </div>
+              <div
+                className={'controlButton'}
+                onClick={() => {
+                  props.onInterrupt();
+                }}
+              >
+                <IoStopCircleSharp size={'1em'} style={{ color: theme.colorError }} />
+              </div>
+            </>
+          )}
         </div>
         <div className={'titleArea'}>
           <span>Console</span>
