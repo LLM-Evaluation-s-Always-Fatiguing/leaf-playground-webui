@@ -63,6 +63,10 @@ export default interface SceneLog {
 
 export enum SceneSystemLogEvent {
   SIMULATION_START = 'simulation_start',
+  SIMULATION_PAUSED = 'simulation_paused',
+  SIMULATION_RESUME = 'simulation_resume',
+  SIMULATION_FAILED = 'simulation_failed',
+  SIMULATION_INTERRUPTED = 'simulation_interrupted',
   SIMULATION_FINISHED = 'simulation_finished',
   EVALUATION_FINISHED = 'evaluation_finished',
   EVERYTHING_DONE = 'everything_done',

@@ -345,6 +345,15 @@ const ProcessingPage = ({
                       switch (systemLog.system_event) {
                         case SceneSystemLogEvent.SIMULATION_START:
                           break;
+                        case SceneSystemLogEvent.SIMULATION_PAUSED:
+                          break;
+                        case SceneSystemLogEvent.SIMULATION_RESUME:
+                          break;
+                        case SceneSystemLogEvent.SIMULATION_FAILED:
+                          message.error('Simulation failed!');
+                          break;
+                        case SceneSystemLogEvent.SIMULATION_INTERRUPTED:
+                          break;
                         case SceneSystemLogEvent.SIMULATION_FINISHED:
                           setSimulationFinished(true);
                           showTaskFinishedForPlayer();
