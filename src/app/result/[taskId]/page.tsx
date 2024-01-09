@@ -330,7 +330,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                   />
                 </CustomCollapseWrapper>
               </Card>
-              <Card
+              {Object.keys(serverBundle.charts).length > 0 && <Card
                 title={'Report'}
                 bodyStyle={{
                   padding: 0,
@@ -403,7 +403,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                     ]}
                   />
                 </CustomCollapseWrapper>
-              </Card>
+              </Card>}
               <Card
                 title={'Logs'}
                 bodyStyle={{

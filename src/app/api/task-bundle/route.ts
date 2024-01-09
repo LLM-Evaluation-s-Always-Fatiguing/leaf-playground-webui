@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     const sceneConfigFilePath = baseFullPath + '/scene_config.json';
     const chatsFilePath = baseFullPath + '/charts.json';
     const metricsFilePath = baseFullPath + '/metrics.json';
-    const logsFilePath = baseFullPath + '/logs.jsonl';
+    const logsFilePath = baseFullPath + '/.log.jsonl';
 
     const [sceneObjConfig, charts, metrics, logs] = await Promise.all([
       fs.readFile(sceneConfigFilePath, { encoding: 'utf-8' }),
