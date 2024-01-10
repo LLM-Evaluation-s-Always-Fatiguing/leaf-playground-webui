@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (err) {
-    return new Response(JSON.stringify({ error: 'Get agents connected status failed.' }), {
+    return new Response(JSON.stringify({ error: 'Get agents connected status failed.', info: err }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });

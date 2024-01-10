@@ -756,9 +756,7 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
                       });
                       await ServerAPI.sceneTask.status(serverUrl);
                       serverAccessible = true;
-                    } catch {
-                      console.info('Server not ready, retrying...');
-                    }
+                    } catch {}
                   }
                   if (hasHumanAgent) {
                     const localIP = await LocalAPI.network.getLocalIP();
