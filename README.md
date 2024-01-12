@@ -31,6 +31,10 @@ To tailor visualization components for specific Scenes, create your custom compo
 
 Once your component is developed, register it within the `getProcessingVisualizationComponent` function located in `src/app/processing/[taskId]/page.tsx`. This is done by adding a case statement for the scene name.
 
+### Add Scene-Specific Result Report Components
+
+For displaying custom Scene result components in the Report section of the result page, the component must be defined either as a `ResultReportFunctionComponent` or a `ResultReportClassComponent`. This is dependent on the implementation approach. Registration of these components occurs within the `getSpecializedReportComponents` function found in `src/app/result/[taskId]/page.tsx`, following the validation process by `checkMetrics`.
+
 ### Make WebUI Bundle
 
 To make a production-ready bundle, run the following command:

@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
           )
         ) {
           const taskData = await fs.readFile(taskFilePath, { encoding: 'utf8' });
-          const logsFilePath = path.join(bundlesPath, dir, 'logs.jsonl');
+          const logsFilePath = path.join(bundlesPath, dir, '.log.jsonl');
           const taskFinished = await fs.stat(logsFilePath).then(
             () => true,
             () => false

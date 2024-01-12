@@ -19,6 +19,9 @@ import JSONViewModal from '@/components/common/JSONViewModal';
 import LoadingOverlay from '@/components/common/LoadingOverlay';
 import { EvaluatorMark } from '@/components/homepage/icons/EvaluatorMark';
 import { HumanMetricMark } from '@/components/processing/common/icons/HumanMetricMark';
+import ResultReportComponentWithExtraProps from '@/components/result/common/ReportComponentWithExtraProps';
+import { DefaultResultReportComponentProps } from '@/components/result/def';
+import WhoIsTheSpyDefaultReport from '@/components/result/specialized/who-is-the-spy/DefaultReport';
 import VegaChart from '@/components/vega/VegaChart';
 import LocalAPI from '@/services/local';
 import useGlobalStore from '@/stores/global';
@@ -223,6 +226,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
     const serverBundle = await LocalAPI.taskBundle.server.get(bundlePath);
     const webuiBundle = await LocalAPI.taskBundle.webui.get(bundlePath);
     globalStore.updatePageTitle(webuiBundle.scene.scene_metadata.scene_definition.name || '');
+    globalStore.updateInfoFromWebUITaskBundle(webuiBundle);
     setServerBundle(serverBundle);
     setWebUIBundle(webuiBundle);
     setLoading(false);
@@ -231,6 +235,48 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
   useEffect(() => {
     loadDataFromLocal();
   }, []);
+
+  function getSpecializedReportComponents(): {
+    displayName: string;
+    component: React.ComponentType<DefaultResultReportComponentProps>;
+  }[] {
+    const components: {
+      displayName: string;
+      component: React.ComponentType<DefaultResultReportComponentProps>;
+    }[] = [];
+    const checkMetrics = (requiredMetrics: string[]) => {
+      const existMetrics = Array.from(
+        new Set([
+          ...Object.keys(serverBundle?.metrics.metrics || {}),
+          ...Object.keys(serverBundle?.metrics.human_metrics || {}),
+        ])
+      );
+      return requiredMetrics.every((m) => existMetrics.includes(m));
+    };
+    switch (webuiBundle?.scene.scene_metadata.scene_definition.name) {
+      case '谁是卧底':
+        {
+          if (checkMetrics(WhoIsTheSpyDefaultReport.requiredMetrics)) {
+            components.push({
+              displayName: WhoIsTheSpyDefaultReport.reportName,
+              component: ResultReportComponentWithExtraProps(WhoIsTheSpyDefaultReport, {}),
+            });
+          }
+        }
+        break;
+      default:
+        break;
+    }
+    return components;
+  }
+
+  const reportComponents = useMemo(() => {
+    return getSpecializedReportComponents();
+  }, [webuiBundle?.scene, serverBundle?.metrics]);
+
+  const hasSpecializedReport = reportComponents.length > 0;
+  const hasServerCharts = Object.keys(serverBundle?.charts || {}).length > 0;
+  const showReportPart = hasSpecializedReport || hasServerCharts;
 
   return (
     <>
@@ -330,80 +376,80 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                   />
                 </CustomCollapseWrapper>
               </Card>
-              {Object.keys(serverBundle.charts).length > 0 && <Card
-                title={'Report'}
-                bodyStyle={{
-                  padding: 0,
-                }}
-              >
-                <CustomCollapseWrapper>
-                  <Collapse
-                    defaultActiveKey={['charts', 'metrics']}
-                    items={[
-                      {
-                        key: 'charts',
-                        label: 'Charts',
-                        children: (
-                          <div
-                            style={{
-                              width: '100%',
-                              display: 'flex',
-                              flexDirection: 'row',
-                              justifyContent: 'flex-start',
-                              alignItems: 'stretch',
-                              flexWrap: 'wrap',
-                              gap: 10,
-                            }}
-                          >
-                            {Object.entries(serverBundle.charts).map(([chartName, chartSpec], index: number) => {
-                              return (
-                                <NormalNoBoxShadowCard
-                                  key={chartName + index}
-                                  bodyStyle={{
-                                    width: '100%',
-                                    height: '100%',
-                                    padding: '12px 16px',
-                                  }}
-                                  bordered={false}
-                                  hoverable
-                                >
-                                  <VegaChart vSpec={chartSpec} />
-                                </NormalNoBoxShadowCard>
-                              );
-                            })}
-                          </div>
-                        ),
-                      },
-                      // {
-                      //   key: 'metrics',
-                      //   label: 'Metrics',
-                      //   children: (
-                      //     <Descriptions
-                      //       items={[
-                      //         ...serverBundle.metrics.map((metric, index) => {
-                      //           return {
-                      //             key: index,
-                      //             label: metric.evaluator,
-                      //             children: (
-                      //               <Button
-                      //                 {...jsonCodeButtonCommonProps}
-                      //                 onClick={() => {
-                      //                   setViewingJSON(metric);
-                      //                   setJSONViewerModalTitle('SceneMetricConfig Detail');
-                      //                   setJSONViewerModalOpen(true);
-                      //                 }}
-                      //               />
-                      //             ),
-                      //           };
-                      //         }),
-                      //       ]}
-                      //     />
-                      //   ),
-                      // },
-                    ]}
-                  />
-                </CustomCollapseWrapper>
-              </Card>}
+              {showReportPart && (
+                <Card
+                  title={'Report'}
+                  bodyStyle={{
+                    padding: 0,
+                  }}
+                >
+                  <CustomCollapseWrapper>
+                    <Collapse
+                      defaultActiveKey={[
+                        ...reportComponents.map((rc) => rc.displayName),
+                        ...(hasServerCharts ? ['charts'] : []),
+                      ]}
+                      items={[
+                        ...reportComponents.map((reportComponent) => {
+                          const ReportComponent = reportComponent.component;
+                          return {
+                            key: reportComponent.displayName,
+                            label: reportComponent.displayName,
+                            children: (
+                              <ReportComponent
+                                scene={webuiBundle.scene}
+                                createSceneParams={webuiBundle.createSceneParams}
+                                logs={serverBundle.logs}
+                                metrics={serverBundle.metrics}
+                              />
+                            ),
+                          };
+                        }),
+                        ...(hasServerCharts
+                          ? [
+                              {
+                                key: 'charts',
+                                label: 'Charts',
+                                children: (
+                                  <div
+                                    style={{
+                                      width: '100%',
+                                      display: 'flex',
+                                      flexDirection: 'row',
+                                      justifyContent: 'flex-start',
+                                      alignItems: 'stretch',
+                                      flexWrap: 'wrap',
+                                      gap: 10,
+                                    }}
+                                  >
+                                    {Object.entries(serverBundle.charts).map(
+                                      ([chartName, chartSpec], index: number) => {
+                                        return (
+                                          <NormalNoBoxShadowCard
+                                            key={chartName + index}
+                                            bodyStyle={{
+                                              width: '100%',
+                                              height: '100%',
+                                              padding: '12px 16px',
+                                            }}
+                                            bordered={false}
+                                            hoverable
+                                          >
+                                            <VegaChart vSpec={chartSpec} />
+                                          </NormalNoBoxShadowCard>
+                                        );
+                                      }
+                                    )}
+                                  </div>
+                                ),
+                              },
+                            ]
+                          : []),
+                      ]}
+                    />
+                  </CustomCollapseWrapper>
+                </Card>
+              )}
               <Card
                 title={'Logs'}
                 bodyStyle={{
@@ -431,19 +477,13 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                 }
               >
                 <Table<SceneActionLog>
-                  rowKey={'id'}
+                  rowKey={'created_at'}
                   tableLayout={'fixed'}
                   bordered
                   style={{
                     width: '100%',
                   }}
                   columns={[
-                    {
-                      width: 80,
-                      title: 'ID',
-                      dataIndex: 'id',
-                      ellipsis: true,
-                    },
                     {
                       width: 180,
                       title: 'Created At',

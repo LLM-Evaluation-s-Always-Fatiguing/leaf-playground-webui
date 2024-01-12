@@ -491,7 +491,7 @@ const ProcessingPage = ({
     }
   };
 
-  function getProcessingVisualizationComponent(): React.FC<DefaultProcessingVisualizationComponentProps> {
+  function getProcessingVisualizationComponent(): React.ComponentType<DefaultProcessingVisualizationComponentProps> {
     switch (tryVisualizationName || globalStore.currentScene?.scene_metadata.scene_definition.name) {
       case 'RAG QA Examine':
       case 'GeneralMCQExamine':
