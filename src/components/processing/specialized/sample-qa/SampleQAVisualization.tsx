@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { SceneActionLog } from '@/types/server/Log';
+import { SceneActionLog } from '@/types/server/common/Log';
 import SceneAgentConfig from '@/types/server/config/Agent';
 import { Button, Slider, Space } from 'antd';
 import { useTheme } from 'antd-style';
@@ -187,7 +187,7 @@ const SampleQAVisualization = (props: SampleQAVisualizationProps) => {
   const currentDisplayLogs = splitLogs[currentQAPartIndex] || [];
 
   const allAgents = Object.entries(
-    globalStore.createSceneParams?.scene_obj_config.scene_config_data.roles_config || {}
+    globalStore.createSceneTaskParams?.scene_obj_config.scene_config_data.roles_config || {}
   ).reduce((total, [roleName, roleConfig]) => {
     return [...total, ...(roleConfig.agents_config || [])];
   }, [] as SceneAgentConfig[]);

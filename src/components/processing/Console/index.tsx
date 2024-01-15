@@ -1,7 +1,7 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { getAllAgentInstanceFrom } from '@/types/api-router/webui/AgentInstance';
-import { CreateSceneParams, getEnabledMetricsFromCreateSceneParams } from '@/types/server/CreateSceneParams';
-import { SceneActionLog } from '@/types/server/Log';
+import { CreateSceneTaskParams, getEnabledMetricsFromCreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
+import { SceneActionLog } from '@/types/server/common/Log';
 import { SceneTaskStatus } from '@/types/server/SceneTask';
 import { SceneMetricConfig } from '@/types/server/config/Metric';
 import Scene, { SceneMetricDefinition } from '@/types/server/meta/Scene';
@@ -178,7 +178,7 @@ interface ProcessingConsoleProps {
   simulationFinished: boolean;
   evaluationFinished: boolean;
   scene: Scene;
-  createSceneParams: CreateSceneParams;
+  createSceneTaskParams: CreateSceneTaskParams;
   logs: SceneActionLog[];
   targetAgentId: string;
   playerMode: boolean;
@@ -218,7 +218,7 @@ const ProcessingConsole = forwardRef<ProcessingConsoleMethods, ProcessingConsole
   const [evaluationMode, setEvaluationMode] = useState(false);
   const [humanOnlyEvaluationMode, setHumanOnlyEvaluationMode] = useState(false);
   const hasEnabledMetric =
-    !props.targetAgentId && getEnabledMetricsFromCreateSceneParams(props.createSceneParams).length > 0;
+    !props.targetAgentId && getEnabledMetricsFromCreateSceneTaskParams(props.createSceneTaskParams).length > 0;
   const [highlightedLogId, setHighlightedLogId] = useState<string>();
 
   const displayLogs = useMemo(() => {
@@ -261,7 +261,7 @@ const ProcessingConsole = forwardRef<ProcessingConsoleMethods, ProcessingConsole
         .find((r) => r.name === logRoleName)
         ?.actions.find((a) => a.name === logActionName)?.metrics || [];
     const metricsConfig =
-      props.createSceneParams.scene_obj_config.scene_config_data.roles_config[logRoleName]?.actions_config[
+      props.createSceneTaskParams.scene_obj_config.scene_config_data.roles_config[logRoleName]?.actions_config[
         logActionName
       ]?.metrics_config || {};
     return (
@@ -325,8 +325,8 @@ const ProcessingConsole = forwardRef<ProcessingConsoleMethods, ProcessingConsole
   }, []);
 
   const allAgents = useMemo(() => {
-    return getAllAgentInstanceFrom(props.scene, props.createSceneParams);
-  }, [props.scene, props.createSceneParams]);
+    return getAllAgentInstanceFrom(props.scene, props.createSceneTaskParams);
+  }, [props.scene, props.createSceneTaskParams]);
 
   const processStatusStr = props.wsConnected
     ? props.simulationFinished && props.evaluationFinished

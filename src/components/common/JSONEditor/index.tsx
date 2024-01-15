@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import SampleJSONSchema from '@/types/SampleJSONSchema';
+import SampleJSONSchema from '@/types/common/SampleJSONSchema';
 import { useTheme } from 'antd-style';
 import Editor, { Monaco } from '@monaco-editor/react';
 import { editor } from 'monaco-editor';

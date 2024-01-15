@@ -159,31 +159,19 @@ export const PreCode: React.FunctionComponent<{ children: any }> = (props) => {
   );
 };
 
-export const LocalImage = (
-  props: {
-    localAssetsBasePath?: string;
-  } & PropsWithChildren &
-    React.HTMLProps<HTMLImageElement> &
-    Record<string, any>
-) => {
+export const LocalImage = (props: PropsWithChildren & React.HTMLProps<HTMLImageElement> & Record<string, any>) => {
   const [realSrc, setRealSrc] = useState('');
   useEffect(() => {
     const process = async () => {
       try {
-        const path = await LocalAPI.path.join(props.localAssetsBasePath || '', props.src || '');
-        if (path) {
-          setRealSrc(`/api/file?filePath=${encodeURIComponent(path)}`);
-        } else {
-          setRealSrc('');
-        }
+        setRealSrc(`/api/server/hub/project/image_asset?filePath=${encodeURIComponent(props.src || '')}&projectId=who_is_the_spy_cn_93da611b`);
       } catch (e) {
         console.error(e);
       }
     };
     process();
-  }, [props.localAssetsBasePath, props.src]);
+  }, [props.src]);
   const imageProps = { ...props };
-  delete imageProps.localAssetsBasePath;
   delete imageProps.node;
   // eslint-disable-next-line @next/next/no-img-element
   return (
@@ -200,16 +188,9 @@ export const LocalImage = (
   );
 };
 
-export const _Image = (
-  props: {
-    localAssetsBasePath?: string;
-  } & PropsWithChildren &
-    React.HTMLProps<HTMLImageElement> &
-    Record<string, any>
-) => {
+export const _Image = (props: PropsWithChildren & React.HTMLProps<HTMLImageElement> & Record<string, any>) => {
   const localImage = !props.src?.startsWith('http');
   const imageProps = { ...props };
-  delete imageProps.localAssetsBasePath;
   delete imageProps.node;
   return localImage ? (
     <LocalImage {...props} />
@@ -221,8 +202,7 @@ export const _Image = (
 
 interface MarkdownContentProps {
   content: string;
-  useLocalAssets?: boolean;
-  localAssetsBasePath?: string;
+  useHubAssets?: boolean;
   removeComments?: boolean;
 }
 
@@ -265,10 +245,10 @@ function _MarkDownContent(props: MarkdownContentProps) {
           return <a {...aProps} target={target} />;
         },
         pre: PreCode as any,
-        ...(props.useLocalAssets
+        ...(props.useHubAssets
           ? {
               img: (imgProps) => {
-                return <_Image {...imgProps} localAssetsBasePath={props.localAssetsBasePath} />;
+                return <_Image {...imgProps} />;
               },
             }
           : {}),
@@ -278,6 +258,9 @@ function _MarkDownContent(props: MarkdownContentProps) {
         },
       }}
       urlTransform={(url, key, node) => {
+        if (url.startsWith('.')) {
+          console.log(url);
+        }
         // By default, the defaultUrlTransform function in Windows environments treats local paths, such as those starting with C:/, as unsafe and replaces them with an empty string. Hence, in this case, it simply returns the URL that it has identified without any modification.
         return url;
       }}
@@ -307,13 +290,14 @@ const ExtraStyleProvider = styled.div`
 export default function Markdown(
   props: {
     content: string;
-    useLocalAssets?: boolean;
-    localAssetsBasePath?: string;
+    useHubAssets?: boolean;
+    projectId?: string;
     removeComments?: boolean;
     limitHeight?: boolean;
     fontSize?: number | string;
   } & React.DOMAttributes<HTMLDivElement>
 ) {
+  console.log(props.content);
   return (
     <Typography
       style={{
@@ -335,8 +319,7 @@ export default function Markdown(
         }}
       >
         <MarkdownContent
-          useLocalAssets={props.useLocalAssets}
-          localAssetsBasePath={props.localAssetsBasePath}
+          useHubAssets={props.useHubAssets}
           removeComments={props.removeComments}
           content={props.content}
         />

@@ -1,10 +1,8 @@
 'use client';
 
 import React, { CSSProperties, useEffect, useState } from 'react';
-import ServerInfo from '@/types/server/meta/ServerInfo';
-import { Button, ButtonProps, Descriptions, Modal, Space, Spin, message } from 'antd';
-import { AiOutlineFolderOpen } from 'react-icons/ai';
-import LocalAPI from '@/services/local';
+import ServerAppInfo from '@/types/server/meta/ServerAppInfo';
+import { ButtonProps, Descriptions, Modal, Space, Spin, message } from 'antd';
 import ServerAPI from '@/services/server';
 
 interface AboutModalProps {
@@ -14,7 +12,7 @@ interface AboutModalProps {
 
 const AboutModal: React.FC<AboutModalProps> = ({ open, onNeedClose }) => {
   const [modalLoading, setModalLoading] = useState(false);
-  const [serverInfo, setServerInfo] = useState<ServerInfo>();
+  const [serverInfo, setServerInfo] = useState<ServerAppInfo>();
 
   const resetState = () => {
     setModalLoading(false);
@@ -23,8 +21,8 @@ const AboutModal: React.FC<AboutModalProps> = ({ open, onNeedClose }) => {
   const loadData = async () => {
     try {
       setModalLoading(true);
-      const serverInfo = await ServerAPI.info();
-      setServerInfo(serverInfo);
+      const homepageResp = await ServerAPI.site.homepage();
+      setServerInfo(homepageResp.app_info);
     } catch (e) {
       console.error(e);
       message.error('Fetch Server Info Failed');
@@ -77,43 +75,24 @@ const AboutModal: React.FC<AboutModalProps> = ({ open, onNeedClose }) => {
           items={[
             {
               key: '1',
-              label: 'Server Zoo Root Path',
+              label: 'Server Name',
               span: 24,
               labelStyle,
-              children: (
-                <Space>
-                  {serverInfo?.paths.zoo_dir}
-                  <Button
-                    {...openDictButtonProps}
-                    icon={<AiOutlineFolderOpen size={'1.2em'} />}
-                    onClick={() => {
-                      if (serverInfo?.paths.zoo_dir) {
-                        LocalAPI.dict.open(serverInfo.paths.zoo_dir);
-                      }
-                    }}
-                  />
-                </Space>
-              ),
+              children: <Space>{serverInfo?.name}</Space>,
             },
             {
               key: '2',
-              label: 'Server Save Root Path',
+              label: 'Server Version',
               span: 24,
               labelStyle,
-              children: (
-                <Space>
-                  {serverInfo?.paths.result_dir}
-                  <Button
-                    {...openDictButtonProps}
-                    icon={<AiOutlineFolderOpen size={'1.2em'} />}
-                    onClick={() => {
-                      if (serverInfo?.paths.result_dir) {
-                        LocalAPI.dict.open(serverInfo.paths.result_dir);
-                      }
-                    }}
-                  />
-                </Space>
-              ),
+              children: <Space>{serverInfo?.version}</Space>,
+            },
+            {
+              key: '3',
+              label: 'Hub Dir',
+              span: 24,
+              labelStyle,
+              children: <Space>{serverInfo?.hub_dir}</Space>,
             },
           ]}
         />

@@ -3,19 +3,23 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskInfo';
-import { CreateSceneParams, getRoleAgentConfigsMapFromCreateSceneParams } from '@/types/server/CreateSceneParams';
-import DynamicObject from '@/types/server/DynamicObject';
 import { SceneActionConfig } from '@/types/server/config/Action';
 import SceneAgentConfig from '@/types/server/config/Agent';
+import {
+  CreateSceneTaskParams,
+  getRoleAgentConfigsMapFromCreateSceneTaskParams,
+} from '@/types/server/config/CreateSceneTaskParams';
 import { MetricEvaluatorObjConfig } from '@/types/server/config/Evaluator';
 import { SceneMetricConfig } from '@/types/server/config/Metric';
 import { SceneRoleConfig } from '@/types/server/config/Role';
 import { SceneConfigData } from '@/types/server/config/Scene';
 import SceneAgentMetadata from '@/types/server/meta/Agent';
+import DynamicObject from '@/types/server/meta/DynamicObject';
 import EvaluatorMetadata from '@/types/server/meta/Evaluator';
+import Project from '@/types/server/meta/Project';
 import Scene from '@/types/server/meta/Scene';
-import ServerInfo from '@/types/server/meta/ServerInfo';
-import { WebUIRoleMetricConfig, getWebUIMetricsConfigFromCreateSceneParams } from '@/types/webui/MetricConfig';
+import ServerInfo from '@/types/server/meta/ServerAppInfo';
+import { WebUIRoleMetricConfig, getWebUIMetricsConfigFromCreateSceneTaskParams } from '@/types/webui/MetricConfig';
 import { Button, Card, Collapse, Flex, Space, message } from 'antd';
 import { useTheme } from 'antd-style';
 import { Form, Switch } from '@formily/antd-v5';
@@ -180,22 +184,22 @@ const CollapseItemTitle = styled.div`
 `;
 
 interface SceneConfigBoardProps {
-  scene: Scene;
+  project: Project;
   taskHistory: WebUITaskBundleTaskInfo[];
   serverInfo: ServerInfo;
 }
 
-function splitCreateSceneParamsToState(
+function splitCreateSceneTaskParamsToState(
   scene: Scene,
-  createSceneParams: CreateSceneParams
+  createSceneTaskParams: CreateSceneTaskParams
 ): {
   sceneFormValues: any;
   roleAgentConfigsMap: Record<string, SceneAgentConfig[]>;
   webUIMetricsConfig: Record<string, WebUIRoleMetricConfig>;
 } {
-  const roleAgentConfigsMap = getRoleAgentConfigsMapFromCreateSceneParams(createSceneParams);
-  const webUIMetricsConfig = getWebUIMetricsConfigFromCreateSceneParams(scene, createSceneParams);
-  const sceneFormValues: Partial<SceneConfigData> = createSceneParams.scene_obj_config.scene_config_data;
+  const roleAgentConfigsMap = getRoleAgentConfigsMapFromCreateSceneTaskParams(createSceneTaskParams);
+  const webUIMetricsConfig = getWebUIMetricsConfigFromCreateSceneTaskParams(scene, createSceneTaskParams);
+  const sceneFormValues: Partial<SceneConfigData> = createSceneTaskParams.scene_obj_config.scene_config_data;
   delete sceneFormValues.roles_config;
   return {
     sceneFormValues,
@@ -204,7 +208,9 @@ function splitCreateSceneParamsToState(
   };
 }
 
-const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardProps) => {
+const SceneConfigBoard = ({ project, serverInfo, taskHistory }: SceneConfigBoardProps) => {
+  const scene = project.metadata;
+
   const router = useRouter();
   const theme = useTheme();
   const globalStore = useGlobalStore();
@@ -725,7 +731,8 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
                     }
                   });
 
-                  const createSceneParams: CreateSceneParams = {
+                  const createSceneTaskParams: CreateSceneTaskParams = {
+                    project_id: project.id,
                     scene_obj_config: {
                       scene_obj: scene.scene_metadata.obj_for_import,
                       scene_config_data: {
@@ -739,13 +746,10 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
                     reporter_obj_config: {
                       charts: charts,
                     },
-                    work_dir: scene.work_dir,
                   };
-                  const { id: task_id, host, port } = await ServerAPI.sceneTask.createSceneTask(createSceneParams);
-                  const save_dir = await LocalAPI.path.join(serverInfo.paths.result_dir, task_id);
+                  const { id: task_id, host, port } = await ServerAPI.sceneTask.createSceneTask(createSceneTaskParams);
+                  globalStore.updateInfoAfterSceneTaskCreated(project, createSceneTaskParams, task_id);
                   const serverUrl = `${window.location.protocol}//${host}:${port}`;
-                  await LocalAPI.taskBundle.webui.save(save_dir, task_id, serverUrl, scene, createSceneParams);
-                  globalStore.updateInfoAfterSceneTaskCreated(save_dir, task_id, scene, createSceneParams);
                   let serverAccessible = false;
                   while (!serverAccessible) {
                     try {
@@ -762,16 +766,12 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
                     const localIP = await LocalAPI.network.getLocalIP();
                     const hostBaseUrl = `${window.location.protocol}//${localIP}:${window.location.port}`;
                     router.push(
-                      `/prepare/${task_id}?serverUrl=${encodeURIComponent(serverUrl)}&bundlePath=${encodeURIComponent(
-                        save_dir
-                      )}&hostBaseUrl=${encodeURIComponent(hostBaseUrl)}`
+                      `/prepare/${task_id}?serverUrl=${encodeURIComponent(serverUrl)}&hostBaseUrl=${encodeURIComponent(
+                        hostBaseUrl
+                      )}`
                     );
                   } else {
-                    router.push(
-                      `/processing/${task_id}?serverUrl=${encodeURIComponent(
-                        serverUrl
-                      )}&bundlePath=${encodeURIComponent(save_dir)}`
-                    );
+                    router.push(`/processing/${task_id}?serverUrl=${encodeURIComponent(serverUrl)}`);
                   }
                 } catch (e) {
                   console.error(e);
@@ -800,10 +800,10 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
         open={taskHistoryModalOpen}
         scene={scene}
         tasks={taskHistory}
-        onApplyHistoryTaskConfig={(createSceneParams) => {
-          const { sceneFormValues, roleAgentConfigsMap, webUIMetricsConfig } = splitCreateSceneParamsToState(
+        onApplyHistoryTaskConfig={(createSceneTaskParams) => {
+          const { sceneFormValues, roleAgentConfigsMap, webUIMetricsConfig } = splitCreateSceneTaskParamsToState(
             scene,
-            createSceneParams
+            createSceneTaskParams
           );
           sceneForm.setValues(sceneFormValues);
           try {
@@ -812,10 +812,10 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
           setRoleAgentConfigsMap(roleAgentConfigsMap);
           setWebUIMetricsConfig(webUIMetricsConfig);
           setTaskHistoryModalOpen(false);
-          if (createSceneParams.metric_evaluator_objs_config.evaluators.length > 0) {
+          if (createSceneTaskParams.metric_evaluator_objs_config.evaluators.length > 0) {
             setUseMetricEvaluators(true);
             setEvaluatorConfigMap(
-              createSceneParams.metric_evaluator_objs_config.evaluators.reduce(
+              createSceneTaskParams.metric_evaluator_objs_config.evaluators.reduce(
                 (total, evaluator) => {
                   total[evaluator.evaluator_obj.obj] = evaluator;
                   return total;
@@ -824,7 +824,7 @@ const SceneConfigBoard = ({ scene, serverInfo, taskHistory }: SceneConfigBoardPr
               )
             );
             setEnabledEvaluatorNames(
-              createSceneParams.metric_evaluator_objs_config.evaluators.map((e) => e.evaluator_obj.obj)
+              createSceneTaskParams.metric_evaluator_objs_config.evaluators.map((e) => e.evaluator_obj.obj)
             );
           } else {
             setUseMetricEvaluators(false);

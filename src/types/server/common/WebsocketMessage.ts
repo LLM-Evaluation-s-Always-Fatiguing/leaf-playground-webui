@@ -1,4 +1,4 @@
-import SceneLog from '@/types/server/Log';
+import SceneLog from '@/types/server/common/Log';
 
 export enum WebsocketMessageType {
   DATA = 'data',

@@ -2,8 +2,8 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import SceneLog, { SceneActionLog, SceneLogType, SceneSystemLog, SceneSystemLogEvent } from '@/types/server/Log';
 import { SceneTaskStatus } from '@/types/server/SceneTask';
+import SceneLog, { SceneActionLog, SceneLogType, SceneSystemLog, SceneSystemLogEvent } from '@/types/server/common/Log';
 import {
   WebsocketDataMessage,
   WebsocketEvent,
@@ -11,7 +11,7 @@ import {
   WebsocketMessage,
   WebsocketMessageOperation,
   WebsocketMessageType,
-} from '@/types/server/WebsocketMessage';
+} from '@/types/server/common/WebsocketMessage';
 import { SceneMetricConfig } from '@/types/server/config/Metric';
 import { SceneMetricDefinition } from '@/types/server/meta/Scene';
 import { Button, Modal, message } from 'antd';
@@ -155,7 +155,6 @@ const ProcessingPage = ({
   const router = useRouter();
   const searchParams = useSearchParams();
   const serverUrl = searchParams.get('serverUrl') as string;
-  const bundlePath = searchParams.get('bundlePath');
   const agentId = searchParams.get('agentId');
 
   const playerMode = !!agentId;
@@ -267,8 +266,7 @@ const ProcessingPage = ({
             startStatusPolling();
           }
         case SceneTaskStatus.FINISHED:
-          const webuiBundle = await LocalAPI.taskBundle.webui.get(bundlePath!);
-          globalStore.updateInfoFromWebUITaskBundle(webuiBundle);
+          await globalStore.syncTaskStateFromServer(taskId);
           if (taskStatusResp === SceneTaskStatus.FINISHED) {
             setSimulationFinished(true);
             setEvaluationFinished(true);
@@ -298,8 +296,8 @@ const ProcessingPage = ({
 
   useEffect(() => {
     const prepare = async () => {
-      if (!taskId || !bundlePath || !serverUrl) {
-        message.error('TaskID BundlePath is not valid!');
+      if (!taskId || !serverUrl) {
+        message.error('Task ID,  Server Url is not valid!');
         router.replace('/');
         return;
       }
@@ -309,7 +307,7 @@ const ProcessingPage = ({
         return;
       }
 
-      globalStore.updatePageTitle(globalStore.currentScene?.scene_metadata.scene_definition.name || '');
+      globalStore.updatePageTitle(globalStore.currentProject?.metadata.scene_metadata.scene_definition.name || '');
 
       if (taskStatusRef.current === SceneTaskStatus.RUNNING) {
         setLoadingTip('Connecting to server...');
@@ -486,13 +484,11 @@ const ProcessingPage = ({
   }, [taskStatus, playerMode, startStatusCheckFinished]);
 
   const goToResult = () => {
-    if (globalStore.bundlePath) {
-      router.replace(`/result/${taskId}?bundlePath=${encodeURIComponent(globalStore.bundlePath)}`);
-    }
+    router.replace(`/result/${taskId}`);
   };
 
   function getProcessingVisualizationComponent(): React.ComponentType<DefaultProcessingVisualizationComponentProps> {
-    switch (tryVisualizationName || globalStore.currentScene?.scene_metadata.scene_definition.name) {
+    switch (tryVisualizationName || globalStore.currentProject?.metadata.scene_metadata.scene_definition.name) {
       case 'RAG QA Examine':
       case 'GeneralMCQExamine':
       case 'Mmlu':
@@ -518,7 +514,7 @@ const ProcessingPage = ({
 
   const VisualizationComponent = useMemo(() => {
     return getProcessingVisualizationComponent();
-  }, [globalStore.currentScene, globalStore.createSceneParams, tryVisualizationName]);
+  }, [globalStore.currentProject, globalStore.createSceneTaskParams, tryVisualizationName]);
 
   return (
     <PageContainer>
@@ -537,10 +533,10 @@ const ProcessingPage = ({
           </div>
         )}
         <div className="visualizationComponentWrapper">
-          {globalStore.currentScene && globalStore.createSceneParams && (
+          {globalStore.currentProject && globalStore.createSceneTaskParams && (
             <VisualizationComponent
-              scene={globalStore.currentScene}
-              createSceneParams={globalStore.createSceneParams}
+              scene={globalStore.currentProject.metadata}
+              createSceneTaskParams={globalStore.createSceneTaskParams}
               logs={logs}
               targetAgentId={targetAgentId}
               playerMode={playerMode}
@@ -552,15 +548,15 @@ const ProcessingPage = ({
         </div>
       </VisualizationArea>
       <ConsoleArea>
-        {globalStore.currentScene && globalStore.createSceneParams && (
+        {globalStore.currentProject && globalStore.createSceneTaskParams && (
           <ProcessingConsole
             ref={consoleRef}
             taskStatus={taskStatus}
             wsConnected={wsConnected}
             simulationFinished={simulationFinished}
             evaluationFinished={evaluationFinished}
-            scene={globalStore.currentScene}
-            createSceneParams={globalStore.createSceneParams}
+            scene={globalStore.currentProject.metadata}
+            createSceneTaskParams={globalStore.createSceneTaskParams}
             logs={logs}
             targetAgentId={targetAgentId}
             playerMode={playerMode}

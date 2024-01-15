@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, useEffect, useRef, useState } from 'react';
-import FormilyJSONSchema from '@/types/FormilyJSONSchema';
+import FormilyJSONSchema from '@/types/common/FormilyJSONSchema';
 import { Checkbox } from 'antd';
 import { FormItem } from '@formily/antd-v5';
 import { ObjectField } from '@formily/core';

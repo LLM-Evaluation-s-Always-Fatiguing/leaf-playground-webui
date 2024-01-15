@@ -1,5 +1,5 @@
-import FormilyJSONSchema from '@/types/FormilyJSONSchema';
-import SampleJSONSchema from '@/types/SampleJSONSchema';
+import FormilyJSONSchema from '@/types/common/FormilyJSONSchema';
+import SampleJSONSchema from '@/types/common/SampleJSONSchema';
 import { Resolver } from '@stoplight/json-ref-resolver';
 import cloneDeep from 'lodash/cloneDeep';
 import { TransformCore, TransformationUnit } from './transformation-unit-defs';

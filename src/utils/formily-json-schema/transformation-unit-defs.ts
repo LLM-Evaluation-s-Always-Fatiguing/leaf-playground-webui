@@ -1,4 +1,4 @@
-import FormilyJSONSchema from '@/types/FormilyJSONSchema';
+import FormilyJSONSchema from '@/types/common/FormilyJSONSchema';
 
 export enum TransformationUnitType {
   PREPROCESSOR = 'PREPROCESSOR',

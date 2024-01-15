@@ -1,4 +1,4 @@
-import DynamicObject from '@/types/server/DynamicObject';
+import DynamicObject from '@/types/server/meta/DynamicObject';
 import { SceneRoleConfig } from '@/types/server/config/Role';
 
 export interface SceneConfigData {
