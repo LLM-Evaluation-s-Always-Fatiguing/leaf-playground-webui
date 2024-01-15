@@ -1,4 +1,4 @@
-import { CreateSceneParams } from '@/types/server/CreateSceneParams';
+import { CreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
 import Scene from '@/types/server/meta/Scene';
 
 export interface WebUIMetricConfig {
@@ -13,7 +13,7 @@ export interface WebUIRoleMetricConfig {
   actions_config: Record<string, WebUIActionMetricConfig>;
 }
 
-export function getWebUIMetricsConfigFromCreateSceneParams(scene: Scene, createSceneParams: CreateSceneParams) {
+export function getWebUIMetricsConfigFromCreateSceneTaskParams(scene: Scene, createSceneTaskParams: CreateSceneTaskParams) {
   const webUIMetricsConfig: Record<string, WebUIRoleMetricConfig> = {};
   scene.scene_metadata.scene_definition.roles.forEach((role) => {
     if ((role.actions || []).length > 0) {
@@ -28,7 +28,7 @@ export function getWebUIMetricsConfigFromCreateSceneParams(scene: Scene, createS
           action.metrics?.forEach((metric) => {
             webUIMetricsConfig[role.name].actions_config[action.name].metrics_config[metric.name] = {
               enable:
-                createSceneParams.scene_obj_config.scene_config_data.roles_config[role.name].actions_config[action.name]
+                createSceneTaskParams.scene_obj_config.scene_config_data.roles_config[role.name].actions_config[action.name]
                   .metrics_config?.[metric.name].enable || false,
             };
           });

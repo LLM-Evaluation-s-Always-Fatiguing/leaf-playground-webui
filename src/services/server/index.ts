@@ -1,14 +1,11 @@
-import ServerInfo from '@/types/server/meta/ServerInfo';
-import request from '@/services/server/request';
-import sceneAPI from '@/services/server/scene';
+import projectAPI from '@/services/server/project';
+import siteAPI from '@/services/server/site';
 import sceneTaskAPI from '@/services/server/task';
 
 const ServerAPI = {
-  scene: sceneAPI,
+  site: siteAPI,
+  project: projectAPI,
   sceneTask: sceneTaskAPI,
-  async info(): Promise<ServerInfo> {
-    return (await request.get('/info')).data;
-  },
 };
 
 export default ServerAPI;

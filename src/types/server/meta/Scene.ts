@@ -1,6 +1,6 @@
-import FormilyJSONSchema from '@/types/FormilyJSONSchema';
-import SampleJSONSchema from '@/types/SampleJSONSchema';
-import DynamicObject from '@/types/server/DynamicObject';
+import FormilyJSONSchema from '@/types/common/FormilyJSONSchema';
+import SampleJSONSchema from '@/types/common/SampleJSONSchema';
+import DynamicObject from '@/types/server/meta/DynamicObject';
 import SceneAgentMetadata, { ServerSceneAgentMetadata } from '@/types/server/meta/Agent';
 import EvaluatorMetadata, { ServerEvaluatorMetadata } from '@/types/server/meta/Evaluator';
 
@@ -88,12 +88,10 @@ export interface ServerScene {
   agents_metadata: Record<string, ServerSceneAgentMetadata[]>;
   evaluators_metadata: ServerEvaluatorMetadata[];
   charts_metadata?: SceneChartMetadata[];
-  work_dir: string;
 }
 
 export default interface Scene extends ServerScene {
   scene_metadata: SceneMetadata;
   agents_metadata: Record<string, SceneAgentMetadata[]>;
   evaluators_metadata: EvaluatorMetadata[];
-  readme?: string;
 }

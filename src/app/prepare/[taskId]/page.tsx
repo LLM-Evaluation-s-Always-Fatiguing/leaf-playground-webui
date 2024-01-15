@@ -2,15 +2,14 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { getRoleAgentConfigsMapFromCreateSceneParams } from '@/types/server/CreateSceneParams';
 import { SceneTaskStatus } from '@/types/server/SceneTask';
-import { WebsocketMessage } from '@/types/server/WebsocketMessage';
+import { WebsocketMessage } from '@/types/server/common/WebsocketMessage';
+import { getRoleAgentConfigsMapFromCreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
 import { Card, Collapse, Flex, Space, message } from 'antd';
 import styled from '@emotion/styled';
 import AgentCard from '@/components/agent/AgentCard';
 import LoadingOverlay from '@/components/common/LoadingOverlay';
-import SceneInfoBoard from '@/components/homepage/SceneInfoBoard';
-import LocalAPI from '@/services/local';
+import ProjectInfoBoard from '@/components/homepage/ProjectInfoBoard';
 import ServerAPI from '@/services/server';
 import useGlobalStore from '@/stores/global';
 
@@ -91,7 +90,6 @@ const ProcessingPage = ({
   const router = useRouter();
   const searchParams = useSearchParams();
   const serverUrl = searchParams.get('serverUrl');
-  const bundlePath = searchParams.get('bundlePath');
   const hostBaseUrl = searchParams.get('hostBaseUrl');
   const agentId = searchParams.get('agentId');
 
@@ -136,9 +134,9 @@ const ProcessingPage = ({
           wsRef.current?.close();
           await new Promise((resolve) => setTimeout(resolve, 1500));
           router.push(
-            `/processing/${taskId}?serverUrl=${encodeURIComponent(serverUrl!)}&bundlePath=${encodeURIComponent(
-              bundlePath!
-            )}${agentId ? `&agentId=${encodeURIComponent(agentId)}` : ''}`
+            `/processing/${taskId}?serverUrl=${encodeURIComponent(serverUrl!)}${
+              agentId ? `&agentId=${encodeURIComponent(agentId)}` : ''
+            }`
           );
         }
       }
@@ -165,16 +163,15 @@ const ProcessingPage = ({
 
   useEffect(() => {
     const prepare = async () => {
-      if (!taskId || !bundlePath || !serverUrl) {
+      if (!taskId || !serverUrl) {
         message.error('Page params is not valid!');
         router.replace('/');
         return;
       }
       try {
         setLoadingTip('Connecting to server...');
-        const webuiBundle = await LocalAPI.taskBundle.webui.get(bundlePath!);
-        globalStore.updateInfoFromWebUITaskBundle(webuiBundle);
-        globalStore.updatePageTitle(globalStore.currentScene?.scene_metadata.scene_definition.name || '');
+        await globalStore.syncTaskStateFromServer(taskId);
+        globalStore.updatePageTitle(globalStore.currentProject?.metadata.scene_metadata.scene_definition.name || '');
         if (agentId && !wsRef.current) {
           wsRef.current = new WebSocket(`ws://${serverUrl.replace(/^(http:\/\/|https:\/\/)/, '')}/ws/human/${agentId}`);
 
@@ -225,18 +222,18 @@ const ProcessingPage = ({
     };
   }, []);
 
-  const scene = globalStore.currentScene;
-  const roleAgentConfigsMap = globalStore.createSceneParams
-    ? getRoleAgentConfigsMapFromCreateSceneParams(globalStore.createSceneParams)
+  const project = globalStore.currentProject;
+  const roleAgentConfigsMap = globalStore.createSceneTaskParams
+    ? getRoleAgentConfigsMapFromCreateSceneTaskParams(globalStore.createSceneTaskParams)
     : {};
 
   return (
     <PageContainer>
       <LoadingOverlay spinning={loading} tip={loadingTip} />
-      {!loading && !!scene && (
+      {!loading && !!project && (
         <>
           <InfoArea>
-            <SceneInfoBoard scene={globalStore.currentScene} displayMode={true} onStartClick={async () => {}} />
+            <ProjectInfoBoard project={project} displayMode={true} onStartClick={async () => {}} />
           </InfoArea>
           <AgentsArea>
             <Card
@@ -270,8 +267,8 @@ const ProcessingPage = ({
             >
               <CustomCollapseWrapper>
                 <Collapse
-                  defaultActiveKey={scene.scene_metadata.scene_definition.roles.map((r) => r.name)}
-                  items={scene.scene_metadata.scene_definition.roles
+                  defaultActiveKey={project.metadata.scene_metadata.scene_definition.roles.map((r) => r.name)}
+                  items={project.metadata.scene_metadata.scene_definition.roles
                     .filter((r) => !r.is_static)
                     .map((role, index) => {
                       const maxAgents =
@@ -282,14 +279,12 @@ const ProcessingPage = ({
                         children: (
                           <Space wrap={true}>
                             {(roleAgentConfigsMap[role.name] || []).map((agentConfig, index) => {
-                              const agentsMetadata = scene.agents_metadata[role.name];
+                              const agentsMetadata = project.metadata.agents_metadata[role.name];
                               const sceneAgentMeta = agentsMetadata.find(
                                 (m) => m.obj_for_import.obj === agentConfig.obj_for_import.obj
                               );
                               const joinLink = `${hostBaseUrl}/prepare/${taskId}?serverUrl=${encodeURIComponent(
                                 serverUrl!
-                              )}&bundlePath=${encodeURIComponent(bundlePath!)}&hostBaseUrl=${encodeURIComponent(
-                                hostBaseUrl!
                               )}&agentId=${encodeURIComponent(agentConfig.config_data.profile.id)}`;
                               const you = agentConfig.config_data.profile.id === agentId;
                               return (

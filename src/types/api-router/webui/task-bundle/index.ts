@@ -1,9 +1,9 @@
 import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskInfo';
-import { CreateSceneParams } from '@/types/server/CreateSceneParams';
+import { CreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
 import Scene from '@/types/server/meta/Scene';
 
 export default interface WebUITaskBundle {
   taskInfo: WebUITaskBundleTaskInfo;
   scene: Scene;
-  createSceneParams: CreateSceneParams;
+  createSceneTaskParams: CreateSceneTaskParams;
 }

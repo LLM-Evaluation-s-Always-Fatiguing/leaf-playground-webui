@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskInfo';
-import { CreateSceneParams } from '@/types/server/CreateSceneParams';
+import { CreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
 import Scene from '@/types/server/meta/Scene';
 import { Button, ButtonProps, Flex, Modal, Popover, Space, Table, Tooltip, Tree, TreeDataNode } from 'antd';
 import { useTheme } from 'antd-style';
@@ -14,7 +14,7 @@ interface TaskHistoryModalProps {
   open: boolean;
   scene: Scene;
   tasks: WebUITaskBundleTaskInfo[];
-  onApplyHistoryTaskConfig: (createSceneParams: CreateSceneParams) => void;
+  onApplyHistoryTaskConfig: (createSceneTaskParams: CreateSceneTaskParams) => void;
   onNeedClose: () => void;
 }
 
@@ -59,7 +59,7 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
     >
       <LoadingOverlay spinning={loading} tip={'Operating...'} />
       <Table
-        rowKey={"id"}
+        rowKey={'id'}
         scroll={{
           y: '65vh',
         }}
@@ -172,8 +172,8 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
                     {...buttonProps}
                     onClick={async () => {
                       setLoading(true);
-                      const taskDetail = await LocalAPI.taskBundle.webui.get(record.bundlePath);
-                      onApplyHistoryTaskConfig(taskDetail.createSceneParams);
+                      // const taskDetail = await LocalAPI.taskBundle.webui.get(record.bundlePath);
+                      // onApplyHistoryTaskConfig(taskDetail.createSceneTaskParams);
                     }}
                   >
                     Replay
@@ -181,7 +181,7 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
                   <Button
                     {...buttonProps}
                     onClick={async () => {
-                      await LocalAPI.dict.open(record.bundlePath);
+                      // await LocalAPI.dict.open(record.bundlePath);
                     }}
                   >
                     Result Dict

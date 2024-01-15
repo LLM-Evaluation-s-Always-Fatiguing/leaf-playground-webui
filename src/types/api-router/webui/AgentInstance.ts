@@ -1,4 +1,4 @@
-import { CreateSceneParams } from '@/types/server/CreateSceneParams';
+import { CreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
 import SceneAgentConfig from '@/types/server/config/Agent';
 import SceneAgentMetadata from '@/types/server/meta/Agent';
 import Scene, { SceneRoleDefinition } from '@/types/server/meta/Scene';
@@ -9,9 +9,9 @@ export default interface WebUIAgentInstance {
   role: SceneRoleDefinition;
 }
 
-export function getAllAgentInstanceFrom(scene: Scene, createSceneParams: CreateSceneParams): WebUIAgentInstance[] {
+export function getAllAgentInstanceFrom(scene: Scene, createSceneTaskParams: CreateSceneTaskParams): WebUIAgentInstance[] {
   const allAgentInstances: WebUIAgentInstance[] = [];
-  Object.entries(createSceneParams.scene_obj_config.scene_config_data.roles_config).forEach(
+  Object.entries(createSceneTaskParams.scene_obj_config.scene_config_data.roles_config).forEach(
     ([roleName, roleConfig]) => {
       const role = scene.scene_metadata.scene_definition.roles.find((r) => r.name === roleName);
       if (role) {

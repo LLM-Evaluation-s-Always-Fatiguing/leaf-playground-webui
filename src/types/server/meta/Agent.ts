@@ -1,6 +1,6 @@
-import FormilyJSONSchema from '@/types/FormilyJSONSchema';
-import SampleJSONSchema from '@/types/SampleJSONSchema';
-import DynamicObject from '@/types/server/DynamicObject';
+import FormilyJSONSchema from '@/types/common/FormilyJSONSchema';
+import SampleJSONSchema from '@/types/common/SampleJSONSchema';
+import DynamicObject from '@/types/server/meta/DynamicObject';
 
 export interface ServerSceneAgentMetadata {
   cls_name: string;

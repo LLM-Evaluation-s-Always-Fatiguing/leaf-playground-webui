@@ -4,8 +4,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import ServerTaskBundle from '@/types/api-router/server/task-bundle';
 import WebUITaskBundle from '@/types/api-router/webui/task-bundle';
-import { getRoleAgentConfigsMapFromCreateSceneParams } from '@/types/server/CreateSceneParams';
-import { SceneActionLog, SceneLogType } from '@/types/server/Log';
+import { getRoleAgentConfigsMapFromCreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
+import { SceneActionLog, SceneLogType } from '@/types/server/common/Log';
 import { Button, ButtonProps, Card, Collapse, Descriptions, Space, Table, Tooltip } from 'antd';
 import { useTheme } from 'antd-style';
 import { Switch } from '@formily/antd-v5';
@@ -200,11 +200,11 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
   }, [serverBundle?.logs]);
   const [showLogsMetrics, setShowLogsMetrics] = useState<boolean>(false);
   const roleAgentConfigMap = useMemo(() => {
-    if (webuiBundle?.createSceneParams) {
-      return getRoleAgentConfigsMapFromCreateSceneParams(webuiBundle.createSceneParams);
+    if (webuiBundle?.createSceneTaskParams) {
+      return getRoleAgentConfigsMapFromCreateSceneTaskParams(webuiBundle.createSceneTaskParams);
     }
     return {};
-  }, [webuiBundle?.createSceneParams]);
+  }, [webuiBundle?.createSceneTaskParams]);
   const agentConfigMap = useMemo(() => {
     return keyBy(
       flatten(
@@ -398,7 +398,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                             children: (
                               <ReportComponent
                                 scene={webuiBundle.scene}
-                                createSceneParams={webuiBundle.createSceneParams}
+                                createSceneTaskParams={webuiBundle.createSceneTaskParams}
                                 logs={serverBundle.logs}
                                 metrics={serverBundle.metrics}
                               />
@@ -568,7 +568,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                             const { enabledMetrics, hasMetrics } = getSceneActionLogMetricInfo(
                               log,
                               webuiBundle.scene,
-                              webuiBundle.createSceneParams
+                              webuiBundle.createSceneTaskParams
                             );
                             if (hasMetrics) {
                               return (

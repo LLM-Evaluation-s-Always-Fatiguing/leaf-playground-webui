@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import Image from 'next/image';
-import { SceneActionLog } from '@/types/server/Log';
+import { SceneActionLog } from '@/types/server/common/Log';
 import { Button, Collapse, Tabs } from 'antd';
 import styled from '@emotion/styled';
 import { IoLogoMarkdown } from 'react-icons/io5';

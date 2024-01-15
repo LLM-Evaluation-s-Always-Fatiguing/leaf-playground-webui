@@ -1,29 +1,27 @@
-import WebUITaskBundle from '@/types/api-router/webui/task-bundle';
-import { CreateSceneParams } from '@/types/server/CreateSceneParams';
-import Scene from '@/types/server/meta/Scene';
+import { CreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
+import Project from '@/types/server/meta/Project';
+import { message } from 'antd';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import ServerAPI from '@/services/server';
 
 interface GlobalState {
   pageTitle?: string;
-  currentScene?: Scene;
-  createSceneParams?: CreateSceneParams;
+  currentProject?: Project;
+  createSceneTaskParams?: CreateSceneTaskParams;
   taskId?: string;
-  bundlePath?: string;
   updatePageTitle: (pageTitle: string) => void;
   clearPageTitle: () => void;
-  updateCurrentScene: (scene: Scene) => void;
-  updateCreateSceneParams: (createSceneParams: CreateSceneParams) => void;
+  updateCurrentProject: (project: Project) => void;
+  updateCreateSceneTaskParams: (createSceneTaskParams: CreateSceneTaskParams) => void;
   updateTaskId: (taskId: string) => void;
-  updateTaskResultSavedDir: (bundlePath: string) => void;
   updateInfoAfterSceneTaskCreated: (
-    bundlePath: string,
-    taskId: string,
-    scene: Scene,
-    createSceneParams: CreateSceneParams
+    project: Project,
+    createSceneTaskParams: CreateSceneTaskParams,
+    taskId: string
   ) => void;
-  updateInfoFromWebUITaskBundle: (bundle: WebUITaskBundle) => void;
+  syncTaskStateFromServer: (taskId: string) => Promise<void>;
   clearTaskState: () => void;
 }
 
@@ -31,11 +29,9 @@ const useGlobalStore = create<GlobalState>()(
   immer(
     devtools((set) => ({
       pageTitle: undefined,
-      currentScene: undefined,
-      createSceneParams: undefined,
-      create: undefined,
+      currentProject: undefined,
+      createSceneTaskParams: undefined,
       taskId: undefined,
-      bundlePath: undefined,
       updatePageTitle: (pageTitle: string) =>
         set((state) => {
           state.pageTitle = pageTitle;
@@ -44,42 +40,43 @@ const useGlobalStore = create<GlobalState>()(
         set((state) => {
           state.pageTitle = undefined;
         }),
-      updateCurrentScene: (scene) =>
+      updateCurrentProject: (project) =>
         set((state) => {
-          state.currentScene = scene;
+          state.currentProject = project;
         }),
-      updateCreateSceneParams: (createSceneParams) =>
+      updateCreateSceneTaskParams: (createSceneTaskParams) =>
         set((state) => {
-          state.createSceneParams = createSceneParams;
+          state.createSceneTaskParams = createSceneTaskParams;
         }),
       updateTaskId: (taskId) =>
         set((state) => {
           state.taskId = taskId;
         }),
-      updateTaskResultSavedDir: (bundlePath) =>
+      updateInfoAfterSceneTaskCreated: (project, createSceneTaskParams, taskId) =>
         set((state) => {
-          state.bundlePath = bundlePath;
-        }),
-      updateInfoAfterSceneTaskCreated: (bundlePath, taskId, scene, createSceneParams) =>
-        set((state) => {
-          state.bundlePath = bundlePath;
+          state.currentProject = project;
+          state.createSceneTaskParams = createSceneTaskParams;
           state.taskId = taskId;
-          state.currentScene = scene;
-          state.createSceneParams = createSceneParams;
         }),
-      updateInfoFromWebUITaskBundle: (bundle) =>
-        set((state) => {
-          state.bundlePath = bundle.taskInfo.bundlePath;
-          state.taskId = bundle.taskInfo.id;
-          state.currentScene = bundle.scene;
-          state.createSceneParams = bundle.createSceneParams;
-        }),
+      syncTaskStateFromServer: async (taskId) => {
+        try {
+          const createSceneTaskParams = await ServerAPI.sceneTask.getSceneTaskPayload(taskId);
+          const projectDetail = await ServerAPI.project.detail(createSceneTaskParams.project_id);
+          set((state) => {
+            state.currentProject = projectDetail;
+            state.createSceneTaskParams = createSceneTaskParams;
+            state.taskId = taskId;
+          });
+        } catch (e) {
+          message.error(`Sync task state from server failed.`);
+          console.error(e);
+        }
+      },
       clearTaskState: () =>
         set((state) => {
-          state.bundlePath = undefined;
+          state.currentProject = undefined;
+          state.createSceneTaskParams = undefined;
           state.taskId = undefined;
-          state.currentScene = undefined;
-          state.createSceneParams = undefined;
         }),
     }))
   )

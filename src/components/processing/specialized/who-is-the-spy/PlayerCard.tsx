@@ -106,7 +106,7 @@ const PlayerCard = (props: PlayerCardProps) => {
         <div className="name">{props.agent.config.config_data.profile.name}</div>
         {props.godView && <div className="role">{props.role}</div>}
         {(props.you || props.godView) && (
-          <div className="key">{<Markdown content={props.gameKey} useLocalAssets={true} limitHeight={true} />}</div>
+          <div className="key">{<Markdown content={props.gameKey} useHubAssets={true} limitHeight={true} />}</div>
         )}
         {props.you && <div className="youMark">You</div>}
       </Content>

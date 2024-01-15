@@ -2,14 +2,15 @@
 
 import React, { useEffect, useState } from 'react';
 import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskInfo';
+import Project from '@/types/server/meta/Project';
 import Scene from '@/types/server/meta/Scene';
-import ServerInfo from '@/types/server/meta/ServerInfo';
+import ServerAppInfo from '@/types/server/meta/ServerAppInfo';
 import { message } from 'antd';
 import styled from '@emotion/styled';
 import md5 from 'crypto-js/md5';
 import LoadingOverlay from '@/components/common/LoadingOverlay';
 import SceneConfigBoard from '@/components/homepage/SceneConfigBoard';
-import SceneInfoBoard from '@/components/homepage/SceneInfoBoard';
+import ProjectInfoBoard from '@/components/homepage/ProjectInfoBoard';
 import SceneListComponent from '@/components/scene/SceneListComponent';
 import LocalAPI from '@/services/local';
 import ServerAPI from '@/services/server';
@@ -50,8 +51,8 @@ const PageContainer = styled.div`
 `;
 
 interface HomePageProps {
-  serverInfo: ServerInfo;
-  scenes: Scene[];
+  appInfo: ServerAppInfo;
+  projects: string[];
   taskHistory: Record<string, WebUITaskBundleTaskInfo[]>;
 }
 
@@ -60,29 +61,34 @@ export default function HomePage(props: HomePageProps) {
 
   const [taskHistory, setTaskHistory] = useState<Record<string, WebUITaskBundleTaskInfo[]>>(props.taskHistory);
 
-  const [scenesLoading, setScenesLoading] = useState(false);
-  const [scenes, setScenes] = useState<Scene[]>(props.scenes);
-  const [selectedSceneIndex, setSelectedSceneIndex] = useState<number>(0);
+  const [projectsLoading, setProjectsLoading] = useState(false);
+  const [projects, setProjects] = useState<string[]>(props.projects);
+  const [selectedProject, setSelectedProject] = useState<string>(props.projects[0]);
 
-  const selectedScene = scenes[selectedSceneIndex];
+  const [projectDetailLoading, setProjectDetailLoading] = useState(false);
+  const [projectDetail, setProjectDetail] = useState<Project>();
+
   const [started, setStarted] = useState(false);
 
-  const loadScenes = async () => {
+  const reloadProjectList = async () => {
     try {
-      setScenesLoading(true);
-      const scenes = await ServerAPI.scene.getScenes();
-      setScenes(scenes);
+      setProjectsLoading(true);
+      const homepageResp = await ServerAPI.site.homepage();
+      if (!homepageResp.projects.some((p) => p === selectedProject) && homepageResp.projects.length > 0) {
+        setSelectedProject(homepageResp.projects[0]);
+      }
+      setProjects(homepageResp.projects);
     } catch (e) {
       console.error(e);
-      message.error('Failed to load scenes');
+      message.error('Failed to load project list.');
     } finally {
-      setScenesLoading(false);
+      setProjectsLoading(false);
     }
   };
 
-  const loadTaskHistory = async () => {
+  const reloadTaskHistory = async () => {
     try {
-      const taskHistory = await LocalAPI.taskBundle.webui.getAll(props.serverInfo.paths.result_dir);
+      // const taskHistory = await LocalAPI.taskBundle.webui.getAll(props.serverInfo.paths.result_dir);
       setTaskHistory(taskHistory);
     } catch (e) {
       console.error(e);
@@ -90,49 +96,62 @@ export default function HomePage(props: HomePageProps) {
     }
   };
 
+  const loadProjectDetail = async () => {
+    try {
+      setProjectDetailLoading(true);
+      const projectResp = await ServerAPI.project.detail(selectedProject);
+      setProjectDetail(projectResp);
+      setProjectDetailLoading(false);
+    } catch (e) {
+      console.error(e);
+      message.error('Failed to load project detail');
+      setProjectDetailLoading(false);
+    }
+  };
+
   useEffect(() => {
     globalStore.clearTaskState();
-    loadScenes();
-    loadTaskHistory();
+    reloadProjectList();
+    reloadTaskHistory();
+    loadProjectDetail();
   }, []);
+
+  useEffect(() => {
+    loadProjectDetail();
+  }, [selectedProject]);
 
   return (
     <PageContainer>
       <ScenesArea>
         <div className="content">
-          {scenes.map((scene, index) => {
+          {projects.map((project, index) => {
             return (
               <SceneListComponent
-                key={scene.scene_metadata.scene_definition.name}
-                scene={scene}
-                selected={selectedSceneIndex === index}
+                key={project}
+                project={project}
+                selected={selectedProject === project}
                 onClick={() => {
-                  setSelectedSceneIndex(index);
+                  setSelectedProject(project);
                   setStarted(false);
                 }}
               />
             );
           })}
         </div>
-        <LoadingOverlay spinning={scenesLoading} />
+        <LoadingOverlay spinning={projectsLoading} />
       </ScenesArea>
       <OperationArea>
-        {started && selectedScene ? (
+        <LoadingOverlay spinning={projectDetailLoading} />
+        {started && projectDetail ? (
           <SceneConfigBoard
-            key={selectedScene.scene_metadata.scene_definition.name}
-            scene={selectedScene}
-            serverInfo={props.serverInfo}
-            taskHistory={
-              taskHistory[
-                md5(
-                  `${selectedScene.scene_metadata.obj_for_import.obj}+${selectedScene.scene_metadata.obj_for_import.module}`
-                ).toString()
-              ] || []
-            }
+            key={projectDetail.id}
+            project={projectDetail}
+            serverInfo={props.appInfo}
+            taskHistory={[]}
           />
         ) : (
-          <SceneInfoBoard
-            scene={scenes[selectedSceneIndex]}
+          <ProjectInfoBoard
+            project={projectDetail}
             onStartClick={async () => {
               setStarted(true);
             }}

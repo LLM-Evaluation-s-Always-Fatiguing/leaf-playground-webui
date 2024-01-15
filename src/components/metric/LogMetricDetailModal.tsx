@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { SceneActionLog, SceneLogHumanMetricRecord } from '@/types/server/Log';
+import { SceneActionLog, SceneLogHumanMetricRecord } from '@/types/server/common/Log';
 import { SceneMetricConfig } from '@/types/server/config/Metric';
 import { SceneMetricDefinition, SceneMetricRecordDisplayType } from '@/types/server/meta/Scene';
 import { Button, Collapse, Flex, InputNumber, Rate, Tabs, Typography, message } from 'antd';

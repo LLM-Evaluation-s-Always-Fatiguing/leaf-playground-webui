@@ -1,4 +1,4 @@
-import { CreateSceneParams } from '@/types/server/CreateSceneParams';
+import { CreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
 import {
   SceneActionLog,
   SceneLogContent,
@@ -6,7 +6,7 @@ import {
   SceneLogMediaType,
   SceneLogMessage,
   SceneLogTextContent,
-} from '@/types/server/Log';
+} from '@/types/server/common/Log';
 import Scene from '@/types/server/meta/Scene';
 import Markdown from '@/components/markdown/Markdown';
 
@@ -15,7 +15,7 @@ export function getSceneLogMessageDisplayContent(message: SceneLogMessage, markd
     case SceneLogMediaType.TEXT: {
       const content = message.content as SceneLogTextContent;
       const displayContent = content.display_text || content.text;
-      return markdown ? <Markdown content={displayContent} useLocalAssets={true} /> : displayContent;
+      return markdown ? <Markdown content={displayContent} useHubAssets={true} /> : displayContent;
     }
     case SceneLogMediaType.AUDIO:
       return 'Audio';
@@ -56,14 +56,14 @@ export function getSceneLogGroundTruthDisplayContent(content: SceneLogContent, m
   }
 }
 
-export function getSceneActionLogMetricInfo(log: SceneActionLog, scene: Scene, createSceneParams: CreateSceneParams) {
+export function getSceneActionLogMetricInfo(log: SceneActionLog, scene: Scene, createSceneTaskParams: CreateSceneTaskParams) {
   const [logRoleName, logActionName] = log.action_belonged_chain ? log.action_belonged_chain.split('.') : [];
   const metrics =
     scene.scene_metadata.scene_definition.roles
       .find((r) => r.name === logRoleName)
       ?.actions.find((a) => a.name === logActionName)?.metrics || [];
   const metricsConfig =
-    createSceneParams.scene_obj_config.scene_config_data.roles_config[logRoleName]?.actions_config[logActionName]
+    createSceneTaskParams.scene_obj_config.scene_config_data.roles_config[logRoleName]?.actions_config[logActionName]
       ?.metrics_config || {};
   const enabledMetrics = metrics.filter((metric) => {
     return metricsConfig[metric.name]?.enable;

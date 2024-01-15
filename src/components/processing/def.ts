@@ -1,10 +1,10 @@
-import { CreateSceneParams } from '@/types/server/CreateSceneParams';
-import { SceneActionLog } from '@/types/server/Log';
+import { CreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
+import { SceneActionLog } from '@/types/server/common/Log';
 import Scene from '@/types/server/meta/Scene';
 
 export interface DefaultProcessingVisualizationComponentProps {
   scene: Scene;
-  createSceneParams: CreateSceneParams;
+  createSceneTaskParams: CreateSceneTaskParams;
   logs: SceneActionLog[];
   targetAgentId?: string;
   playerMode: boolean;

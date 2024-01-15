@@ -1,4 +1,4 @@
-import FormilyJSONSchema from '@/types/FormilyJSONSchema';
+import FormilyJSONSchema from '@/types/common/FormilyJSONSchema';
 import merge from 'lodash/merge';
 import type { TransformCore } from '../../transformation-unit-defs';
 import { AbstractBasicTransformationUnit } from '../../transformation-unit-defs';

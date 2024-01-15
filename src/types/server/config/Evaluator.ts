@@ -1,4 +1,4 @@
-import DynamicObject from '@/types/server/DynamicObject';
+import DynamicObject from '@/types/server/meta/DynamicObject';
 
 export interface MetricEvaluatorConfigData {
   [key: string]: any;

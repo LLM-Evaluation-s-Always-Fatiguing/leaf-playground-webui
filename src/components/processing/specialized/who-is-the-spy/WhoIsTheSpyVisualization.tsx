@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import WebUIAgentInstance, { getAllAgentInstanceFrom } from '@/types/api-router/webui/AgentInstance';
-import { SceneActionLog } from '@/types/server/Log';
+import { SceneActionLog } from '@/types/server/common/Log';
 import { Button, Slider, Tabs } from 'antd';
 import { useTheme } from 'antd-style';
 import styled from '@emotion/styled';
@@ -518,7 +518,7 @@ const WhoIsTheSpyVisualization = (props: WhoIsTheSpyVisualizationProps) => {
   const chatScrollAreaRef = useRef<HTMLDivElement>(null);
 
   const { allAgents, agentMapKeyById, deskSeatAgentsMap } = useMemo(() => {
-    const agents = getAllAgentInstanceFrom(props.scene, props.createSceneParams);
+    const agents = getAllAgentInstanceFrom(props.scene, props.createSceneTaskParams);
     const seatsIndex = assignSeats(agents.length);
     const topSeatAgents: WebUIAgentInstance[] = [];
     const rightSeatAgents: WebUIAgentInstance[] = [];
@@ -546,7 +546,7 @@ const WhoIsTheSpyVisualization = (props: WhoIsTheSpyVisualizationProps) => {
         left: leftSeatAgents,
       } as Record<string, WebUIAgentInstance[]>,
     };
-  }, [props.scene, props.createSceneParams]);
+  }, [props.scene, props.createSceneTaskParams]);
 
   const splitGamesLogs = useMemo(() => {
     return splitLogs(props.logs, 'game');

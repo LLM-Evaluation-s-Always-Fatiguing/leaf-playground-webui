@@ -22,8 +22,8 @@ interface WhoIsTheSpyDefaultReportProps extends DefaultResultReportComponentProp
 
 const WhoIsTheSpyDefaultReport: ResultReportFunctionComponent<WhoIsTheSpyDefaultReportProps> = (props) => {
   const agents = useMemo(() => {
-    return getAllAgentInstanceFrom(props.scene, props.createSceneParams);
-  }, [props.scene, props.createSceneParams]);
+    return getAllAgentInstanceFrom(props.scene, props.createSceneTaskParams);
+  }, [props.scene, props.createSceneTaskParams]);
   const source = useMemo(() => {
     if (!props.metrics) return [];
     const agentsKeyByAgentId = keyBy(agents, (a) => a.config.config_data.profile.id);

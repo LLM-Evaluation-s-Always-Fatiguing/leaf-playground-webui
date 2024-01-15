@@ -1,5 +1,6 @@
 'use client';
 
+import Project from '@/types/server/meta/Project';
 import Scene from '@/types/server/meta/Scene';
 import { Button } from 'antd';
 import styled from '@emotion/styled';
@@ -60,30 +61,29 @@ const Container = styled.div`
   }
 `;
 
-interface SceneInfoBoardProps {
-  scene?: Scene;
+interface ProjectInfoBoardProps {
+  project?: Project;
   displayMode?: boolean;
   onStartClick: () => Promise<void>;
 }
 
-const SceneInfoBoard = (props: SceneInfoBoardProps) => {
+const ProjectInfoBoard = (props: ProjectInfoBoardProps) => {
   return (
     <Container>
-      {props.scene && (
+      {props.project && (
         <>
           <Header>
-            <div className="title">{props.scene.scene_metadata.scene_definition.name}</div>
+            <div className="title">{props.project.metadata.scene_metadata.scene_definition.name}</div>
           </Header>
           <div className="infoArea">
-            {props.scene.readme ? (
+            {props.project.readme ? (
               <Markdown
-                content={props.scene.readme}
-                useLocalAssets={true}
-                localAssetsBasePath={props.scene.work_dir}
+                content={props.project.readme}
+                useHubAssets={true}
                 removeComments={true}
               />
             ) : (
-              <div className="desc">{props.scene.scene_metadata.scene_definition.description}</div>
+              <div className="desc">{props.project.metadata.scene_metadata.scene_definition.description}</div>
             )}
           </div>
           {!props.displayMode && (
@@ -110,4 +110,4 @@ const SceneInfoBoard = (props: SceneInfoBoardProps) => {
   );
 };
 
-export default SceneInfoBoard;
+export default ProjectInfoBoard;

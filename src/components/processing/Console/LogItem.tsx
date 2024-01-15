@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import { SceneActionLog } from '@/types/server/Log';
+import { SceneActionLog } from '@/types/server/common/Log';
 import { SceneMetricConfig } from '@/types/server/config/Metric';
 import { SceneMetricDefinition } from '@/types/server/meta/Scene';
 import { Button, Tooltip } from 'antd';
