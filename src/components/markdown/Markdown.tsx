@@ -159,12 +159,22 @@ export const PreCode: React.FunctionComponent<{ children: any }> = (props) => {
   );
 };
 
-export const LocalImage = (props: PropsWithChildren & React.HTMLProps<HTMLImageElement> & Record<string, any>) => {
+export const HubAssetsImage = (
+  props: {
+    hubAssetsProjectId?: string;
+  } & PropsWithChildren &
+    React.HTMLProps<HTMLImageElement> &
+    Record<string, any>
+) => {
   const [realSrc, setRealSrc] = useState('');
   useEffect(() => {
     const process = async () => {
       try {
-        setRealSrc(`/api/server/hub/project/image_asset?filePath=${encodeURIComponent(props.src || '')}&projectId=who_is_the_spy_cn_93da611b`);
+        setRealSrc(
+          `/api/server/hub/project/image_asset?filePath=${encodeURIComponent(props.src || '')}${
+            props.hubAssetsProjectId ? `&projectId=${props.hubAssetsProjectId}` : ''
+          }`
+        );
       } catch (e) {
         console.error(e);
       }
@@ -188,12 +198,18 @@ export const LocalImage = (props: PropsWithChildren & React.HTMLProps<HTMLImageE
   );
 };
 
-export const _Image = (props: PropsWithChildren & React.HTMLProps<HTMLImageElement> & Record<string, any>) => {
-  const localImage = !props.src?.startsWith('http');
+export const _Image = (
+  props: {
+    hubAssetsProjectId?: string;
+  } & PropsWithChildren &
+    React.HTMLProps<HTMLImageElement> &
+    Record<string, any>
+) => {
+  const noHttpImage = !props.src?.startsWith('http');
   const imageProps = { ...props };
   delete imageProps.node;
-  return localImage ? (
-    <LocalImage {...props} />
+  return noHttpImage ? (
+    <HubAssetsImage {...props} />
   ) : (
     // eslint-disable-next-line @next/next/no-img-element
     <img alt={''} {...imageProps} />
@@ -203,6 +219,7 @@ export const _Image = (props: PropsWithChildren & React.HTMLProps<HTMLImageEleme
 interface MarkdownContentProps {
   content: string;
   useHubAssets?: boolean;
+  hubAssetsProjectId?: string;
   removeComments?: boolean;
 }
 
@@ -248,7 +265,7 @@ function _MarkDownContent(props: MarkdownContentProps) {
         ...(props.useHubAssets
           ? {
               img: (imgProps) => {
-                return <_Image {...imgProps} />;
+                return <_Image {...imgProps} hubAssetsProjectId={props.hubAssetsProjectId} />;
               },
             }
           : {}),
@@ -258,9 +275,6 @@ function _MarkDownContent(props: MarkdownContentProps) {
         },
       }}
       urlTransform={(url, key, node) => {
-        if (url.startsWith('.')) {
-          console.log(url);
-        }
         // By default, the defaultUrlTransform function in Windows environments treats local paths, such as those starting with C:/, as unsafe and replaces them with an empty string. Hence, in this case, it simply returns the URL that it has identified without any modification.
         return url;
       }}
@@ -291,13 +305,12 @@ export default function Markdown(
   props: {
     content: string;
     useHubAssets?: boolean;
-    projectId?: string;
+    hubAssetsProjectId?: string;
     removeComments?: boolean;
     limitHeight?: boolean;
     fontSize?: number | string;
   } & React.DOMAttributes<HTMLDivElement>
 ) {
-  console.log(props.content);
   return (
     <Typography
       style={{
@@ -320,6 +333,7 @@ export default function Markdown(
       >
         <MarkdownContent
           useHubAssets={props.useHubAssets}
+          hubAssetsProjectId={props.hubAssetsProjectId}
           removeComments={props.removeComments}
           content={props.content}
         />

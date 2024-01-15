@@ -1,8 +1,7 @@
 import WebUIAgentInstance from '@/types/api-router/webui/AgentInstance';
-import SceneAgentConfig from '@/types/server/config/Agent';
+import Project from '@/types/server/meta/Project';
 import { Card } from 'antd';
 import styled from '@emotion/styled';
-import { RiRobot2Fill } from 'react-icons/ri';
 import Markdown from '@/components/markdown/Markdown';
 import RoleAvatar from '@/components/processing/specialized/who-is-the-spy/RoleAvatar';
 import { TrophyIcon } from '@/components/processing/specialized/who-is-the-spy/icons/TrophyIcon';
@@ -60,6 +59,7 @@ const Content = styled.div`
 `;
 
 interface PlayerCardProps {
+  project: Project;
   agent: WebUIAgentInstance;
   godView: boolean;
   live: boolean;
@@ -106,7 +106,16 @@ const PlayerCard = (props: PlayerCardProps) => {
         <div className="name">{props.agent.config.config_data.profile.name}</div>
         {props.godView && <div className="role">{props.role}</div>}
         {(props.you || props.godView) && (
-          <div className="key">{<Markdown content={props.gameKey} useHubAssets={true} limitHeight={true} />}</div>
+          <div className="key">
+            {
+              <Markdown
+                content={props.gameKey}
+                useHubAssets={true}
+                hubAssetsProjectId={props.project.id}
+                limitHeight={true}
+              />
+            }
+          </div>
         )}
         {props.you && <div className="youMark">You</div>}
       </Content>

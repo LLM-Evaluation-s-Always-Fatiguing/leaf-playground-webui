@@ -785,6 +785,7 @@ const WhoIsTheSpyVisualization = (props: WhoIsTheSpyVisualizationProps) => {
                 return (
                   <PlayerCard
                     key={agent.config.config_data.profile.id}
+                    project={props.project}
                     godView={godView}
                     live={live}
                     win={win}
@@ -849,7 +850,7 @@ const WhoIsTheSpyVisualization = (props: WhoIsTheSpyVisualizationProps) => {
                         }}
                       />
                     </div>
-                    <div className="body">{getSceneLogMessageDisplayContent(log.response, true)}</div>
+                    <div className="body">{getSceneLogMessageDisplayContent(log.response, true, props.project.id)}</div>
                   </div>
                 </div>
               );

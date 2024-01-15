@@ -535,6 +535,7 @@ const ProcessingPage = ({
         <div className="visualizationComponentWrapper">
           {globalStore.currentProject && globalStore.createSceneTaskParams && (
             <VisualizationComponent
+              project={globalStore.currentProject}
               scene={globalStore.currentProject.metadata}
               createSceneTaskParams={globalStore.createSceneTaskParams}
               logs={logs}
