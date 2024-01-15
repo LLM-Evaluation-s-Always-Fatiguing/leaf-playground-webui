@@ -1,0 +1,332 @@
+[
+  {
+    "agent": "ChatGLM3-6B",
+    "characterConsistency": {
+      "knowledgeExposure": 2.016,
+      "knowledgeAccuracy": 2.792,
+      "knowledgeHallucination": 2.704,
+      "personaBehavior": 2.455,
+      "personaUtterance": 2.812
+    },
+    "personalityBackTesting": 0.532,
+    "conversationalAbility": {
+      "fluency": 3.269,
+      "coherency": 3.647,
+      "consistency": 3.283
+    },
+    "rolePlayingAttractiveness": {
+      "humanLikeness": 3.064,
+      "communicationSkills": 2.932,
+      "expressionDiversity": 1.969,
+      "empathy": 2.993
+    }
+  },
+  {
+    "agent": "XVERSE-7B",
+    "characterConsistency": {
+      "knowledgeExposure": 1.834,
+      "knowledgeAccuracy": 2.774,
+      "knowledgeHallucination": 2.763,
+      "personaBehavior": 2.564,
+      "personaUtterance": 2.887
+    },
+    "personalityBackTesting": 0.62,
+    "conversationalAbility": {
+      "fluency": 3.393,
+      "coherency": 3.752,
+      "consistency": 3.518
+    },
+    "rolePlayingAttractiveness": {
+      "humanLikeness": 3.395,
+      "communicationSkills": 2.743,
+      "expressionDiversity": 2.013,
+      "empathy": 2.936
+    }
+  },
+  {
+    "agent": "Baichuan2-7B",
+    "characterConsistency": {
+      "knowledgeExposure": 1.813,
+      "knowledgeAccuracy": 2.849,
+      "knowledgeHallucination": 2.929,
+      "personaBehavior": 2.83,
+      "personaUtterance": 3.081
+    },
+    "personalityBackTesting": 0.625,
+    "conversationalAbility": {
+      "fluency": 3.551,
+      "coherency": 3.894,
+      "consistency": 3.827
+    },
+    "rolePlayingAttractiveness": {
+      "humanLikeness": 3.67,
+      "communicationSkills": 2.728,
+      "expressionDiversity": 2.115,
+      "empathy": 2.984
+    }
+  },
+  {
+    "agent": "Qwen-7B",
+    "characterConsistency": {
+      "knowledgeExposure": 1.956,
+      "knowledgeAccuracy": 2.728,
+      "knowledgeHallucination": 2.633,
+      "personaBehavior": 2.605,
+      "personaUtterance": 2.78
+    },
+    "personalityBackTesting": 0.606,
+    "conversationalAbility": {
+      "fluency": 3.187,
+      "coherency": 3.564,
+      "consistency": 3.229
+    },
+    "rolePlayingAttractiveness": {
+      "humanLikeness": 3.036,
+      "communicationSkills": 2.791,
+      "expressionDiversity": 2.052,
+      "empathy": 2.838
+    }
+  },
+  {
+    "agent": "InternLM-7B",
+    "characterConsistency": {
+      "knowledgeExposure": 1.782,
+      "knowledgeAccuracy": 2.8,
+      "knowledgeHallucination": 2.781,
+      "personaBehavior": 2.719,
+      "personaUtterance": 3.016
+    },
+    "personalityBackTesting": 0.63,
+    "conversationalAbility": {
+      "fluency": 3.527,
+      "coherency": 3.823,
+      "consistency": 3.744
+    },
+    "rolePlayingAttractiveness": {
+      "humanLikeness": 3.546,
+      "communicationSkills": 2.622,
+      "expressionDiversity": 2.07,
+      "empathy": 2.897
+    }
+  },
+  {
+    "agent": "XVERSE-13B",
+    "characterConsistency": {
+      "knowledgeExposure": 1.977,
+      "knowledgeAccuracy": 2.828,
+      "knowledgeHallucination": 2.862,
+      "personaBehavior": 2.579,
+      "personaUtterance": 2.915
+    },
+    "personalityBackTesting": 0.63,
+    "conversationalAbility": {
+      "fluency": 3.444,
+      "coherency": 3.811,
+      "consistency": 3.559
+    },
+    "rolePlayingAttractiveness": {
+      "humanLikeness": 3.319,
+      "communicationSkills": 2.939,
+      "expressionDiversity": 2.045,
+      "empathy": 3.018
+    }
+  },
+  {
+    "agent": "Baichuan2-13B",
+    "characterConsistency": {
+      "knowledgeExposure": 1.802,
+      "knowledgeAccuracy": 2.869,
+      "knowledgeHallucination": 2.946,
+      "personaBehavior": 2.808,
+      "personaUtterance": 3.081
+    },
+    "personalityBackTesting": 0.639,
+    "conversationalAbility": {
+      "fluency": 3.596,
+      "coherency": 3.924,
+      "consistency": 3.864
+    },
+    "rolePlayingAttractiveness": {
+      "humanLikeness": 3.7,
+      "communicationSkills": 2.703,
+      "expressionDiversity": 2.136,
+      "empathy": 3.021
+    }
+  },
+  {
+    "agent": "Qwen-14B",
+    "characterConsistency": {
+      "knowledgeExposure": 1.988,
+      "knowledgeAccuracy": 2.8,
+      "knowledgeHallucination": 2.811,
+      "personaBehavior": 2.744,
+      "personaUtterance": 2.9
+    },
+    "personalityBackTesting": 0.62,
+    "conversationalAbility": {
+      "fluency": 3.351,
+      "coherency": 3.765,
+      "consistency": 3.51
+    },
+    "rolePlayingAttractiveness": {
+      "humanLikeness": 3.354,
+      "communicationSkills": 2.871,
+      "expressionDiversity": 2.237,
+      "empathy": 2.97
+    }
+  },
+  {
+    "agent": "InternLM-20B",
+    "characterConsistency": {
+      "knowledgeExposure": 1.945,
+      "knowledgeAccuracy": 2.916,
+      "knowledgeHallucination": 2.92,
+      "personaBehavior": 2.753,
+      "personaUtterance": 3.041
+    },
+    "personalityBackTesting": 0.648,
+    "conversationalAbility": {
+      "fluency": 3.576,
+      "coherency": 3.943,
+      "consistency": 3.717
+    },
+    "rolePlayingAttractiveness": {
+      "humanLikeness": 3.582,
+      "communicationSkills": 2.885,
+      "expressionDiversity": 2.132,
+      "empathy": 3.047
+    }
+  },
+  {
+    "agent": "CharacterGLM",
+    "characterConsistency": {
+      "knowledgeExposure": 1.64,
+      "knowledgeAccuracy": 2.819,
+      "knowledgeHallucination": 2.738,
+      "personaBehavior": 2.301,
+      "personaUtterance": 2.969
+    },
+    "personalityBackTesting": 0,
+    "conversationalAbility": {
+      "fluency": 3.414,
+      "coherency": 3.717,
+      "consistency": 3.737
+    },
+    "rolePlayingAttractiveness": {
+      "humanLikeness": 3.738,
+      "communicationSkills": 2.265,
+      "expressionDiversity": 1.966,
+      "empathy": 2.812
+    }
+  },
+  {
+    "agent": "Xingchen",
+    "characterConsistency": {
+      "knowledgeExposure": 1.636,
+      "knowledgeAccuracy": 2.768,
+      "knowledgeHallucination": 2.743,
+      "personaBehavior": 2.772,
+      "personaUtterance": 3.055
+    },
+    "personalityBackTesting": 0.63,
+    "conversationalAbility": {
+      "fluency": 3.378,
+      "coherency": 3.807,
+      "consistency": 3.754
+    },
+    "rolePlayingAttractiveness": {
+      "humanLikeness": 3.757,
+      "communicationSkills": 2.272,
+      "expressionDiversity": 2.1,
+      "empathy": 2.799
+    }
+  },
+  {
+    "agent": "MiniMax",
+    "characterConsistency": {
+      "knowledgeExposure": 1.835,
+      "knowledgeAccuracy": 2.91,
+      "knowledgeHallucination": 2.944,
+      "personaBehavior": 2.774,
+      "personaUtterance": 3.125
+    },
+    "personalityBackTesting": 0.685,
+    "conversationalAbility": {
+      "fluency": 3.609,
+      "coherency": 3.932,
+      "consistency": 3.811
+    },
+    "rolePlayingAttractiveness": {
+      "humanLikeness": 3.768,
+      "communicationSkills": 2.672,
+      "expressionDiversity": 2.15,
+      "empathy": 3.017
+    }
+  },
+  {
+    "agent": "BC-NPC-Turbo",
+    "characterConsistency": {
+      "knowledgeExposure": 1.802,
+      "knowledgeAccuracy": 2.964,
+      "knowledgeHallucination": 2.993,
+      "personaBehavior": 2.91,
+      "personaUtterance": 3.151
+    },
+    "personalityBackTesting": 0.681,
+    "conversationalAbility": {
+      "fluency": 3.578,
+      "coherency": 3.898,
+      "consistency": 3.916
+    },
+    "rolePlayingAttractiveness": {
+      "humanLikeness": 3.836,
+      "communicationSkills": 2.643,
+      "expressionDiversity": 2.336,
+      "empathy": 2.971
+    }
+  },
+  {
+    "agent": "GPT-3.5",
+    "characterConsistency": {
+      "knowledgeExposure": 1.716,
+      "knowledgeAccuracy": 2.339,
+      "knowledgeHallucination": 2.212,
+      "personaBehavior": 1.921,
+      "personaUtterance": 2.316
+    },
+    "personalityBackTesting": 0.653,
+    "conversationalAbility": {
+      "fluency": 2.629,
+      "coherency": 2.917,
+      "consistency": 2.7
+    },
+    "rolePlayingAttractiveness": {
+      "humanLikeness": 2.565,
+      "communicationSkills": 2.422,
+      "expressionDiversity": 1.66,
+      "empathy": 2.526
+    }
+  },
+  {
+    "agent": "GPT-4",
+    "characterConsistency": {
+      "knowledgeExposure": 2.25,
+      "knowledgeAccuracy": 2.855,
+      "knowledgeHallucination": 2.785,
+      "personaBehavior": 2.721,
+      "personaUtterance": 2.873
+    },
+    "personalityBackTesting": 0.694,
+    "conversationalAbility": {
+      "fluency": 3.332,
+      "coherency": 3.669,
+      "consistency": 3.343
+    },
+    "rolePlayingAttractiveness": {
+      "humanLikeness": 3.143,
+      "communicationSkills": 3.184,
+      "expressionDiversity": 2.153,
+      "empathy": 3.01
+    }
+  }
+]
