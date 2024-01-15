@@ -80,6 +80,7 @@ const ProjectInfoBoard = (props: ProjectInfoBoardProps) => {
               <Markdown
                 content={props.project.readme}
                 useHubAssets={true}
+                hubAssetsProjectId={props.project.id}
                 removeComments={true}
               />
             ) : (

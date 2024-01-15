@@ -1,4 +1,3 @@
-import { CreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
 import {
   SceneActionLog,
   SceneLogContent,
@@ -7,15 +6,20 @@ import {
   SceneLogMessage,
   SceneLogTextContent,
 } from '@/types/server/common/Log';
+import { CreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
 import Scene from '@/types/server/meta/Scene';
 import Markdown from '@/components/markdown/Markdown';
 
-export function getSceneLogMessageDisplayContent(message: SceneLogMessage, markdown = false) {
+export function getSceneLogMessageDisplayContent(message: SceneLogMessage, markdown = false, projectId: string) {
   switch (message.content.type) {
     case SceneLogMediaType.TEXT: {
       const content = message.content as SceneLogTextContent;
       const displayContent = content.display_text || content.text;
-      return markdown ? <Markdown content={displayContent} useHubAssets={true} /> : displayContent;
+      return markdown ? (
+        <Markdown content={displayContent} useHubAssets={true} hubAssetsProjectId={projectId} />
+      ) : (
+        displayContent
+      );
     }
     case SceneLogMediaType.AUDIO:
       return 'Audio';
@@ -56,7 +60,11 @@ export function getSceneLogGroundTruthDisplayContent(content: SceneLogContent, m
   }
 }
 
-export function getSceneActionLogMetricInfo(log: SceneActionLog, scene: Scene, createSceneTaskParams: CreateSceneTaskParams) {
+export function getSceneActionLogMetricInfo(
+  log: SceneActionLog,
+  scene: Scene,
+  createSceneTaskParams: CreateSceneTaskParams
+) {
   const [logRoleName, logActionName] = log.action_belonged_chain ? log.action_belonged_chain.split('.') : [];
   const metrics =
     scene.scene_metadata.scene_definition.roles
