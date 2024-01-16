@@ -21,6 +21,7 @@ import { createSchemaField } from '@formily/react';
 import ColorPicker from '@/components/formily/components/ColorPicker';
 import NoConfigRequired from '@/components/formily/components/NoConfigRequired';
 import NullableObject from '@/components/formily/components/NullableObject';
+import FormilyUploadStringFileContent from '@/components/formily/components/UploadStringFileContent';
 
 const FormilyDefaultSchemaField = createSchemaField({
   components: {
@@ -46,6 +47,8 @@ const FormilyDefaultSchemaField = createSchemaField({
 
     NoConfigRequired,
     ColorPicker,
+
+    UploadStringFileContent: FormilyUploadStringFileContent,
   },
 });
 

@@ -1,3 +1,4 @@
+import UploadStringFileContentTransformationUnit from '@/utils/formily-json-schema/transformation-units/custom-type/string-file-content';
 import ObjectNullableAnyOfTransformationUnit from '@/utils/formily-json-schema/transformation-units/specialized/object-nullable-any-of';
 import BasicAllOfTransformationUnit from './basic/all-of';
 import BasicArrayTransformationUnit from './basic/array';
@@ -15,6 +16,7 @@ export const SystemTransformationUnits = [
   new RemoveTitleTempSuffixPreprocessor(),
 
   // Specialized
+  new UploadStringFileContentTransformationUnit(),
   new TopObjectTransformationUnit(),
   new EmptyObjectNoConfigRequiredTransformationUnit(),
   new NoObjectNullableAnyOfTransformationUnit(),
