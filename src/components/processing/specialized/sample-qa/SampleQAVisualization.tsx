@@ -294,7 +294,7 @@ const SampleQAVisualization = (props: SampleQAVisualizationProps) => {
                     }}
                   />
                 </div>
-                <div className="body">{getSceneLogMessageDisplayContent(log.response, true)}</div>
+                <div className="body">{getSceneLogMessageDisplayContent(log.response, true, props.project.id)}</div>
               </div>
             </div>
           );

@@ -627,6 +627,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
         open={jsonViewerModalOpen}
         jsonObject={viewingLog || viewingJSON}
         isSceneLog={!!viewingLog}
+        projectId={globalStore.currentProject?.id}
         onNeedClose={() => {
           setJSONViewerModalOpen(false);
           setViewingJSON(undefined);

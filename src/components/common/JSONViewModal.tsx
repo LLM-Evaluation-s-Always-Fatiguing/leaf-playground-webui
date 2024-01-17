@@ -69,10 +69,18 @@ interface JSONViewModalProps {
   title?: string;
   jsonObject?: any;
   isSceneLog?: boolean;
+  projectId?: string;
   onNeedClose: () => void;
 }
 
-const JSONViewModal: React.FC<JSONViewModalProps> = ({ open, title, jsonObject, isSceneLog, onNeedClose }) => {
+const JSONViewModal: React.FC<JSONViewModalProps> = ({
+  open,
+  title,
+  jsonObject,
+  isSceneLog,
+  projectId,
+  onNeedClose,
+}) => {
   const resetState = () => {};
 
   useEffect(() => {
@@ -153,7 +161,7 @@ const JSONViewModal: React.FC<JSONViewModalProps> = ({ open, title, jsonObject, 
                                                   .join(', ')}]: `}</div>
                                               </div>
                                               <div className={'body'}>
-                                                {getSceneLogMessageDisplayContent(reference, true)}
+                                                {getSceneLogMessageDisplayContent(reference, true, projectId!)}
                                               </div>
                                             </MarkdownContentItem>
                                           );
@@ -176,7 +184,9 @@ const JSONViewModal: React.FC<JSONViewModalProps> = ({ open, title, jsonObject, 
                                           .join(', ')}]: `}
                                     </div>
                                   </div>
-                                  <div className={'body'}>{getSceneLogMessageDisplayContent(log.response, true)}</div>
+                                  <div className={'body'}>
+                                    {getSceneLogMessageDisplayContent(log.response, true, projectId!)}
+                                  </div>
                                 </MarkdownContentItem>
                               ),
                             },

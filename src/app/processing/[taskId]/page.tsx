@@ -674,6 +674,7 @@ const ProcessingPage = ({
         open={jsonViewModalOpen}
         jsonObject={jsonViewModalData || operatingLog}
         isSceneLog={!!operatingLog}
+        projectId={globalStore.currentProject?.id}
         onNeedClose={() => {
           setJSONViewModalOpen(false);
           setJSONViewModalData(undefined);

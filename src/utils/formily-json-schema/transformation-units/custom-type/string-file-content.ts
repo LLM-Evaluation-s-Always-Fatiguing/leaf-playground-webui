@@ -1,4 +1,4 @@
-import FormilyJSONSchema from '@/types/FormilyJSONSchema';
+import FormilyJSONSchema from '@/types/common/FormilyJSONSchema';
 import { AbstractSpecializedTransformationUnit, TransformCore } from '../../transformation-unit-defs';
 
 export default class UploadStringFileContentTransformationUnit extends AbstractSpecializedTransformationUnit {

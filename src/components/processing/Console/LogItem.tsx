@@ -196,7 +196,7 @@ const ConsoleLogItem = ({
             <strong>
               {`${log.response.sender.name} --> [${log.response.receivers.map((r) => r.name).join(', ')}]: `}
             </strong>
-            {getSceneLogMessageDisplayContent(log.response)}
+            {getSceneLogMessageDisplayContent(log.response, false, '')}
           </TruncatableParagraph>
         </Body>
       </MainContainer>
