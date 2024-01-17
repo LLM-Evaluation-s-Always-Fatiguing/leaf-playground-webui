@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import request from '@/app/api/server/hub/request';
+import request from '@/app/api/server/request';
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;

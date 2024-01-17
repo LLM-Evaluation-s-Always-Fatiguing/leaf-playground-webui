@@ -17,3 +17,7 @@ export interface ServerProject {
 export default interface Project extends ServerProject {
   metadata: Scene;
 }
+
+export interface ListProject extends Pick<Project, 'id' | 'name'> {
+  description: string;
+}

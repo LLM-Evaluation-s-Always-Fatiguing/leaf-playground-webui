@@ -60,7 +60,7 @@ const useGlobalStore = create<GlobalState>()(
         }),
       syncTaskStateFromServer: async (taskId) => {
         try {
-          const createSceneTaskParams = await ServerAPI.sceneTask.getSceneTaskPayload(taskId);
+          const createSceneTaskParams = await ServerAPI.sceneTask.payload(taskId);
           const projectDetail = await ServerAPI.project.detail(createSceneTaskParams.project_id);
           set((state) => {
             state.currentProject = projectDetail;

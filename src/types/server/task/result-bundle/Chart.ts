@@ -1,5 +1,5 @@
 import { VisualizationSpec } from 'vega-embed';
 
-export default interface ServerTaskBundleCharts {
+export default interface SceneTaskResultBundleCharts {
   [key: string]: VisualizationSpec;
 }

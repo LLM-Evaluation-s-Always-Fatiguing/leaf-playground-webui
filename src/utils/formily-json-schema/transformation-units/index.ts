@@ -5,14 +5,12 @@ import BasicBooleanTransformationUnit from './basic/boolean';
 import BasicNumberTransformationUnit from './basic/number';
 import BasicObjectTransformationUnit from './basic/object';
 import BasicStringTransformationUnit from './basic/string';
-import RemoveTitleTempSuffixPreprocessor from './preprocessor/remove-title-temp-suffix';
 import EmptyObjectNoConfigRequiredTransformationUnit from './specialized/empty-object-no-config-required';
 import NoObjectNullableAnyOfTransformationUnit from './specialized/no-object-nullable-any-of';
 import TopObjectTransformationUnit from './specialized/top-object';
 
 export const SystemTransformationUnits = [
   // Preprocessor
-  new RemoveTitleTempSuffixPreprocessor(),
 
   // Specialized
   new TopObjectTransformationUnit(),

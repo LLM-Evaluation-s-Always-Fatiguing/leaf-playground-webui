@@ -171,7 +171,7 @@ export const HubAssetsImage = (
     const process = async () => {
       try {
         setRealSrc(
-          `/api/server/hub/project/image_asset?filePath=${encodeURIComponent(props.src || '')}${
+          `/api/server/project/image_asset?filePath=${encodeURIComponent(props.src || '')}${
             props.hubAssetsProjectId ? `&projectId=${props.hubAssetsProjectId}` : ''
           }`
         );

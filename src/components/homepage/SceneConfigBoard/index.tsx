@@ -2,7 +2,6 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskInfo';
 import { SceneActionConfig } from '@/types/server/config/Action';
 import SceneAgentConfig from '@/types/server/config/Agent';
 import {
@@ -40,6 +39,7 @@ import { DefaultSceneInfoConfig } from '@/models/scene';
 import LocalAPI from '@/services/local';
 import ServerAPI from '@/services/server';
 import useGlobalStore from '@/stores/global';
+import SceneTaskHistory from '@/types/server/task/SceneTaskHistory';
 
 const Container = styled.div`
   width: 100%;
@@ -185,7 +185,7 @@ const CollapseItemTitle = styled.div`
 
 interface SceneConfigBoardProps {
   project: Project;
-  taskHistory: WebUITaskBundleTaskInfo[];
+  taskHistory: SceneTaskHistory[];
   serverInfo: ServerInfo;
 }
 
@@ -208,7 +208,7 @@ function splitCreateSceneTaskParamsToState(
   };
 }
 
-const SceneConfigBoard = ({ project, serverInfo, taskHistory }: SceneConfigBoardProps) => {
+const SceneConfigBoard = ({ project, taskHistory }: SceneConfigBoardProps) => {
   const scene = project.metadata;
 
   const router = useRouter();
@@ -747,31 +747,14 @@ const SceneConfigBoard = ({ project, serverInfo, taskHistory }: SceneConfigBoard
                       charts: charts,
                     },
                   };
-                  const { id: task_id, host, port } = await ServerAPI.sceneTask.createSceneTask(createSceneTaskParams);
+                  const { id: task_id } = await ServerAPI.sceneTask.create(createSceneTaskParams);
                   globalStore.updateInfoAfterSceneTaskCreated(project, createSceneTaskParams, task_id);
-                  const serverUrl = `${window.location.protocol}//${host}:${port}`;
-                  let serverAccessible = false;
-                  while (!serverAccessible) {
-                    try {
-                      await new Promise((resolve) => {
-                        setTimeout(() => {
-                          resolve(null);
-                        }, 1000);
-                      });
-                      await ServerAPI.sceneTask.status(serverUrl);
-                      serverAccessible = true;
-                    } catch {}
-                  }
                   if (hasHumanAgent) {
                     const localIP = await LocalAPI.network.getLocalIP();
                     const hostBaseUrl = `${window.location.protocol}//${localIP}:${window.location.port}`;
-                    router.push(
-                      `/prepare/${task_id}?serverUrl=${encodeURIComponent(serverUrl)}&hostBaseUrl=${encodeURIComponent(
-                        hostBaseUrl
-                      )}`
-                    );
+                    router.push(`/prepare/${task_id}?hostBaseUrl=${encodeURIComponent(hostBaseUrl)}`);
                   } else {
-                    router.push(`/processing/${task_id}?serverUrl=${encodeURIComponent(serverUrl)}`);
+                    router.push(`/processing/${task_id}`);
                   }
                 } catch (e) {
                   console.error(e);
@@ -796,46 +779,46 @@ const SceneConfigBoard = ({ project, serverInfo, taskHistory }: SceneConfigBoard
           </div>
         )}
       </Container>
-      <TaskHistoryModal
-        open={taskHistoryModalOpen}
-        scene={scene}
-        tasks={taskHistory}
-        onApplyHistoryTaskConfig={(createSceneTaskParams) => {
-          const { sceneFormValues, roleAgentConfigsMap, webUIMetricsConfig } = splitCreateSceneTaskParamsToState(
-            scene,
-            createSceneTaskParams
-          );
-          sceneForm.setValues(sceneFormValues);
-          try {
-            sceneForm.validate();
-          } catch {}
-          setRoleAgentConfigsMap(roleAgentConfigsMap);
-          setWebUIMetricsConfig(webUIMetricsConfig);
-          setTaskHistoryModalOpen(false);
-          if (createSceneTaskParams.metric_evaluator_objs_config.evaluators.length > 0) {
-            setUseMetricEvaluators(true);
-            setEvaluatorConfigMap(
-              createSceneTaskParams.metric_evaluator_objs_config.evaluators.reduce(
-                (total, evaluator) => {
-                  total[evaluator.evaluator_obj.obj] = evaluator;
-                  return total;
-                },
-                {} as Record<string, MetricEvaluatorObjConfig>
-              )
-            );
-            setEnabledEvaluatorNames(
-              createSceneTaskParams.metric_evaluator_objs_config.evaluators.map((e) => e.evaluator_obj.obj)
-            );
-          } else {
-            setUseMetricEvaluators(false);
-            setEvaluatorConfigMap({});
-            setEnabledEvaluatorNames([]);
-          }
-        }}
-        onNeedClose={() => {
-          setTaskHistoryModalOpen(false);
-        }}
-      />
+      {/*<TaskHistoryModal*/}
+      {/*  open={taskHistoryModalOpen}*/}
+      {/*  scene={scene}*/}
+      {/*  tasks={taskHistory}*/}
+      {/*  onApplyHistoryTaskConfig={(createSceneTaskParams) => {*/}
+      {/*    const { sceneFormValues, roleAgentConfigsMap, webUIMetricsConfig } = splitCreateSceneTaskParamsToState(*/}
+      {/*      scene,*/}
+      {/*      createSceneTaskParams*/}
+      {/*    );*/}
+      {/*    sceneForm.setValues(sceneFormValues);*/}
+      {/*    try {*/}
+      {/*      sceneForm.validate();*/}
+      {/*    } catch {}*/}
+      {/*    setRoleAgentConfigsMap(roleAgentConfigsMap);*/}
+      {/*    setWebUIMetricsConfig(webUIMetricsConfig);*/}
+      {/*    setTaskHistoryModalOpen(false);*/}
+      {/*    if (createSceneTaskParams.metric_evaluator_objs_config.evaluators.length > 0) {*/}
+      {/*      setUseMetricEvaluators(true);*/}
+      {/*      setEvaluatorConfigMap(*/}
+      {/*        createSceneTaskParams.metric_evaluator_objs_config.evaluators.reduce(*/}
+      {/*          (total, evaluator) => {*/}
+      {/*            total[evaluator.evaluator_obj.obj] = evaluator;*/}
+      {/*            return total;*/}
+      {/*          },*/}
+      {/*          {} as Record<string, MetricEvaluatorObjConfig>*/}
+      {/*        )*/}
+      {/*      );*/}
+      {/*      setEnabledEvaluatorNames(*/}
+      {/*        createSceneTaskParams.metric_evaluator_objs_config.evaluators.map((e) => e.evaluator_obj.obj)*/}
+      {/*      );*/}
+      {/*    } else {*/}
+      {/*      setUseMetricEvaluators(false);*/}
+      {/*      setEvaluatorConfigMap({});*/}
+      {/*      setEnabledEvaluatorNames([]);*/}
+      {/*    }*/}
+      {/*  }}*/}
+      {/*  onNeedClose={() => {*/}
+      {/*    setTaskHistoryModalOpen(false);*/}
+      {/*  }}*/}
+      {/*/>*/}
       <SelectAgentModal
         open={selectAgentModalOpen}
         selectableAgentsMetadata={operatingRoleName ? scene.agents_metadata[operatingRoleName] : []}

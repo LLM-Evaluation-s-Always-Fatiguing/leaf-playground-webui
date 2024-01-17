@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { getAllAgentInstanceFrom } from '@/types/api-router/webui/AgentInstance';
+import { getAllAgentInstanceFrom } from '@/types/webui/AgentInstance';
 import styled from '@emotion/styled';
 import ReactECharts from 'echarts-for-react';
 import keyBy from 'lodash/keyBy';
