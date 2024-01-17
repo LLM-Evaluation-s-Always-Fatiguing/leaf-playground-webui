@@ -29,7 +29,12 @@ export function getSceneLogMessageDisplayContent(message: SceneLogMessage, markd
       return 'Video';
     case SceneLogMediaType.JSON: {
       const content = message.content as SceneLogJSONContent;
-      if (content.display_text) return markdown ? <Markdown content={content.display_text} /> : content.display_text;
+      if (content.display_text)
+        return markdown ? (
+          <Markdown content={content.display_text} useHubAssets={true} hubAssetsProjectId={projectId} />
+        ) : (
+          content.display_text
+        );
       return JSON.stringify(content.data, null, 2);
     }
     default:

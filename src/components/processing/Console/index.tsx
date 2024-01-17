@@ -1,8 +1,8 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import { getAllAgentInstanceFrom } from '@/types/api-router/webui/AgentInstance';
+import { getAllAgentInstanceFrom } from '@/types/webui/AgentInstance';
 import { CreateSceneTaskParams, getEnabledMetricsFromCreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
 import { SceneActionLog } from '@/types/server/common/Log';
-import { SceneTaskStatus } from '@/types/server/SceneTask';
+import { SceneTaskStatus } from '@/types/server/task/SceneTask';
 import { SceneMetricConfig } from '@/types/server/config/Metric';
 import Scene, { SceneMetricDefinition } from '@/types/server/meta/Scene';
 import { Segmented, Space, Tabs } from 'antd';

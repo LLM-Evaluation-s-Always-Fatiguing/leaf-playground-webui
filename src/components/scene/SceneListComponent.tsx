@@ -1,5 +1,6 @@
 'use client';
 
+import { ListProject } from '@/types/server/meta/Project';
 import { Card } from 'antd';
 import { useTheme } from 'antd-style';
 import styled from '@emotion/styled';
@@ -51,7 +52,7 @@ const Container = styled.div`
 
 interface SceneListComponentProps {
   selected: boolean;
-  project: string;
+  project: ListProject;
   onClick?: () => void;
 }
 
@@ -86,8 +87,8 @@ const SceneListComponent = (props: SceneListComponentProps) => {
           />
         </CoverImage>
         <div className="info">
-          <div className="title">{props.project}</div>
-          {/*<div className="desc">{props.scene.scene_metadata.scene_definition.description}</div>*/}
+          <div className="title">{props.project.name}</div>
+          <div className="desc">{props.project.description}</div>
         </div>
       </Container>
     </Card>

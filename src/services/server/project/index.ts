@@ -1,8 +1,10 @@
 import SceneAgentMetadata from '@/types/server/meta/Agent';
-import Project, { ServerProject } from '@/types/server/meta/Project';
+import Project, { ListProject, ServerProject } from '@/types/server/meta/Project';
 import Scene from '@/types/server/meta/Scene';
 import request from '@/services/server/request';
 import { transferStandardJSONSchemaToFormilyJSONSchema } from '@/utils/json-schema';
+
+const prefix = '/hub';
 
 async function asyncReduce<T, U>(
   array: T[],
@@ -19,8 +21,11 @@ async function asyncReduce<T, U>(
 }
 
 const projectAPI = {
+  async list(): Promise<ListProject[]> {
+    return (await request.get(`${prefix}/refresh`)).data;
+  },
   async detail(projectId: string): Promise<Project> {
-    const originProject: ServerProject = (await request.get(`/hub/${projectId}/info`)).data;
+    const originProject: ServerProject = (await request.get(`${prefix}/${projectId}/info`)).data;
     const sceneMetadataConfigSchemaTransformResult = await transferStandardJSONSchemaToFormilyJSONSchema(
       originProject.metadata.scene_metadata.config_schema
     );

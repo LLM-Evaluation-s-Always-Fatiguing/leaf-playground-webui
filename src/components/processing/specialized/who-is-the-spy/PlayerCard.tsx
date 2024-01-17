@@ -1,4 +1,4 @@
-import WebUIAgentInstance from '@/types/api-router/webui/AgentInstance';
+import WebUIAgentInstance from '@/types/webui/AgentInstance';
 import Project from '@/types/server/meta/Project';
 import { Card } from 'antd';
 import styled from '@emotion/styled';

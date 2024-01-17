@@ -1,18 +1,15 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import WebUITaskBundleTaskInfo from '@/types/api-router/webui/task-bundle/TaskInfo';
-import Project from '@/types/server/meta/Project';
-import Scene from '@/types/server/meta/Scene';
+import Project, { ListProject } from '@/types/server/meta/Project';
 import ServerAppInfo from '@/types/server/meta/ServerAppInfo';
+import SceneTaskHistory from '@/types/server/task/SceneTaskHistory';
 import { message } from 'antd';
 import styled from '@emotion/styled';
-import md5 from 'crypto-js/md5';
 import LoadingOverlay from '@/components/common/LoadingOverlay';
-import SceneConfigBoard from '@/components/homepage/SceneConfigBoard';
 import ProjectInfoBoard from '@/components/homepage/ProjectInfoBoard';
+import SceneConfigBoard from '@/components/homepage/SceneConfigBoard';
 import SceneListComponent from '@/components/scene/SceneListComponent';
-import LocalAPI from '@/services/local';
 import ServerAPI from '@/services/server';
 import useGlobalStore from '@/stores/global';
 
@@ -52,18 +49,18 @@ const PageContainer = styled.div`
 
 interface HomePageProps {
   appInfo: ServerAppInfo;
-  projects: string[];
-  taskHistory: Record<string, WebUITaskBundleTaskInfo[]>;
+  projects: ListProject[];
+  allHistoryMap: Record<string, SceneTaskHistory[]>;
 }
 
 export default function HomePage(props: HomePageProps) {
   const globalStore = useGlobalStore();
 
-  const [taskHistory, setTaskHistory] = useState<Record<string, WebUITaskBundleTaskInfo[]>>(props.taskHistory);
+  const [allTaskHistoryMap, setAllTaskHistoryMap] = useState<Record<string, SceneTaskHistory[]>>(props.allHistoryMap);
 
   const [projectsLoading, setProjectsLoading] = useState(false);
-  const [projects, setProjects] = useState<string[]>(props.projects);
-  const [selectedProject, setSelectedProject] = useState<string>(props.projects[0]);
+  const [projects, setProjects] = useState<ListProject[]>(props.projects);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(props.projects[0].id);
 
   const [projectDetailLoading, setProjectDetailLoading] = useState(false);
   const [projectDetail, setProjectDetail] = useState<Project>();
@@ -74,8 +71,8 @@ export default function HomePage(props: HomePageProps) {
     try {
       setProjectsLoading(true);
       const homepageResp = await ServerAPI.site.homepage();
-      if (!homepageResp.projects.some((p) => p === selectedProject) && homepageResp.projects.length > 0) {
-        setSelectedProject(homepageResp.projects[0]);
+      if (!homepageResp.projects.some((p) => p.id === selectedProjectId) && homepageResp.projects.length > 0) {
+        setSelectedProjectId(homepageResp.projects[0].id);
       }
       setProjects(homepageResp.projects);
     } catch (e) {
@@ -88,8 +85,8 @@ export default function HomePage(props: HomePageProps) {
 
   const reloadTaskHistory = async () => {
     try {
-      // const taskHistory = await LocalAPI.taskBundle.webui.getAll(props.serverInfo.paths.result_dir);
-      setTaskHistory(taskHistory);
+      const allHistoryMapResp = await ServerAPI.sceneTask.allHistoryMap();
+      setAllTaskHistoryMap(allHistoryMapResp);
     } catch (e) {
       console.error(e);
       message.error('Failed to load task history');
@@ -99,7 +96,7 @@ export default function HomePage(props: HomePageProps) {
   const loadProjectDetail = async () => {
     try {
       setProjectDetailLoading(true);
-      const projectResp = await ServerAPI.project.detail(selectedProject);
+      const projectResp = await ServerAPI.project.detail(selectedProjectId);
       setProjectDetail(projectResp);
       setProjectDetailLoading(false);
     } catch (e) {
@@ -118,7 +115,7 @@ export default function HomePage(props: HomePageProps) {
 
   useEffect(() => {
     loadProjectDetail();
-  }, [selectedProject]);
+  }, [selectedProjectId]);
 
   return (
     <PageContainer>
@@ -127,11 +124,11 @@ export default function HomePage(props: HomePageProps) {
           {projects.map((project, index) => {
             return (
               <SceneListComponent
-                key={project}
+                key={project.id}
                 project={project}
-                selected={selectedProject === project}
+                selected={selectedProjectId === project.id}
                 onClick={() => {
-                  setSelectedProject(project);
+                  setSelectedProjectId(project.id);
                   setStarted(false);
                 }}
               />
@@ -147,7 +144,7 @@ export default function HomePage(props: HomePageProps) {
             key={projectDetail.id}
             project={projectDetail}
             serverInfo={props.appInfo}
-            taskHistory={[]}
+            taskHistory={allTaskHistoryMap[projectDetail.id] || []}
           />
         ) : (
           <ProjectInfoBoard

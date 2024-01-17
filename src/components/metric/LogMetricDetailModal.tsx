@@ -315,7 +315,8 @@ interface LogMetricDetailModalProps {
   open: boolean;
   editable: boolean;
   humanOnlyEvaluationMode: boolean;
-  serverUrl: string;
+  projectId: string;
+  taskId: string;
   log?: SceneActionLog;
   metrics?: SceneMetricDefinition[];
   metricsConfig?: Record<string, SceneMetricConfig>;
@@ -365,14 +366,14 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
             const metric = enabledMetrics.find((m) => m.name === metricName);
             if (metric) {
               if (metric.is_comparison) {
-                await ServerAPI.sceneTask.updateLogHumanCompareMetricRecord(props.serverUrl, {
+                await ServerAPI.sceneTask.logs.updateLogHumanCompareMetricRecord(props.taskId, {
                   log_id: props.log.id,
                   metric_name: metricKey,
                   value: [],
                   reason: newHumanMetrics[metricName].reason,
                 });
               } else {
-                await ServerAPI.sceneTask.updateLogHumanMetricRecord(props.serverUrl, {
+                await ServerAPI.sceneTask.logs.updateLogHumanMetricRecord(props.taskId, {
                   log_id: props.log.id,
                   metric_name: metricKey,
                   value: newHumanMetrics[metricName].value,
@@ -455,7 +456,7 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
                           }}
                         />
                       </div>
-                      <div className={'body'}>{getSceneLogMessageDisplayContent(reference, true)}</div>
+                      <div className={'body'}>{getSceneLogMessageDisplayContent(reference, true, props.projectId)}</div>
                     </ContentItem>
                   );
                 })}
@@ -493,7 +494,9 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
                     />
                   </div>
                   {props.log && (
-                    <div className={'body'}>{getSceneLogMessageDisplayContent(props.log.response, true)}</div>
+                    <div className={'body'}>
+                      {getSceneLogMessageDisplayContent(props.log.response, true, props.projectId)}
+                    </div>
                   )}
                 </ContentItem>
               </div>

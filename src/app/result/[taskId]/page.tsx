@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import ServerTaskBundle from '@/types/api-router/server/task-bundle';
+import SceneTaskResultBundle from '../../../types/server/task/result-bundle';
 import WebUITaskBundle from '@/types/api-router/webui/task-bundle';
 import { getRoleAgentConfigsMapFromCreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
 import { SceneActionLog, SceneLogType } from '@/types/server/common/Log';
@@ -193,7 +193,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
   const bundlePath = searchParams.get('bundlePath');
 
   const [loading, setLoading] = useState(true);
-  const [serverBundle, setServerBundle] = useState<ServerTaskBundle>();
+  const [serverBundle, setServerBundle] = useState<SceneTaskResultBundle>();
   const [webuiBundle, setWebUIBundle] = useState<WebUITaskBundle>();
   const actionLogs = useMemo(() => {
     return (serverBundle?.logs || []).filter((l) => l.log_type === SceneLogType.ACTION) as SceneActionLog[];

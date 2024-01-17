@@ -2,7 +2,6 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { SceneTaskStatus } from '@/types/server/SceneTask';
 import SceneLog, { SceneActionLog, SceneLogType, SceneSystemLog, SceneSystemLogEvent } from '@/types/server/common/Log';
 import {
   WebsocketDataMessage,
@@ -14,6 +13,7 @@ import {
 } from '@/types/server/common/WebsocketMessage';
 import { SceneMetricConfig } from '@/types/server/config/Metric';
 import { SceneMetricDefinition } from '@/types/server/meta/Scene';
+import { SceneTaskStatus } from '@/types/server/task/SceneTask';
 import { Button, Modal, message } from 'antd';
 import { Input } from '@formily/antd-v5';
 import styled from '@emotion/styled';
@@ -28,9 +28,9 @@ import { DefaultProcessingVisualizationComponentProps } from '@/components/proce
 import BuddhaLogo from '@/components/processing/specialized/buddha/BuddhaLogo';
 import SampleQAVisualization from '@/components/processing/specialized/sample-qa/SampleQAVisualization';
 import WhoIsTheSpyVisualization from '@/components/processing/specialized/who-is-the-spy/WhoIsTheSpyVisualization';
-import LocalAPI from '@/services/local';
 import ServerAPI from '@/services/server';
 import useGlobalStore from '@/stores/global';
+import { getFullServerWebSocketURL } from '@/utils/websocket';
 
 const PageContainer = styled.div`
   width: 100%;
@@ -154,7 +154,6 @@ const ProcessingPage = ({
   const taskId = params.taskId;
   const router = useRouter();
   const searchParams = useSearchParams();
-  const serverUrl = searchParams.get('serverUrl') as string;
   const agentId = searchParams.get('agentId');
 
   const playerMode = !!agentId;
@@ -214,10 +213,7 @@ const ProcessingPage = ({
       statusPollingTimerRef.current = undefined;
     }
     statusPollingTimerRef.current = setInterval(async () => {
-      let taskStatusResp = (await ServerAPI.sceneTask.getStatus(taskId)).status;
-      try {
-        taskStatusResp = (await ServerAPI.sceneTask.status(serverUrl)).status;
-      } catch {}
+      const taskStatusResp = (await ServerAPI.sceneTask.status(taskId)).status;
       setTaskStatus(taskStatusResp);
       taskStatusRef.current = taskStatusResp;
     }, 1000);
@@ -233,10 +229,7 @@ const ProcessingPage = ({
   const checkTaskStatusOnStart = async () => {
     try {
       setLoadingTip('Checking task status...');
-      let taskStatusResp = (await ServerAPI.sceneTask.getStatus(taskId)).status;
-      try {
-        taskStatusResp = (await ServerAPI.sceneTask.status(serverUrl)).status;
-      } catch {}
+      const taskStatusResp = (await ServerAPI.sceneTask.status(taskId)).status;
       setTaskStatus(taskStatusResp);
       taskStatusRef.current = taskStatusResp;
       switch (taskStatusResp) {
@@ -245,7 +238,7 @@ const ProcessingPage = ({
           let finalStatus: SceneTaskStatus = taskStatusResp;
           while (wait) {
             await new Promise((resolve) => setTimeout(resolve, 1500));
-            const taskStatusResp = await ServerAPI.sceneTask.getStatus(taskId);
+            const taskStatusResp = await ServerAPI.sceneTask.status(taskId);
             finalStatus = taskStatusResp.status;
             if (taskStatusResp.status !== SceneTaskStatus.PENDING) {
               wait = false;
@@ -296,8 +289,8 @@ const ProcessingPage = ({
 
   useEffect(() => {
     const prepare = async () => {
-      if (!taskId || !serverUrl) {
-        message.error('Task ID,  Server Url is not valid!');
+      if (!taskId) {
+        message.error('Task ID is not valid!');
         router.replace('/');
         return;
       }
@@ -313,9 +306,8 @@ const ProcessingPage = ({
         setLoadingTip('Connecting to server...');
       }
       if (!wsRef.current) {
-        wsRef.current = new WebSocket(
-          `ws://${serverUrl.replace(/^(http:\/\/|https:\/\/)/, '')}/ws${agentId ? `/human/${agentId}` : ''}`
-        );
+        const wsUrl = await getFullServerWebSocketURL(`/task/ws/${taskId}${agentId ? `/human/${agentId}` : ''}`);
+        wsRef.current = new WebSocket(wsUrl);
 
         wsRef.current.onopen = function () {
           wsOpenRef.current = true;
@@ -581,7 +573,7 @@ const ProcessingPage = ({
               try {
                 setLoadingTip('Pausing task...');
                 setLoading(true);
-                await ServerAPI.sceneTask.pause(serverUrl);
+                await ServerAPI.sceneTask.pause(taskId);
                 setTaskStatus(SceneTaskStatus.PAUSED);
                 taskStatusRef.current = SceneTaskStatus.PAUSED;
               } catch (e) {
@@ -595,7 +587,7 @@ const ProcessingPage = ({
               try {
                 setLoadingTip('Resuming task...');
                 setLoading(true);
-                await ServerAPI.sceneTask.resume(serverUrl);
+                await ServerAPI.sceneTask.resume(taskId);
                 setTaskStatus(SceneTaskStatus.RUNNING);
                 taskStatusRef.current = SceneTaskStatus.RUNNING;
               } catch (e) {
@@ -611,7 +603,7 @@ const ProcessingPage = ({
                 content: 'Once interrupted, the task will be closed and cannot be recovered.',
                 onOk: async () => {
                   try {
-                    await ServerAPI.sceneTask.interrupt(serverUrl);
+                    await ServerAPI.sceneTask.interrupt(taskId);
                     setTaskStatus(SceneTaskStatus.INTERRUPTED);
                     taskStatusRef.current = SceneTaskStatus.INTERRUPTED;
                   } catch (e) {
@@ -633,7 +625,6 @@ const ProcessingPage = ({
                   setLoading(true);
                   wsRef.current?.send('disconnect');
                   wsRef.current?.close();
-                  await ServerAPI.sceneTask.save(serverUrl);
                   goToResult();
                 }}
               >
@@ -690,7 +681,7 @@ const ProcessingPage = ({
         open={logMetricDetailModalOpen}
         editable={true}
         humanOnlyEvaluationMode={logMetricDetailModalData?.humanOnlyEvaluationMode || false}
-        serverUrl={serverUrl}
+        taskId={taskId}
         log={logMetricDetailModalData?.log}
         metrics={logMetricDetailModalData?.metrics}
         metricsConfig={logMetricDetailModalData?.metricsConfig}

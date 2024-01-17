@@ -1,109 +1,55 @@
-import { SceneTaskStatus } from '@/types/server/SceneTask';
 import { CreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
-import { SceneMetricRecordDisplayType } from '@/types/server/meta/Scene';
-import { default as localRequest } from '@/services/local/request';
+import { SceneTaskStatus } from '@/types/server/task/SceneTask';
+import SceneTaskHistory from '@/types/server/task/SceneTaskHistory';
+import { groupBy } from 'lodash';
 import request from '@/services/server/request';
+import sceneTaskLogsAPI from '@/services/server/task/logs';
+
+export const prefix = '/task';
 
 const sceneTaskAPI = {
-  async createSceneTask(config: CreateSceneTaskParams): Promise<{
+  async create(config: CreateSceneTaskParams): Promise<{
     id: string;
-    host: string;
-    port: string;
-    created_at: string;
   }> {
-    return (await request.post('/task/create', config)).data;
+    return (await request.post(`${prefix}/create`, config)).data;
   },
-  async getStatus(taskId: string): Promise<{
+  async pause(taskId: string) {
+    return (await request.post(`${prefix}/${taskId}/pause`)).data;
+  },
+  async resume(taskId: string) {
+    return (await request.post(`${prefix}/${taskId}/resume`)).data;
+  },
+  async interrupt(taskId: string) {
+    return (await request.post(`${prefix}/${taskId}/interrupt`)).data;
+  },
+  async close(taskId: string) {
+    return (await request.post(`${prefix}/${taskId}/close`)).data;
+  },
+  async delete(taskId: string) {
+    return (await request.post(`${prefix}/${taskId}/delete`)).data;
+  },
+  async agentsConnectedStatus(taskId: string): Promise<Record<string, boolean>> {
+    return (await request.get(`${prefix}/${taskId}/agents_connected`)).data;
+  },
+  async payload(taskId: string): Promise<CreateSceneTaskParams> {
+    return (await request.get(`${prefix}/${taskId}/payload`)).data;
+  },
+  async status(taskId: string): Promise<{
     status: SceneTaskStatus;
   }> {
-    return (await request.get(`/task/${taskId}/status`)).data;
+    return (await request.get(`${prefix}/${taskId}/status`)).data;
   },
-  async getSceneTaskPayload(taskId: string): Promise<CreateSceneTaskParams> {
-    return (await request.get(`/task/${taskId}/payload`)).data;
+  async resultBundlePath(taskId: string): Promise<string> {
+    return (await request.get(`${prefix}/${taskId}/results_dir`)).data;
   },
 
-  async status(serverUrl: string): Promise<{
-    status: SceneTaskStatus;
-  }> {
-    return (
-      await localRequest.get(`/server/task/status`, {
-        params: {
-          serverUrl,
-        },
-      })
-    ).data;
+  async allHistoryMap(): Promise<Record<string, SceneTaskHistory[]>> {
+    const allTaskHistories = (await request.get<SceneTaskHistory[]>(`${prefix}/history`)).data;
+    console.log(groupBy(allTaskHistories, (h) => h.project_id));
+    return groupBy(allTaskHistories, (h) => h.project_id);
   },
-  async pause(serverUrl: string) {
-    return (
-      await localRequest.post(`/server/task/pause`, {
-        serverUrl,
-      })
-    ).data;
-  },
-  async resume(serverUrl: string) {
-    return (
-      await localRequest.post(`/server/task/resume`, {
-        serverUrl,
-      })
-    ).data;
-  },
-  async interrupt(serverUrl: string) {
-    return (
-      await localRequest.post(`/server/task/interrupt`, {
-        serverUrl,
-      })
-    ).data;
-  },
-  async save(serverUrl: string) {
-    return (
-      await localRequest.post(`/server/task/save`, {
-        serverUrl,
-      })
-    ).data;
-  },
-  async updateLogHumanMetricRecord(
-    serverUrl: string,
-    params: {
-      log_id: string;
-      metric_name: string;
-      value: any;
-      display_type: SceneMetricRecordDisplayType;
-      target_agent: string;
-      reason?: string;
-    }
-  ) {
-    return (
-      await localRequest.post(`/server/task/metric-record/human`, {
-        serverUrl,
-        params,
-      })
-    ).data;
-  },
-  async updateLogHumanCompareMetricRecord(
-    serverUrl: string,
-    params: {
-      log_id: string;
-      metric_name: string;
-      value: string[];
-      reason?: string;
-    }
-  ) {
-    return (
-      await localRequest.post(`/server/task/metric-record/human-compare`, {
-        serverUrl,
-        params,
-      })
-    ).data;
-  },
-  async getAgentConnectedStatus(serverUrl: string): Promise<Record<string, boolean>> {
-    return (
-      await localRequest.get(`/server/task/agents_connected`, {
-        params: {
-          serverUrl,
-        },
-      })
-    ).data;
-  },
+
+  logs: sceneTaskLogsAPI,
 };
 
 export default sceneTaskAPI;

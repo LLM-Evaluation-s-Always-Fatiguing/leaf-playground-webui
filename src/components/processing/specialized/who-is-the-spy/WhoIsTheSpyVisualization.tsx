@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
-import WebUIAgentInstance, { getAllAgentInstanceFrom } from '@/types/api-router/webui/AgentInstance';
+import WebUIAgentInstance, { getAllAgentInstanceFrom } from '@/types/webui/AgentInstance';
 import { SceneActionLog } from '@/types/server/common/Log';
 import { Button, Slider, Tabs } from 'antd';
 import { useTheme } from 'antd-style';

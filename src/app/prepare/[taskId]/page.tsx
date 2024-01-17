@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { SceneTaskStatus } from '@/types/server/SceneTask';
+import { SceneTaskStatus } from '@/types/server/task/SceneTask';
 import { WebsocketMessage } from '@/types/server/common/WebsocketMessage';
 import { getRoleAgentConfigsMapFromCreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
 import { Card, Collapse, Flex, Space, message } from 'antd';
@@ -114,10 +114,10 @@ const ProcessingPage = ({
           wait = false;
           return;
         }
-        const taskStatus = await ServerAPI.sceneTask.getStatus(taskId);
+        const taskStatus = await ServerAPI.sceneTask.status(taskId);
         let allConnected = taskStatus.status !== SceneTaskStatus.PENDING;
         if (!allConnected) {
-          const agentConnectedStatusResp = await ServerAPI.sceneTask.getAgentConnectedStatus(serverUrl || '');
+          const agentConnectedStatusResp = await ServerAPI.sceneTask.agentsConnectedStatus(taskId);
           setAgentConnectedMap(agentConnectedStatusResp);
           allConnected = Object.entries(agentConnectedStatusResp).every(([agentId, connected]) => connected);
         } else {
