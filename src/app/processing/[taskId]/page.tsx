@@ -244,6 +244,7 @@ const ProcessingPage = ({
               wait = false;
             }
           }
+          setTaskStatus(finalStatus);
           if (finalStatus === SceneTaskStatus.INTERRUPTED || finalStatus === SceneTaskStatus.FAILED) {
             setLoadingTip('Task failed!');
             message.error('Task failed!');
@@ -305,8 +306,10 @@ const ProcessingPage = ({
       if (taskStatusRef.current === SceneTaskStatus.RUNNING) {
         setLoadingTip('Connecting to server...');
       }
+      const wsUrl = await getFullServerWebSocketURL(
+        agentId ? `/task/${taskId}/human/${agentId}/ws` : `/task/${taskId}/logs/ws`
+      );
       if (!wsRef.current) {
-        const wsUrl = await getFullServerWebSocketURL(`/task/ws/${taskId}${agentId ? `/human/${agentId}` : ''}`);
         wsRef.current = new WebSocket(wsUrl);
 
         wsRef.current.onopen = function () {
@@ -319,7 +322,7 @@ const ProcessingPage = ({
         };
 
         wsRef.current.onmessage = async (event) => {
-          const wsMessage: WebsocketMessage = JSON.parse(JSON.parse(event.data));
+          const wsMessage: WebsocketMessage = JSON.parse(event.data);
           switch (wsMessage.type) {
             case WebsocketMessageType.DATA:
               const wsDataMessage = wsMessage as WebsocketDataMessage;
@@ -621,14 +624,14 @@ const ProcessingPage = ({
               <Button
                 type="primary"
                 onClick={async () => {
-                  setLoadingTip('Saving task result...');
+                  setLoadingTip('Moving to result...');
                   setLoading(true);
                   wsRef.current?.send('disconnect');
                   wsRef.current?.close();
                   goToResult();
                 }}
               >
-                Complete evaluation and generate report
+                To Result
               </Button>
             )}
           </div>
@@ -677,23 +680,26 @@ const ProcessingPage = ({
           setOperatingLog(undefined);
         }}
       />
-      <LogMetricDetailModal
-        open={logMetricDetailModalOpen}
-        editable={true}
-        humanOnlyEvaluationMode={logMetricDetailModalData?.humanOnlyEvaluationMode || false}
-        taskId={taskId}
-        log={logMetricDetailModalData?.log}
-        metrics={logMetricDetailModalData?.metrics}
-        metricsConfig={logMetricDetailModalData?.metricsConfig}
-        onNeedClose={() => {
-          setLogMetricDetailModalOpen(false);
-          setLogMetricDetailModalData(undefined);
-        }}
-        onOpenJSONDetail={(data) => {
-          setJSONViewModalData(data);
-          setJSONViewModalOpen(true);
-        }}
-      />
+      {globalStore.currentProject && (
+        <LogMetricDetailModal
+          open={logMetricDetailModalOpen}
+          editable={true}
+          humanOnlyEvaluationMode={logMetricDetailModalData?.humanOnlyEvaluationMode || false}
+          projectId={globalStore.currentProject.id}
+          taskId={taskId}
+          log={logMetricDetailModalData?.log}
+          metrics={logMetricDetailModalData?.metrics}
+          metricsConfig={logMetricDetailModalData?.metricsConfig}
+          onNeedClose={() => {
+            setLogMetricDetailModalOpen(false);
+            setLogMetricDetailModalData(undefined);
+          }}
+          onOpenJSONDetail={(data) => {
+            setJSONViewModalData(data);
+            setJSONViewModalOpen(true);
+          }}
+        />
+      )}
     </PageContainer>
   );
 };

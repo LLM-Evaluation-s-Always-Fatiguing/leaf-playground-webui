@@ -366,21 +366,22 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
             const metric = enabledMetrics.find((m) => m.name === metricName);
             if (metric) {
               if (metric.is_comparison) {
-                await ServerAPI.sceneTask.logs.updateLogHumanCompareMetricRecord(props.taskId, {
-                  log_id: props.log.id,
+                await ServerAPI.sceneTask.logs.updateLogHumanCompareMetricRecord(props.taskId, props.log.id, {
                   metric_name: metricKey,
                   value: [],
                   reason: newHumanMetrics[metricName].reason,
                 });
               } else {
-                await ServerAPI.sceneTask.logs.updateLogHumanMetricRecord(props.taskId, {
-                  log_id: props.log.id,
-                  metric_name: metricKey,
-                  value: newHumanMetrics[metricName].value,
-                  display_type: metric.record_display_type!,
-                  target_agent: props.log.response.sender.id,
-                  reason: newHumanMetrics[metricName].reason,
-                });
+                await ServerAPI.sceneTask.logs.updateLogHumanMetricRecord(
+                  props.taskId,
+                  props.log.id,
+                  props.log.response.sender.id,
+                  {
+                    metric_name: metricKey,
+                    value: newHumanMetrics[metricName].value,
+                    reason: newHumanMetrics[metricName].reason,
+                  }
+                );
               }
             }
           }

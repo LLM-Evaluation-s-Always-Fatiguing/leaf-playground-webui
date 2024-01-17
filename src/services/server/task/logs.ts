@@ -9,27 +9,32 @@ const prefix = (taskId: string) => {
 const sceneTaskLogsAPI = {
   async updateLogHumanMetricRecord(
     taskId: string,
-    params: {
-      log_id: string;
+    logId: string,
+    agentId: string,
+    data: {
       metric_name: string;
       value: any;
-      display_type: SceneMetricRecordDisplayType;
-      target_agent: string;
       reason?: string;
     }
   ) {
-    return (await request.post(`${prefix(taskId)}/${params.log_id}/record/metric/update`, params)).data;
+    return (
+      await request.post(`${prefix(taskId)}/${logId}/record/metric/update`, data, {
+        params: {
+          agent_id: agentId,
+        },
+      })
+    ).data;
   },
   async updateLogHumanCompareMetricRecord(
     taskId: string,
-    params: {
-      log_id: string;
+    logId: string,
+    data: {
       metric_name: string;
       value: string[];
       reason?: string;
     }
   ) {
-    return (await request.post(`${prefix(taskId)}/${params.log_id}/record/compare/update`, params)).data;
+    return (await request.post(`${prefix(taskId)}/${logId}/record/compare/update`, data)).data;
   },
 };
 

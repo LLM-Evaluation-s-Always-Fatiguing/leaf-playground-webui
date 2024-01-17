@@ -2,9 +2,9 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { SceneTaskStatus } from '@/types/server/task/SceneTask';
 import { WebsocketMessage } from '@/types/server/common/WebsocketMessage';
 import { getRoleAgentConfigsMapFromCreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
+import { SceneTaskStatus } from '@/types/server/task/SceneTask';
 import { Card, Collapse, Flex, Space, message } from 'antd';
 import styled from '@emotion/styled';
 import AgentCard from '@/components/agent/AgentCard';
@@ -12,6 +12,7 @@ import LoadingOverlay from '@/components/common/LoadingOverlay';
 import ProjectInfoBoard from '@/components/homepage/ProjectInfoBoard';
 import ServerAPI from '@/services/server';
 import useGlobalStore from '@/stores/global';
+import { getFullServerWebSocketURL } from '@/utils/websocket';
 
 const PageContainer = styled.div`
   width: 100%;
@@ -89,7 +90,6 @@ const ProcessingPage = ({
   const taskId = params.taskId;
   const router = useRouter();
   const searchParams = useSearchParams();
-  const serverUrl = searchParams.get('serverUrl');
   const hostBaseUrl = searchParams.get('hostBaseUrl');
   const agentId = searchParams.get('agentId');
 
@@ -133,11 +133,7 @@ const ProcessingPage = ({
           setLoading(true);
           wsRef.current?.close();
           await new Promise((resolve) => setTimeout(resolve, 1500));
-          router.push(
-            `/processing/${taskId}?serverUrl=${encodeURIComponent(serverUrl!)}${
-              agentId ? `&agentId=${encodeURIComponent(agentId)}` : ''
-            }`
-          );
+          router.push(`/processing/${taskId}${agentId ? `?agentId=${encodeURIComponent(agentId)}` : ''}`);
         }
       }
     } catch (e) {
@@ -163,17 +159,22 @@ const ProcessingPage = ({
 
   useEffect(() => {
     const prepare = async () => {
-      if (!taskId || !serverUrl) {
-        message.error('Page params is not valid!');
+      if (!taskId) {
+        message.error('Task ID is not valid!');
         router.replace('/');
         return;
       }
       try {
         setLoadingTip('Connecting to server...');
+
         await globalStore.syncTaskStateFromServer(taskId);
         globalStore.updatePageTitle(globalStore.currentProject?.metadata.scene_metadata.scene_definition.name || '');
+
+        const wsUrl = await getFullServerWebSocketURL(
+          agentId ? `/task/${taskId}/human/${agentId}/ws` : `/task/${taskId}/logs/ws`
+        );
         if (agentId && !wsRef.current) {
-          wsRef.current = new WebSocket(`ws://${serverUrl.replace(/^(http:\/\/|https:\/\/)/, '')}/ws/human/${agentId}`);
+          wsRef.current = new WebSocket(wsUrl);
 
           wsRef.current.onopen = function () {
             wsOpenRef.current = true;
@@ -283,9 +284,9 @@ const ProcessingPage = ({
                               const sceneAgentMeta = agentsMetadata.find(
                                 (m) => m.obj_for_import.obj === agentConfig.obj_for_import.obj
                               );
-                              const joinLink = `${hostBaseUrl}/prepare/${taskId}?serverUrl=${encodeURIComponent(
-                                serverUrl!
-                              )}&agentId=${encodeURIComponent(agentConfig.config_data.profile.id)}`;
+                              const joinLink = `${hostBaseUrl}/prepare/${taskId}?agentId=${encodeURIComponent(
+                                agentConfig.config_data.profile.id
+                              )}`;
                               const you = agentConfig.config_data.profile.id === agentId;
                               return (
                                 <AgentCard
