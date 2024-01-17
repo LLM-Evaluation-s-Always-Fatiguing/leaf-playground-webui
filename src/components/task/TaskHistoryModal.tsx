@@ -3,13 +3,15 @@
 import React, { useEffect } from 'react';
 import { CreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
 import Scene from '@/types/server/meta/Scene';
+import { SceneTaskStatus, SceneTaskStatusDisplayStrMap } from '@/types/server/task/SceneTask';
 import SceneTaskHistory from '@/types/server/task/SceneTaskHistory';
 import { Button, ButtonProps, Flex, Modal, Popover, Space, Table, Tree, TreeDataNode } from 'antd';
 import { useTheme } from 'antd-style';
+import dayjs from 'dayjs';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import LoadingOverlay from '@/components/common/LoadingOverlay';
+import LocalAPI from '@/services/local';
 import ServerAPI from '@/services/server';
-import { SceneTaskStatus } from '@/types/server/task/SceneTask';
 
 interface TaskHistoryModalProps {
   open: boolean;
@@ -148,13 +150,16 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
           // },
           {
             title: 'Created At',
-            dataIndex: 'time',
+            dataIndex: 'created_at',
+            render: (_, record) => {
+              return dayjs(record.created_at).format('YYYY-MM-DD HH:mm:ss');
+            },
           },
           {
-            title: 'Finished',
-            dataIndex: 'finished',
-            render: (finished) => {
-              return finished ? 'Yes' : 'No';
+            title: 'Status',
+            dataIndex: 'status',
+            render: (_, record) => {
+              return SceneTaskStatusDisplayStrMap[record.status];
             },
           },
           {
@@ -167,6 +172,12 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
                   color: theme.colorPrimary,
                 },
               };
+              // const stillRunning =
+              //   record.status === SceneTaskStatus.PENDING ||
+              //   record.status === SceneTaskStatus.RUNNING ||
+              //   record.status === SceneTaskStatus.PAUSED;
+              const finished = record.status === SceneTaskStatus.FINISHED;
+              const failed = record.status === SceneTaskStatus.INTERRUPTED || record.status === SceneTaskStatus.FAILED;
               return (
                 <Space wrap>
                   <Button
@@ -177,30 +188,33 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
                       onApplyHistoryTaskConfig(payload);
                     }}
                   >
-                    Replay
+                    Replay Task
                   </Button>
-                  {record.status === SceneTaskStatus.FINISHED && <Button
-                    {...buttonProps}
-                    onClick={async () => {
-                      const bundlePath = await ServerAPI.sceneTask.resultBundlePath(record.id);
-
-                      // await LocalAPI.dict.open(record.bundlePath);
-                    }}
-                  >
-                    Result Dict
-                  </Button>}
-                  <Button
-                    {...buttonProps}
-                    onClick={() => {
-                      if (record.finished) {
-                        window.open(`/result/${record.id}`, '_blank');
-                      } else {
-                        window.open(`/processing/${record.id}`, '_blank');
-                      }
-                    }}
-                  >
-                    {record.finished ? 'Result' : 'Check'}
-                  </Button>
+                  {!failed && (
+                    <Button
+                      {...buttonProps}
+                      onClick={() => {
+                        if (finished) {
+                          window.open(`/result/${record.id}`, '_blank');
+                        } else {
+                          window.open(`/processing/${record.id}`, '_blank');
+                        }
+                      }}
+                    >
+                      {finished ? 'To Result' : 'To Processing'}
+                    </Button>
+                  )}
+                  {record.status !== SceneTaskStatus.PENDING && (
+                    <Button
+                      {...buttonProps}
+                      onClick={async () => {
+                        const bundlePath = await ServerAPI.sceneTask.resultBundlePath(record.id);
+                        await LocalAPI.dict.open(bundlePath);
+                      }}
+                    >
+                      Result Bundle Dict
+                    </Button>
+                  )}
                 </Space>
               );
             },

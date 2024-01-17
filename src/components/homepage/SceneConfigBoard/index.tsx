@@ -779,46 +779,46 @@ const SceneConfigBoard = ({ project, taskHistory }: SceneConfigBoardProps) => {
           </div>
         )}
       </Container>
-      {/*<TaskHistoryModal*/}
-      {/*  open={taskHistoryModalOpen}*/}
-      {/*  scene={scene}*/}
-      {/*  tasks={taskHistory}*/}
-      {/*  onApplyHistoryTaskConfig={(createSceneTaskParams) => {*/}
-      {/*    const { sceneFormValues, roleAgentConfigsMap, webUIMetricsConfig } = splitCreateSceneTaskParamsToState(*/}
-      {/*      scene,*/}
-      {/*      createSceneTaskParams*/}
-      {/*    );*/}
-      {/*    sceneForm.setValues(sceneFormValues);*/}
-      {/*    try {*/}
-      {/*      sceneForm.validate();*/}
-      {/*    } catch {}*/}
-      {/*    setRoleAgentConfigsMap(roleAgentConfigsMap);*/}
-      {/*    setWebUIMetricsConfig(webUIMetricsConfig);*/}
-      {/*    setTaskHistoryModalOpen(false);*/}
-      {/*    if (createSceneTaskParams.metric_evaluator_objs_config.evaluators.length > 0) {*/}
-      {/*      setUseMetricEvaluators(true);*/}
-      {/*      setEvaluatorConfigMap(*/}
-      {/*        createSceneTaskParams.metric_evaluator_objs_config.evaluators.reduce(*/}
-      {/*          (total, evaluator) => {*/}
-      {/*            total[evaluator.evaluator_obj.obj] = evaluator;*/}
-      {/*            return total;*/}
-      {/*          },*/}
-      {/*          {} as Record<string, MetricEvaluatorObjConfig>*/}
-      {/*        )*/}
-      {/*      );*/}
-      {/*      setEnabledEvaluatorNames(*/}
-      {/*        createSceneTaskParams.metric_evaluator_objs_config.evaluators.map((e) => e.evaluator_obj.obj)*/}
-      {/*      );*/}
-      {/*    } else {*/}
-      {/*      setUseMetricEvaluators(false);*/}
-      {/*      setEvaluatorConfigMap({});*/}
-      {/*      setEnabledEvaluatorNames([]);*/}
-      {/*    }*/}
-      {/*  }}*/}
-      {/*  onNeedClose={() => {*/}
-      {/*    setTaskHistoryModalOpen(false);*/}
-      {/*  }}*/}
-      {/*/>*/}
+      <TaskHistoryModal
+        open={taskHistoryModalOpen}
+        scene={scene}
+        tasks={taskHistory}
+        onApplyHistoryTaskConfig={(createSceneTaskParams) => {
+          const { sceneFormValues, roleAgentConfigsMap, webUIMetricsConfig } = splitCreateSceneTaskParamsToState(
+            scene,
+            createSceneTaskParams
+          );
+          sceneForm.setValues(sceneFormValues);
+          try {
+            sceneForm.validate();
+          } catch {}
+          setRoleAgentConfigsMap(roleAgentConfigsMap);
+          setWebUIMetricsConfig(webUIMetricsConfig);
+          setTaskHistoryModalOpen(false);
+          if (createSceneTaskParams.metric_evaluator_objs_config.evaluators.length > 0) {
+            setUseMetricEvaluators(true);
+            setEvaluatorConfigMap(
+              createSceneTaskParams.metric_evaluator_objs_config.evaluators.reduce(
+                (total, evaluator) => {
+                  total[evaluator.evaluator_obj.obj] = evaluator;
+                  return total;
+                },
+                {} as Record<string, MetricEvaluatorObjConfig>
+              )
+            );
+            setEnabledEvaluatorNames(
+              createSceneTaskParams.metric_evaluator_objs_config.evaluators.map((e) => e.evaluator_obj.obj)
+            );
+          } else {
+            setUseMetricEvaluators(false);
+            setEvaluatorConfigMap({});
+            setEnabledEvaluatorNames([]);
+          }
+        }}
+        onNeedClose={() => {
+          setTaskHistoryModalOpen(false);
+        }}
+      />
       <SelectAgentModal
         open={selectAgentModalOpen}
         selectableAgentsMetadata={operatingRoleName ? scene.agents_metadata[operatingRoleName] : []}

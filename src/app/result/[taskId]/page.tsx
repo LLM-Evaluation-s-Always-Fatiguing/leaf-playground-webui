@@ -1,11 +1,9 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import SceneTaskResultBundle from '../../../types/server/task/result-bundle';
-import WebUITaskBundle from '@/types/api-router/webui/task-bundle';
-import { getRoleAgentConfigsMapFromCreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
 import { SceneActionLog, SceneLogType } from '@/types/server/common/Log';
+import { getRoleAgentConfigsMapFromCreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
+import SceneTaskResultBundle from '@/types/server/task/result-bundle';
 import { Button, ButtonProps, Card, Collapse, Descriptions, Space, Table, Tooltip } from 'antd';
 import { useTheme } from 'antd-style';
 import { Switch } from '@formily/antd-v5';
@@ -24,6 +22,7 @@ import { DefaultResultReportComponentProps } from '@/components/result/def';
 import WhoIsTheSpyDefaultReport from '@/components/result/specialized/who-is-the-spy/DefaultReport';
 import VegaChart from '@/components/vega/VegaChart';
 import LocalAPI from '@/services/local';
+import ServerAPI from '@/services/server';
 import useGlobalStore from '@/stores/global';
 import {
   getSceneActionLogMetricEvalRecordDisplayInfo,
@@ -184,27 +183,29 @@ const LogMetricArea = styled.div`
 `;
 
 const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
-  const theme = useTheme();
+  const taskId = params.taskId;
 
+  const theme = useTheme();
   const globalStore = useGlobalStore();
 
-  const _taskId = params.taskId;
-  const searchParams = useSearchParams();
-  const bundlePath = searchParams.get('bundlePath');
-
   const [loading, setLoading] = useState(true);
+  const scene = useMemo(() => {
+    return globalStore.currentProject?.metadata;
+  }, [globalStore.currentProject]);
+  const createSceneTaskParams = useMemo(() => {
+    return globalStore.createSceneTaskParams;
+  }, [globalStore.createSceneTaskParams]);
   const [serverBundle, setServerBundle] = useState<SceneTaskResultBundle>();
-  const [webuiBundle, setWebUIBundle] = useState<WebUITaskBundle>();
   const actionLogs = useMemo(() => {
     return (serverBundle?.logs || []).filter((l) => l.log_type === SceneLogType.ACTION) as SceneActionLog[];
   }, [serverBundle?.logs]);
   const [showLogsMetrics, setShowLogsMetrics] = useState<boolean>(false);
   const roleAgentConfigMap = useMemo(() => {
-    if (webuiBundle?.createSceneTaskParams) {
-      return getRoleAgentConfigsMapFromCreateSceneTaskParams(webuiBundle.createSceneTaskParams);
+    if (globalStore.createSceneTaskParams) {
+      return getRoleAgentConfigsMapFromCreateSceneTaskParams(globalStore.createSceneTaskParams);
     }
     return {};
-  }, [webuiBundle?.createSceneTaskParams]);
+  }, [globalStore.createSceneTaskParams]);
   const agentConfigMap = useMemo(() => {
     return keyBy(
       flatten(
@@ -221,14 +222,12 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
   const [jsonViewerModalOpen, setJSONViewerModalOpen] = useState<boolean>(false);
 
   const loadDataFromLocal = async () => {
-    if (!bundlePath) return;
     setLoading(true);
-    const serverBundle = await LocalAPI.taskBundle.server.get(bundlePath);
-    const webuiBundle = await LocalAPI.taskBundle.webui.get(bundlePath);
-    globalStore.updatePageTitle(webuiBundle.scene.scene_metadata.scene_definition.name || '');
-    globalStore.updateInfoFromWebUITaskBundle(webuiBundle);
+    const bundlePath = await ServerAPI.sceneTask.resultBundlePath(taskId);
+    const serverBundle = await LocalAPI.sceneTask.getResultBundle(bundlePath);
+    await globalStore.syncTaskStateFromServer(taskId);
+    globalStore.updatePageTitle(globalStore.currentProject?.metadata.scene_metadata.scene_definition.name || '');
     setServerBundle(serverBundle);
-    setWebUIBundle(webuiBundle);
     setLoading(false);
   };
 
@@ -253,7 +252,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
       );
       return requiredMetrics.every((m) => existMetrics.includes(m));
     };
-    switch (webuiBundle?.scene.scene_metadata.scene_definition.name) {
+    switch (globalStore.currentProject?.metadata.scene_metadata.scene_definition.name) {
       case '谁是卧底':
         {
           if (checkMetrics(WhoIsTheSpyDefaultReport.requiredMetrics)) {
@@ -272,7 +271,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
 
   const reportComponents = useMemo(() => {
     return getSpecializedReportComponents();
-  }, [webuiBundle?.scene, serverBundle?.metrics]);
+  }, [globalStore.currentProject, serverBundle?.metrics]);
 
   const hasSpecializedReport = reportComponents.length > 0;
   const hasServerCharts = Object.keys(serverBundle?.charts || {}).length > 0;
@@ -281,7 +280,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
   return (
     <>
       <LoadingOverlay spinning={loading} tip={'Loading...'} />
-      {!loading && serverBundle && webuiBundle && (
+      {!loading && serverBundle && scene && createSceneTaskParams && (
         <Container>
           <Content>
             <Space direction={'vertical'}>
@@ -293,10 +292,11 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                 extra={
                   <Button
                     onClick={async () => {
-                      await LocalAPI.dict.open(bundlePath!);
+                      const bundlePath = await ServerAPI.sceneTask.resultBundlePath(taskId);
+                      await LocalAPI.dict.open(bundlePath);
                     }}
                   >
-                    Open Source Dict
+                    Open Result Bundle Dict
                   </Button>
                 }
               >
@@ -314,13 +314,13 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                                 key: '1',
                                 label: 'Name',
                                 span: 24,
-                                children: webuiBundle.scene.scene_metadata.scene_definition.name,
+                                children: scene.scene_metadata.scene_definition.name,
                               },
                               {
                                 key: '2',
                                 label: 'Description',
                                 span: 24,
-                                children: webuiBundle.scene.scene_metadata.scene_definition.description,
+                                children: scene.scene_metadata.scene_definition.description,
                               },
                               {
                                 key: '3',
@@ -349,7 +349,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                             children: (
                               <Space>
                                 {roleAgentConfigMap[r].map((agentConfig) => {
-                                  const agentMetadata = webuiBundle.scene.agents_metadata[r].findLast((am) => {
+                                  const agentMetadata = scene.agents_metadata[r].findLast((am) => {
                                     return am.obj_for_import.obj === agentConfig.obj_for_import.obj;
                                   });
                                   if (!agentMetadata) return false;
@@ -397,8 +397,8 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                             label: reportComponent.displayName,
                             children: (
                               <ReportComponent
-                                scene={webuiBundle.scene}
-                                createSceneTaskParams={webuiBundle.createSceneTaskParams}
+                                scene={scene}
+                                createSceneTaskParams={createSceneTaskParams}
                                 logs={serverBundle.logs}
                                 metrics={serverBundle.metrics}
                               />
@@ -529,7 +529,11 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                       dataIndex: 'response',
                       ellipsis: true,
                       render: (_, record) => {
-                        return getSceneLogMessageDisplayContent(record.response);
+                        return getSceneLogMessageDisplayContent(
+                          record.response,
+                          false,
+                          createSceneTaskParams.project_id
+                        );
                       },
                     },
                     {
@@ -567,8 +571,8 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                           expandedRowRender: (log) => {
                             const { enabledMetrics, hasMetrics } = getSceneActionLogMetricInfo(
                               log,
-                              webuiBundle.scene,
-                              webuiBundle.createSceneTaskParams
+                              globalStore.currentProject!.metadata,
+                              globalStore.createSceneTaskParams!
                             );
                             if (hasMetrics) {
                               return (
