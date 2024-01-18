@@ -18,6 +18,7 @@ interface TaskHistoryModalProps {
   scene: Scene;
   tasks: SceneTaskHistory[];
   onApplyHistoryTaskConfig: (createSceneTaskParams: CreateSceneTaskParams) => void;
+  onDataChanged: () => Promise<void>;
   onNeedClose: () => void;
 }
 
@@ -26,6 +27,7 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
   scene,
   tasks,
   onApplyHistoryTaskConfig,
+  onDataChanged,
   onNeedClose,
 }) => {
   const theme = useTheme();
@@ -215,6 +217,34 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
                       Result Bundle Dict
                     </Button>
                   )}
+                  <Button
+                    type="text"
+                    size="small"
+                    danger
+                    onClick={async () => {
+                      Modal.confirm({
+                        title: 'Delete task',
+                        content: `Confirm delete this task (${record.id}) ?`,
+                        okButtonProps: {
+                          danger: true,
+                        },
+                        onOk: async () => {
+                          try {
+                            await ServerAPI.sceneTask.delete(record.id);
+                            setLoading(true);
+                            await onDataChanged();
+                          } catch (e) {
+                            console.error(e);
+                          } finally {
+                            setLoading(false);
+                          }
+                        },
+                        onCancel() {},
+                      });
+                    }}
+                  >
+                    Delete
+                  </Button>
                 </Space>
               );
             },

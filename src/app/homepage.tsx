@@ -50,6 +50,8 @@ const PageContainer = styled.div`
 interface HomePageProps {
   appInfo: ServerAppInfo;
   projects: ListProject[];
+  selectedProjectId: string;
+  selectedProjectDetail: Project;
   allHistoryMap: Record<string, SceneTaskHistory[]>;
 }
 
@@ -60,10 +62,10 @@ export default function HomePage(props: HomePageProps) {
 
   const [projectsLoading, setProjectsLoading] = useState(false);
   const [projects, setProjects] = useState<ListProject[]>(props.projects);
-  const [selectedProjectId, setSelectedProjectId] = useState<string>(props.projects[0].id);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>(props.selectedProjectId);
 
   const [projectDetailLoading, setProjectDetailLoading] = useState(false);
-  const [projectDetail, setProjectDetail] = useState<Project>();
+  const [projectDetail, setProjectDetail] = useState<Project>(props.selectedProjectDetail);
 
   const [started, setStarted] = useState(false);
 
@@ -94,6 +96,7 @@ export default function HomePage(props: HomePageProps) {
   };
 
   const loadProjectDetail = async () => {
+    if (!selectedProjectId) return;
     try {
       setProjectDetailLoading(true);
       const projectResp = await ServerAPI.project.detail(selectedProjectId);
@@ -110,11 +113,13 @@ export default function HomePage(props: HomePageProps) {
     globalStore.clearTaskState();
     reloadProjectList();
     reloadTaskHistory();
-    loadProjectDetail();
   }, []);
 
   useEffect(() => {
     loadProjectDetail();
+    if (typeof window !== undefined) {
+      window.history.replaceState({}, '', selectedProjectId ? `/?selectedProjectId=${selectedProjectId}` : '/');
+    }
   }, [selectedProjectId]);
 
   return (
@@ -141,10 +146,12 @@ export default function HomePage(props: HomePageProps) {
         <LoadingOverlay spinning={projectDetailLoading} />
         {started && projectDetail ? (
           <SceneConfigBoard
-            key={projectDetail.id}
             project={projectDetail}
             serverInfo={props.appInfo}
             taskHistory={allTaskHistoryMap[projectDetail.id] || []}
+            reloadHistory={async ()=>{
+              await reloadTaskHistory();
+            }}
           />
         ) : (
           <ProjectInfoBoard

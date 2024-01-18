@@ -18,6 +18,7 @@ import EvaluatorMetadata from '@/types/server/meta/Evaluator';
 import Project from '@/types/server/meta/Project';
 import Scene from '@/types/server/meta/Scene';
 import ServerInfo from '@/types/server/meta/ServerAppInfo';
+import SceneTaskHistory from '@/types/server/task/SceneTaskHistory';
 import { WebUIRoleMetricConfig, getWebUIMetricsConfigFromCreateSceneTaskParams } from '@/types/webui/MetricConfig';
 import { Button, Card, Collapse, Flex, Space, message } from 'antd';
 import { useTheme } from 'antd-style';
@@ -39,7 +40,6 @@ import { DefaultSceneInfoConfig } from '@/models/scene';
 import LocalAPI from '@/services/local';
 import ServerAPI from '@/services/server';
 import useGlobalStore from '@/stores/global';
-import SceneTaskHistory from '@/types/server/task/SceneTaskHistory';
 
 const Container = styled.div`
   width: 100%;
@@ -183,12 +183,6 @@ const CollapseItemTitle = styled.div`
   }
 `;
 
-interface SceneConfigBoardProps {
-  project: Project;
-  taskHistory: SceneTaskHistory[];
-  serverInfo: ServerInfo;
-}
-
 function splitCreateSceneTaskParamsToState(
   scene: Scene,
   createSceneTaskParams: CreateSceneTaskParams
@@ -208,7 +202,14 @@ function splitCreateSceneTaskParamsToState(
   };
 }
 
-const SceneConfigBoard = ({ project, taskHistory }: SceneConfigBoardProps) => {
+interface SceneConfigBoardProps {
+  project: Project;
+  taskHistory: SceneTaskHistory[];
+  serverInfo: ServerInfo;
+  reloadHistory: () => Promise<void>;
+}
+
+const SceneConfigBoard = ({ project, taskHistory, reloadHistory }: SceneConfigBoardProps) => {
   const scene = project.metadata;
 
   const router = useRouter();
@@ -814,6 +815,9 @@ const SceneConfigBoard = ({ project, taskHistory }: SceneConfigBoardProps) => {
             setEvaluatorConfigMap({});
             setEnabledEvaluatorNames([]);
           }
+        }}
+        onDataChanged={async () => {
+          await reloadHistory();
         }}
         onNeedClose={() => {
           setTaskHistoryModalOpen(false);
