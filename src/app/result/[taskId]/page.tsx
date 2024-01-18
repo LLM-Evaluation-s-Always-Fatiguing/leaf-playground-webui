@@ -252,7 +252,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
       );
       return requiredMetrics.every((m) => existMetrics.includes(m));
     };
-    switch (globalStore.currentProject?.metadata.scene_metadata.scene_definition.name) {
+    switch (scene?.scene_metadata.scene_definition.name) {
       case '谁是卧底':
         {
           if (checkMetrics(WhoIsTheSpyDefaultReport.requiredMetrics)) {
@@ -271,7 +271,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
 
   const reportComponents = useMemo(() => {
     return getSpecializedReportComponents();
-  }, [globalStore.currentProject, serverBundle?.metrics]);
+  }, [scene, serverBundle?.metrics]);
 
   const hasSpecializedReport = reportComponents.length > 0;
   const hasServerCharts = Object.keys(serverBundle?.charts || {}).length > 0;
@@ -477,7 +477,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                 }
               >
                 <Table<SceneActionLog>
-                  rowKey={'created_at'}
+                  rowKey={'id'}
                   tableLayout={'fixed'}
                   bordered
                   style={{
@@ -571,8 +571,8 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                           expandedRowRender: (log) => {
                             const { enabledMetrics, hasMetrics } = getSceneActionLogMetricInfo(
                               log,
-                              globalStore.currentProject!.metadata,
-                              globalStore.createSceneTaskParams!
+                              scene,
+                              createSceneTaskParams
                             );
                             if (hasMetrics) {
                               return (

@@ -178,6 +178,7 @@ const ProcessingPage = ({
   const [wsConnected, setWSConnected] = useState(false);
   const [logs, setLogs] = useState<SceneActionLog[]>([]);
 
+  const [simulationStarted, setSimulationStarted] = useState(false);
   const [simulationFinished, setSimulationFinished] = useState(false);
   const [evaluationFinished, setEvaluationFinished] = useState(false);
   const allFinished = simulationFinished && evaluationFinished;
@@ -250,26 +251,17 @@ const ProcessingPage = ({
             message.error('Task failed!');
             return false;
           }
-          return true;
         case SceneTaskStatus.RUNNING:
-          if (!playerMode) {
-            startStatusPolling();
-          }
         case SceneTaskStatus.PAUSED:
-          if (playerMode) {
-            startStatusPolling();
-          }
+          startStatusPolling();
         case SceneTaskStatus.FINISHED:
           await globalStore.syncTaskStateFromServer(taskId);
           if (taskStatusResp === SceneTaskStatus.FINISHED) {
             setSimulationFinished(true);
             setEvaluationFinished(true);
             message.success('Task finished!');
-            setLoading(false);
-            return true;
-          } else {
-            return true;
           }
+          return true;
         case SceneTaskStatus.INTERRUPTED:
           setLoadingTip('Task closed!');
           message.warning('Task closed!');
@@ -317,7 +309,7 @@ const ProcessingPage = ({
           setWSConnected(true);
           console.info('WebSocket opened');
           if (taskStatusRef.current === SceneTaskStatus.RUNNING) {
-            setLoading(false);
+            setLoadingTip('Waiting simulation start...');
           }
         };
 
@@ -341,6 +333,10 @@ const ProcessingPage = ({
                       const systemLog = log as SceneSystemLog;
                       switch (systemLog.system_event) {
                         case SceneSystemLogEvent.SIMULATION_START:
+                          if (taskStatusRef.current === SceneTaskStatus.RUNNING) {
+                            setLoading(false);
+                          }
+                          setSimulationStarted(true);
                           break;
                         case SceneSystemLogEvent.SIMULATION_PAUSED:
                           break;
@@ -365,6 +361,7 @@ const ProcessingPage = ({
                           message.success('Task Finished!');
                           setSimulationFinished(true);
                           setEvaluationFinished(true);
+                          setTaskStatus(SceneTaskStatus.FINISHED);
                           break;
                       }
                       break;
@@ -453,8 +450,14 @@ const ProcessingPage = ({
     if (!startStatusCheckFinished) return;
     switch (taskStatus) {
       case SceneTaskStatus.PENDING:
+        break;
       case SceneTaskStatus.RUNNING:
-        setLoading(false);
+        if (!simulationStarted) {
+          setLoadingTip('Wait simulation start...');
+          setLoading(true);
+        } else {
+          setLoading(false);
+        }
         break;
       case SceneTaskStatus.PAUSED:
         if (playerMode) {
@@ -476,7 +479,7 @@ const ProcessingPage = ({
         stopStatusPolling();
         break;
     }
-  }, [taskStatus, playerMode, startStatusCheckFinished]);
+  }, [taskStatus, playerMode, startStatusCheckFinished, simulationStarted]);
 
   const goToResult = () => {
     router.replace(`/result/${taskId}`);
