@@ -1,10 +1,13 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import { getAllAgentInstanceFrom } from '@/types/webui/AgentInstance';
-import { CreateSceneTaskParams, getEnabledMetricsFromCreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
 import { SceneActionLog } from '@/types/server/common/Log';
-import { SceneTaskStatus } from '@/types/server/task/SceneTask';
+import {
+  CreateSceneTaskParams,
+  getEnabledMetricsFromCreateSceneTaskParams,
+} from '@/types/server/config/CreateSceneTaskParams';
 import { SceneMetricConfig } from '@/types/server/config/Metric';
 import Scene, { SceneMetricDefinition } from '@/types/server/meta/Scene';
+import { SceneTaskStatus } from '@/types/server/task/SceneTask';
+import { getAllAgentInstanceFrom } from '@/types/webui/AgentInstance';
 import { Segmented, Space, Tabs } from 'antd';
 import { useTheme } from 'antd-style';
 import styled from '@emotion/styled';
@@ -198,6 +201,7 @@ interface ProcessingConsoleProps {
 
 export type ProcessingConsoleMethods = {
   scrollToLog: (logId: string) => void;
+  setAutoPlay: (autoPlay: boolean) => void;
 };
 
 const ProcessingConsole = forwardRef<ProcessingConsoleMethods, ProcessingConsoleProps>((props, ref) => {
@@ -374,6 +378,7 @@ const ProcessingConsole = forwardRef<ProcessingConsoleMethods, ProcessingConsole
   useImperativeHandle(ref, () => {
     return {
       scrollToLog,
+      setAutoPlay,
     };
   });
 

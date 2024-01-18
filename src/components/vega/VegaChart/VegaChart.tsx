@@ -17,11 +17,11 @@ const Container = styled.div`
   }
 `;
 
-interface VegaChartProps {
+interface VegaChartComponentProps {
   vSpec: VisualizationSpec;
 }
 
-const VegaChart: React.FunctionComponent<VegaChartProps> = (props) => {
+const VegaChartComponent: React.FunctionComponent<VegaChartComponentProps> = (props) => {
   const theme = useTheme();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -68,4 +68,4 @@ const VegaChart: React.FunctionComponent<VegaChartProps> = (props) => {
   );
 };
 
-export default VegaChart;
+export default VegaChartComponent;

@@ -404,6 +404,7 @@ const ProcessingPage = ({
               switch (wsEventMessage.event) {
                 case WebsocketEvent.WAIT_HUMAN_INPUT:
                   console.info('WebSocket Received Event Message:', wsEventMessage);
+                  consoleRef.current?.setAutoPlay(true);
                   setNeedInput(true);
                   needInputRef.current = true;
                   break;
