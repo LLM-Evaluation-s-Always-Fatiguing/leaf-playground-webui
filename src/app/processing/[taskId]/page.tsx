@@ -431,6 +431,7 @@ const ProcessingPage = ({
           wsOpenRef.current = false;
           setWSConnected(false);
           console.info('WebSocket closed.');
+          wsRef.current = undefined;
         };
       }
     };
@@ -612,6 +613,10 @@ const ProcessingPage = ({
                     await ServerAPI.sceneTask.interrupt(taskId);
                     setTaskStatus(SceneTaskStatus.INTERRUPTED);
                     taskStatusRef.current = SceneTaskStatus.INTERRUPTED;
+                    if (wsRef.current) {
+                      wsRef.current?.close();
+                      wsRef.current = undefined;
+                    }
                   } catch (e) {
                     console.error(e);
                   }
