@@ -41,6 +41,9 @@ const Content = styled.div`
 
   .name {
     margin-top: 4px;
+    width: 100%;
+    text-align: center;
+    word-break: break-all;
   }
 
   .role {
