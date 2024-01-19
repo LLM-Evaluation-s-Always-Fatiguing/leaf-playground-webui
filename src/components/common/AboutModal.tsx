@@ -2,7 +2,10 @@
 
 import React, { CSSProperties, useEffect, useState } from 'react';
 import ServerAppInfo from '@/types/server/meta/ServerAppInfo';
+import WebUIAppEnvironmentVariables from '@/types/webui/AppEnvironmentVariables';
 import { ButtonProps, Descriptions, Modal, Space, Spin, message } from 'antd';
+import packageJson from '@/../package.json';
+import LocalAPI from '@/services/local';
 import ServerAPI from '@/services/server';
 
 interface AboutModalProps {
@@ -13,6 +16,7 @@ interface AboutModalProps {
 const AboutModal: React.FC<AboutModalProps> = ({ open, onNeedClose }) => {
   const [modalLoading, setModalLoading] = useState(false);
   const [serverInfo, setServerInfo] = useState<ServerAppInfo>();
+  const [environment, setEnvironment] = useState<WebUIAppEnvironmentVariables>();
 
   const resetState = () => {
     setModalLoading(false);
@@ -22,6 +26,8 @@ const AboutModal: React.FC<AboutModalProps> = ({ open, onNeedClose }) => {
     try {
       setModalLoading(true);
       const homepageResp = await ServerAPI.site.homepage();
+      const environmentResp = await LocalAPI.environment.get();
+      setEnvironment(environmentResp);
       setServerInfo(homepageResp.app_info);
     } catch (e) {
       console.error(e);
@@ -93,6 +99,25 @@ const AboutModal: React.FC<AboutModalProps> = ({ open, onNeedClose }) => {
               span: 24,
               labelStyle,
               children: <Space>{serverInfo?.hub_dir}</Space>,
+            },
+          ]}
+        />
+        <Descriptions
+          title="WebUI Info"
+          items={[
+            {
+              key: '1',
+              label: 'WebUI Version',
+              span: 24,
+              labelStyle,
+              children: <Space>{packageJson.version}</Space>,
+            },
+            {
+              key: '1',
+              label: 'Server URL',
+              span: 24,
+              labelStyle,
+              children: <Space>{environment?.serverUrl}</Space>,
             },
           ]}
         />
