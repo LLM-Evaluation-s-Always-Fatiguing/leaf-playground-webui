@@ -11,7 +11,7 @@ import CustomScrollableAntdModal from '@/components/basic/CustomScrollableAntdMo
 import FormilyDefaultSchemaField from '@/components/formily/FormilyDefaultSchemaField';
 import { getRandomAgentColor } from '@/utils/color';
 
-const nanoid = () => Math.random().toString(16).substring(6, 10);
+const getRandomIdSuffix = () => Math.random().toString(16).substring(6, 10);
 
 interface CreateOrUpdateAgentModalProps {
   open: boolean;
@@ -47,7 +47,7 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
         sceneAgentConfig?.config_data ||
         ({
           profile: {
-            id: `agent_${nanoid()}`,
+            id: `agent_${getRandomIdSuffix()}`,
           },
           chart_major_color: getRandomAgentColor(allAgentColors),
         } as any),
@@ -55,7 +55,7 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
         onFormValuesChange((form) => {
           const currentValues = form.values;
           const oldId = currentValues?.profile?.id;
-          let uuid = nanoid();
+          let uuid = getRandomIdSuffix();
           if (oldId && oldId.split('_').length > 1) {
             const splitId = oldId.split('_');
             uuid = splitId[splitId.length - 1];
