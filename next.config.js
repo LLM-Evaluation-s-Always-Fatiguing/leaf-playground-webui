@@ -11,8 +11,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  experimental: {
-    optimizePackageImports: ['react-icons'],
+  compiler: {
+    emotion: true,
   },
   transpilePackages: ['antd-style', '@formily/antd-v5', '@ant-design/happy-work-theme'],
   async rewrites() {
