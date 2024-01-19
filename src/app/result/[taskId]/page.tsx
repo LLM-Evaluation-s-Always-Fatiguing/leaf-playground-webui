@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { SceneActionLog, SceneLogType } from '@/types/server/common/Log';
 import { getRoleAgentConfigsMapFromCreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
 import SceneTaskResultBundle from '@/types/server/task/result-bundle';
-import { Button, ButtonProps, Card, Collapse, Descriptions, Space, Table, Tooltip } from 'antd';
+import { Button, ButtonProps, Card, Collapse, Descriptions, Space, Table, Tooltip, message } from 'antd';
 import { useTheme } from 'antd-style';
 import { Switch } from '@formily/antd-v5';
 import styled from '@emotion/styled';
@@ -189,6 +189,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
   const globalStore = useGlobalStore();
 
   const [loading, setLoading] = useState(true);
+  const [taskServerAlive, setTaskServerAlive] = useState<boolean>(false);
   const scene = useMemo(() => {
     return globalStore.currentProject?.metadata;
   }, [globalStore.currentProject]);
@@ -222,13 +223,23 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
   const [jsonViewerModalOpen, setJSONViewerModalOpen] = useState<boolean>(false);
 
   const loadDataFromLocal = async () => {
-    setLoading(true);
-    const bundlePath = await ServerAPI.sceneTask.resultBundlePath(taskId);
-    const serverBundle = await LocalAPI.sceneTask.getResultBundle(bundlePath);
-    await globalStore.syncTaskStateFromServer(taskId);
-    globalStore.updatePageTitle(globalStore.currentProject?.metadata.scene_metadata.scene_definition.name || '');
-    setServerBundle(serverBundle);
-    setLoading(false);
+    try {
+      setLoading(true);
+      const checkTaskServerResp = await ServerAPI.sceneTask.checkTaskServer(taskId);
+      setTaskServerAlive(checkTaskServerResp);
+      if (checkTaskServerResp) {
+        await ServerAPI.sceneTask.regenTaskResultBundle(taskId);
+      }
+      const bundlePath = await ServerAPI.sceneTask.resultBundlePath(taskId);
+      const serverBundle = await LocalAPI.sceneTask.getResultBundle(bundlePath);
+      await globalStore.syncTaskStateFromServer(taskId);
+      globalStore.updatePageTitle(globalStore.currentProject?.metadata.scene_metadata.scene_definition.name || '');
+      setServerBundle(serverBundle);
+      setLoading(false);
+    } catch (e) {
+      console.error(e);
+      message.error('Load task result failed!');
+    }
   };
 
   useEffect(() => {

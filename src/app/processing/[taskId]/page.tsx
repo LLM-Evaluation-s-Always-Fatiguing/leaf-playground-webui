@@ -163,6 +163,8 @@ const ProcessingPage = ({
   const [loading, setLoading] = useState(true);
   const [loadingTip, setLoadingTip] = useState('Loading...');
 
+  const [taskServerAlive, setTaskServerAlive] = useState<boolean>(false);
+
   const taskStatusRef = useRef<SceneTaskStatus>(SceneTaskStatus.PENDING);
   const [taskStatus, setTaskStatus] = useState<SceneTaskStatus>(SceneTaskStatus.PENDING);
   const [startStatusCheckFinished, setStartStatusCheckFinished] = useState(false);
@@ -230,6 +232,14 @@ const ProcessingPage = ({
   const checkTaskStatusOnStart = async () => {
     try {
       setLoadingTip('Checking task status...');
+      const checkTaskServerResp = await ServerAPI.sceneTask.checkTaskServer(taskId);
+      setTaskServerAlive(checkTaskServerResp);
+      if (!checkTaskServerResp) {
+        message.error(
+          'The task server is now closed, making it impossible to make further changes to the task result!',
+          10
+        );
+      }
       const taskStatusResp = (await ServerAPI.sceneTask.status(taskId)).status;
       setTaskStatus(taskStatusResp);
       taskStatusRef.current = taskStatusResp;
@@ -552,6 +562,7 @@ const ProcessingPage = ({
         {globalStore.currentProject && globalStore.createSceneTaskParams && (
           <ProcessingConsole
             ref={consoleRef}
+            taskServerAlive={taskServerAlive}
             taskStatus={taskStatus}
             wsConnected={wsConnected}
             simulationFinished={simulationFinished}

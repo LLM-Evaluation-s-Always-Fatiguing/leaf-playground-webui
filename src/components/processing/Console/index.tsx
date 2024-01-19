@@ -176,6 +176,7 @@ const LogsArea = styled.div`
 `;
 
 interface ProcessingConsoleProps {
+  taskServerAlive: boolean;
   taskStatus: SceneTaskStatus;
   wsConnected: boolean;
   simulationFinished: boolean;
@@ -389,15 +390,20 @@ const ProcessingConsole = forwardRef<ProcessingConsoleMethods, ProcessingConsole
           <div
             className="indicator"
             style={{
-              background: props.wsConnected ? theme.colorSuccess : theme.colorError,
+              background: props.taskServerAlive && props.wsConnected ? theme.colorSuccess : theme.colorError,
             }}
           />
-          {props.wsConnected ? (
-            <span>Server Connected( {statusTip || processStatusStr} )</span>
+          {props.taskServerAlive ? (
+            props.wsConnected ? (
+              <span>Server Connected( {statusTip || processStatusStr} )</span>
+            ) : (
+              <span>Server Disconnected</span>
+            )
           ) : (
-            <span>Server Disconnected</span>
+            <span>Server Closed</span>
           )}
           {!props.playerMode &&
+            props.taskServerAlive &&
             (props.taskStatus === SceneTaskStatus.RUNNING || props.taskStatus === SceneTaskStatus.PAUSED) && (
               <>
                 <div
@@ -460,6 +466,7 @@ const ProcessingConsole = forwardRef<ProcessingConsoleMethods, ProcessingConsole
             <div className={`actionButton ${evaluationMode ? 'normal' : ''}`}>
               <div className="iconArea">
                 <Segmented
+                  disabled={!props.taskServerAlive}
                   value={evaluationMode ? (humanOnlyEvaluationMode ? 'human' : 'standard') : 'none'}
                   onChange={(value) => {
                     switch (value) {

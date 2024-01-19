@@ -29,6 +29,17 @@ const sceneTaskAPI = {
   async delete(taskId: string) {
     return (await request.post(`${prefix}/${taskId}/delete`)).data;
   },
+  async checkTaskServer(taskId: string): Promise<boolean> {
+    try {
+      await request.get(`${prefix}/${taskId}/hello`);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  async regenTaskResultBundle(taskId: string) {
+    return (await request.post(`${prefix}/${taskId}/save`)).data;
+  },
   async agentsConnectedStatus(taskId: string): Promise<Record<string, boolean>> {
     return (await request.get(`${prefix}/${taskId}/agents_connected`)).data;
   },
