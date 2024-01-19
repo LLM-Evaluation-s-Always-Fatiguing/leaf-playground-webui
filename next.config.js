@@ -14,6 +14,9 @@ const nextConfig = {
   compiler: {
     emotion: true,
   },
+  experimental: {
+    optimizePackageImports: ['react-icons', '@formily/antd-v5'],
+  },
   transpilePackages: ['antd-style', '@formily/antd-v5', '@ant-design/happy-work-theme'],
   async rewrites() {
     return [

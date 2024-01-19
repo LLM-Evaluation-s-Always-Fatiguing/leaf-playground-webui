@@ -82,7 +82,6 @@
     "@types/react-virtualized": "^9.21.28",
     "@types/tinycolor2": "^1.4.6",
     "archiver": "^6.0.1",
-    "babel-plugin-antd-style": "^1.0.4",
     "eslint": "^8",
     "eslint-config-next": "14.0.2",
     "eslint-config-prettier": "^9.0.0",
