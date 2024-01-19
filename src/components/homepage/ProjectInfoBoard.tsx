@@ -1,7 +1,6 @@
 'use client';
 
 import Project from '@/types/server/meta/Project';
-import Scene from '@/types/server/meta/Scene';
 import { Button } from 'antd';
 import styled from '@emotion/styled';
 import Markdown from '@/components/markdown/Markdown';
