@@ -18,16 +18,16 @@ import { Button, Modal, message } from 'antd';
 import { Input } from '@formily/antd-v5';
 import styled from '@emotion/styled';
 import { MdClose, MdPerson3 } from 'react-icons/md';
-import JSONViewModal from '@/components/common/JSONViewModal';
-import LoadingOverlay from '@/components/common/LoadingOverlay';
-import LogMetricDetailModal from '@/components/metric/LogMetricDetailModal';
-import ProcessingConsole, { ProcessingConsoleMethods } from '@/components/processing/Console';
-import BaseVisualization from '@/components/processing/common/BaseVisualization';
-import VisualizationComponentWithExtraProps from '@/components/processing/common/VisualizationComponentWithExtraProps';
-import { DefaultProcessingVisualizationComponentProps } from '@/components/processing/def';
-import BuddhaLogo from '@/components/processing/specialized/buddha/BuddhaLogo';
-import SampleQAVisualization from '@/components/processing/specialized/sample-qa/SampleQAVisualization';
-import WhoIsTheSpyVisualization from '@/components/processing/specialized/who-is-the-spy/WhoIsTheSpyVisualization';
+import LoadingOverlay from '@/components/loading/LoadingOverlay';
+import JSONViewModal from '@/components/modals/JSONViewModal';
+import LogMetricDetailModal from '@/components/modals/LogMetricDetailModal';
+import ProcessingConsole, { ProcessingConsoleMethods } from '@/app/processing/components/Console';
+import BaseVisualization from '@/app/processing/components/common/BaseVisualization';
+import VisualizationComponentWithExtraProps from '@/app/processing/components/common/VisualizationComponentWithExtraProps';
+import { DefaultProcessingVisualizationComponentProps } from '@/app/processing/components/def';
+import BuddhaLogo from '@/app/processing/components/specialized/buddha/BuddhaLogo';
+import SampleQAVisualization from '@/app/processing/components/specialized/sample-qa/SampleQAVisualization';
+import WhoIsTheSpyVisualization from '@/app/processing/components/specialized/who-is-the-spy/WhoIsTheSpyVisualization';
 import ServerAPI from '@/services/server';
 import useGlobalStore from '@/stores/global';
 import { getFullServerWebSocketURL } from '@/utils/websocket';
@@ -232,17 +232,11 @@ const ProcessingPage = ({
   const checkTaskStatusOnStart = async () => {
     try {
       setLoadingTip('Checking task status...');
-      const checkTaskServerResp = await ServerAPI.sceneTask.checkTaskServer(taskId);
-      setTaskServerAlive(checkTaskServerResp);
-      if (!checkTaskServerResp) {
-        message.error(
-          'The task server is now closed, making it impossible to make further changes to the task result!',
-          10
-        );
-      }
+
       const taskStatusResp = (await ServerAPI.sceneTask.status(taskId)).status;
       setTaskStatus(taskStatusResp);
       taskStatusRef.current = taskStatusResp;
+
       switch (taskStatusResp) {
         case SceneTaskStatus.PENDING:
           let wait = true;
@@ -298,10 +292,20 @@ const ProcessingPage = ({
         return;
       }
       const pass = await checkTaskStatusOnStart();
-      setStartStatusCheckFinished(true);
       if (!pass) {
+        setStartStatusCheckFinished(true);
         return;
       }
+
+      const checkTaskServerResp = await ServerAPI.sceneTask.checkTaskServer(taskId);
+      setTaskServerAlive(checkTaskServerResp);
+      if (!checkTaskServerResp) {
+        message.error(
+          'The task server is now closed, making it impossible to make further changes to the task result!',
+          10
+        );
+      }
+      setStartStatusCheckFinished(true);
 
       globalStore.updatePageTitle(globalStore.currentProject?.metadata.scene_metadata.scene_definition.name || '');
 
@@ -562,6 +566,7 @@ const ProcessingPage = ({
         {globalStore.currentProject && globalStore.createSceneTaskParams && (
           <ProcessingConsole
             ref={consoleRef}
+            startStatusCheckFinished={startStatusCheckFinished}
             taskServerAlive={taskServerAlive}
             taskStatus={taskStatus}
             wsConnected={wsConnected}

@@ -8,7 +8,7 @@ import styled from '@emotion/styled';
 import { FaRegAngry, FaRegLaughSquint } from 'react-icons/fa';
 import { MdOutlineBrightnessAuto, MdOutlineDarkMode, MdOutlineInfo, MdOutlineLightMode } from 'react-icons/md';
 import { TbBrandGithub } from 'react-icons/tb';
-import AboutModal from '@/components/common/AboutModal';
+import AboutModal from '@/components/modals/AboutModal';
 import HeaderPrimaryColorPicker from '@/components/header/PrimaryColorPicker';
 import LEAFLogo from '@/components/project/LEAFLogo';
 import useDisplayConfig from '@/managers/DisplayConfigManager/useDisplayConfig';

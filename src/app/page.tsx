@@ -1,4 +1,4 @@
-import HomePage from '@/app/homepage';
+import Index from '@/app/homepage';
 import ServerAPI from '@/services/server';
 
 export default async function Page({ searchParams }: { searchParams: { selectedProjectId?: string } }) {
@@ -11,7 +11,7 @@ export default async function Page({ searchParams }: { searchParams: { selectedP
     }
     const selectedProjectDetail = await ServerAPI.project.detail(selectedProjectId);
     return (
-      <HomePage
+      <Index
         appInfo={homepageInfo.app_info}
         projects={homepageInfo.projects}
         selectedProjectId={selectedProjectId}

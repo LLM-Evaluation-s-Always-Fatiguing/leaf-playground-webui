@@ -5,7 +5,7 @@ import { useTheme } from 'antd-style';
 import styled from '@emotion/styled';
 import { MdOutlineSettings } from 'react-icons/md';
 import { EvaluatorAvatar } from '@/components/evaluator/icons/EvaluatorAvatar';
-import { EvaluatorMark } from '@/components/homepage/icons/EvaluatorMark';
+import { EvaluatorMark } from '@/app/homepage/components/icons/EvaluatorMark';
 
 const Content = styled.div`
   width: 100%;
