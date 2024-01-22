@@ -160,6 +160,8 @@ const ProcessingPage = ({
 
   const globalStore = useGlobalStore();
 
+  const whileLoopMarkRef = useRef(false);
+
   const [loading, setLoading] = useState(true);
   const [loadingTip, setLoadingTip] = useState('Loading...');
 
@@ -239,17 +241,18 @@ const ProcessingPage = ({
 
       switch (taskStatusResp) {
         case SceneTaskStatus.PENDING:
-          let wait = true;
+          whileLoopMarkRef.current = true;
           let finalStatus: SceneTaskStatus = taskStatusResp;
-          while (wait) {
+          while (whileLoopMarkRef.current) {
             await new Promise((resolve) => setTimeout(resolve, 1500));
             const taskStatusResp = await ServerAPI.sceneTask.status(taskId);
             finalStatus = taskStatusResp.status;
             if (taskStatusResp.status !== SceneTaskStatus.PENDING) {
-              wait = false;
+              whileLoopMarkRef.current = false;
             }
           }
           setTaskStatus(finalStatus);
+          taskStatusRef.current = finalStatus;
           if (finalStatus === SceneTaskStatus.INTERRUPTED || finalStatus === SceneTaskStatus.FAILED) {
             setLoadingTip('Task failed!');
             message.error('Task failed!');
@@ -297,7 +300,18 @@ const ProcessingPage = ({
         return;
       }
 
-      const checkTaskServerResp = await ServerAPI.sceneTask.checkTaskServer(taskId);
+      let checkTaskServerResp = await ServerAPI.sceneTask.checkTaskServer(taskId);
+      if (!checkTaskServerResp && taskStatusRef.current === SceneTaskStatus.RUNNING) {
+        whileLoopMarkRef.current = true;
+        while (whileLoopMarkRef.current) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          checkTaskServerResp = await ServerAPI.sceneTask.checkTaskServer(taskId);
+          if (checkTaskServerResp) {
+            setTaskServerAlive(checkTaskServerResp);
+            whileLoopMarkRef.current = false;
+          }
+        }
+      }
       setTaskServerAlive(checkTaskServerResp);
       if (!checkTaskServerResp) {
         message.error(
@@ -376,6 +390,7 @@ const ProcessingPage = ({
                           setSimulationFinished(true);
                           setEvaluationFinished(true);
                           setTaskStatus(SceneTaskStatus.FINISHED);
+                          taskStatusRef.current = SceneTaskStatus.FINISHED;
                           break;
                       }
                       break;
@@ -458,6 +473,7 @@ const ProcessingPage = ({
         wsRef.current.close();
         wsRef.current = undefined;
       }
+      whileLoopMarkRef.current = false;
       stopStatusPolling();
     };
   }, []);
