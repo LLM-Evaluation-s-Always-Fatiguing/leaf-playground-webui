@@ -525,6 +525,7 @@ const ProcessingPage = ({
       case 'SampleQAVisualization':
         return VisualizationComponentWithExtraProps(SampleQAVisualization, {});
       case 'Buddha':
+      case 'BuddhistScripturesEval':
         return VisualizationComponentWithExtraProps(SampleQAVisualization, {
           askerAvatar: MdPerson3,
           answererAvatar: BuddhaLogo,

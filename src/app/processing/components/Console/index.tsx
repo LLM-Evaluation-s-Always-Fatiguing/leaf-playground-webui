@@ -13,10 +13,10 @@ import { useTheme } from 'antd-style';
 import styled from '@emotion/styled';
 import { CellMeasurer, CellMeasurerCache, List } from 'react-virtualized';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import { BsFillArrowUpLeftCircleFill } from 'react-icons/bs';
 import { IoPauseCircleSharp, IoPlayCircleSharp, IoStopCircleSharp } from 'react-icons/io5';
 import ConsoleLogItem from '@/app/processing/components/Console/LogItem';
 import { TruncatableParagraphEllipsisStatus } from '@/app/processing/components/Console/TruncatableParagraph';
+import CircleFillAutoplayIcon from '@/app/processing/components/common/icons/CircleFillAutoplayIcon';
 import HumanEvaluationModeIcon from '@/app/processing/components/common/icons/HumanEvaluationModeIcon';
 import NoneEvaluationModeIcon from '@/app/processing/components/common/icons/NoneEvaluationModeIcon';
 import StandardEvaluationModeIcon from '@/app/processing/components/common/icons/StandardEvaluationModeIcon';
@@ -462,10 +462,10 @@ const ProcessingConsole = forwardRef<ProcessingConsoleMethods, ProcessingConsole
           >
             <div className="iconArea">
               <div className="icon">
-                <BsFillArrowUpLeftCircleFill size={'1em'} />
+                <CircleFillAutoplayIcon />
               </div>
             </div>
-            <div className="title">Now</div>
+            <div className="title">Auto Play</div>
           </div>
           {hasEnabledMetric && (
             <div className={`actionButton ${evaluationMode ? 'normal' : ''}`}>
