@@ -27,13 +27,28 @@ The Playground is initially configured to use the address `http://127.0.0.1:8000
 
 ### Custom Scene Visualization Components
 
-To tailor visualization components for specific Scenes, create your custom components within the `src/app/processing/components/specialized` directory. These components should have their props extending from `DefaultProcessingVisualizationComponentProps` for consistent integration.
+To develop customized visualization components for specific scenes, follow these unified steps:
 
-Once your component is developed, register it within the `getProcessingVisualizationComponent` function located in `src/app/processing/[taskId]/page.tsx`. This is done by adding a case statement for the scene name.
+1. **Create Component**:
+  - Develop your custom scene visualization component in the `src/app/processing/components/specialized` directory.
+  - Ensure the component's props extend from `DefaultProcessingVisualizationComponentProps`.
+
+2. **Register Component**:
+  - Register your component within the `getProcessingVisualizationComponent` function located in `src/app/processing/[taskId]/page.tsx`.
+  - This is achieved by adding a case statement for your scene's name.
 
 ### Add Scene-Specific Result Report Components
 
-For displaying custom Scene result components in the Report section of the result page, the component must be defined either as a `ResultReportFunctionComponent` or a `ResultReportClassComponent`. This is dependent on the implementation approach. It's recommended to store custom components in the `src/app/result/components/specialized` directory for better organization. Registration of these components occurs within the `getSpecializedReportComponents` function found in `src/app/result/[taskId]/page.tsx`, following the validation process by `checkMetrics`.
+To display custom scene result components in the Report section of the result page, follow these unified steps:
+
+1. **Define Component**:
+  - Define your component as either a `ResultReportFunctionComponent` or a `ResultReportClassComponent`, depending on your implementation approach.
+  - It's recommended to store these custom components in the `src/app/result/components/specialized` directory.
+
+2. **Register Component**:
+  - Register your component within the `getSpecializedReportComponents` function found in `src/app/result/[taskId]/page.tsx`.
+  - Ensure the registration occurs after the validation process by `checkMetrics`.
+
 
 ### Make WebUI Bundle
 
