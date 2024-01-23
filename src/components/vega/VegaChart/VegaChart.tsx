@@ -5,6 +5,7 @@ import { useTheme } from 'antd-style';
 import styled from '@emotion/styled';
 import { View } from 'vega';
 import embed, { VisualizationSpec } from 'vega-embed';
+import NormalNoBoxShadowCard from '@/components/basic/NormalNoBoxShadowCard';
 
 const Container = styled.div`
   width: 100%;
@@ -14,6 +15,27 @@ const Container = styled.div`
   .vega-chart {
     width: 100%;
     height: 100%;
+  }
+
+  .vega-actions {
+    ::before {
+      border-bottom-color: ${(props) => props.theme.colorBgBase} !important;
+    }
+
+    ::after {
+      border-bottom-color: ${(props) => props.theme.colorBgBase} !important;
+    }
+
+    background: ${(props) => props.theme.colorBgBase} !important;
+    border-color: ${(props) => props.theme.colorBgBase} !important;
+
+    a {
+      color: ${(props) => props.theme.colorText} !important;
+
+      :hover {
+        background: ${(props) => props.theme.colorBgTextHover} !important;
+      }
+    }
   }
 `;
 
@@ -62,9 +84,21 @@ const VegaChartComponent: React.FunctionComponent<VegaChartComponentProps> = (pr
   }, []);
 
   return (
-    <Container ref={containerRef}>
-      <div className="vega-chart" ref={chartDomRef} />
-    </Container>
+    <NormalNoBoxShadowCard
+      bodyStyle={{
+        width: '100%',
+        height: '100%',
+        padding: '12px 16px',
+        borderRadius: theme.borderRadius,
+        background: theme.isDarkMode ? 'rgb(51,51,51)' : theme.colorBgBase,
+      }}
+      bordered={false}
+      hoverable
+    >
+      <Container ref={containerRef}>
+        <div className="vega-chart" ref={chartDomRef} />
+      </Container>
+    </NormalNoBoxShadowCard>
   );
 };
 

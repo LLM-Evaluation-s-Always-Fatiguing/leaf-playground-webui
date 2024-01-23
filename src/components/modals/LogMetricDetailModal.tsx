@@ -321,6 +321,7 @@ interface LogMetricDetailModalProps {
   metrics?: SceneMetricDefinition[];
   metricsConfig?: Record<string, SceneMetricConfig>;
   onNeedClose: () => void;
+  onLogChanged?: () => void;
   onOpenJSONDetail: (json: any) => void;
 }
 
@@ -386,6 +387,7 @@ const LogMetricDetailModal = (props: LogMetricDetailModalProps) => {
             }
           }
           message.success('Log metrics saved');
+          props.onLogChanged?.();
           setNewHumanMetrics({});
           setLoading(false);
         } catch (e) {

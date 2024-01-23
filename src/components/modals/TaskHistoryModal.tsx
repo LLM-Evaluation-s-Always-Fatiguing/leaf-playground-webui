@@ -70,7 +70,6 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
         }}
         columns={[
           {
-            width: 260,
             title: 'Task ID',
             dataIndex: 'id',
             ellipsis: true,

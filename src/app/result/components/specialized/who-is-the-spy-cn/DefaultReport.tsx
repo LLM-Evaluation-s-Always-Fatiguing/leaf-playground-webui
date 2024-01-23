@@ -18,9 +18,9 @@ const ChartContainer = styled.div`
   width: calc(100% / 3);
 `;
 
-interface WhoIsTheSpyDefaultReportProps extends DefaultResultReportComponentProps {}
+interface WhoIsTheSpyCNDefaultReportProps extends DefaultResultReportComponentProps {}
 
-const WhoIsTheSpyDefaultReport: ResultReportFunctionComponent<WhoIsTheSpyDefaultReportProps> = (props) => {
+const WhoIsTheSpyCNDefaultReport: ResultReportFunctionComponent<WhoIsTheSpyCNDefaultReportProps> = (props) => {
   const agents = useMemo(() => {
     return getAllAgentInstanceFrom(props.scene, props.createSceneTaskParams);
   }, [props.scene, props.createSceneTaskParams]);
@@ -77,7 +77,15 @@ const WhoIsTheSpyDefaultReport: ResultReportFunctionComponent<WhoIsTheSpyDefault
             xAxis: { type: 'category' },
             yAxis: { max: 5 },
             series: agents.map((agent) => {
-              return { type: 'bar', itemStyle: { color: agent.config.config_data.chart_major_color } };
+              return {
+                type: 'bar',
+                itemStyle: { color: agent.config.config_data.chart_major_color },
+                label: {
+                  show: true,
+                  precision: 2,
+                  position: 'top',
+                },
+              };
             }),
           }}
         />
@@ -86,7 +94,7 @@ const WhoIsTheSpyDefaultReport: ResultReportFunctionComponent<WhoIsTheSpyDefault
   );
 };
 
-WhoIsTheSpyDefaultReport.reportName = 'Default';
-WhoIsTheSpyDefaultReport.requiredMetrics = ['player.describe_key.伪装能力', 'player.predict_role.推理能力'];
+WhoIsTheSpyCNDefaultReport.reportName = 'Default';
+WhoIsTheSpyCNDefaultReport.requiredMetrics = ['player.describe_key.伪装能力', 'player.predict_role.推理能力'];
 
-export default WhoIsTheSpyDefaultReport;
+export default WhoIsTheSpyCNDefaultReport;
