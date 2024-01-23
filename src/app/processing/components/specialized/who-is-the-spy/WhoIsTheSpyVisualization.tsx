@@ -4,15 +4,14 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import { SceneActionLog } from '@/types/server/common/Log';
 import WebUIAgentInstance, { getAllAgentInstanceFrom } from '@/types/webui/AgentInstance';
-import { Button, Slider, Tabs, Tooltip } from 'antd';
+import { Button, Slider, Tabs } from 'antd';
 import { useTheme } from 'antd-style';
 import styled from '@emotion/styled';
 import keyBy from 'lodash/keyBy';
 import { IoMdLocate } from 'react-icons/io';
+import SampleAutoPlayButton from '@/app/processing/components/common/SampleAutoPlayButton';
 import SampleAvatar from '@/app/processing/components/common/SampleAvatar';
 import SampleStatusAvatar from '@/app/processing/components/common/SampleStatusAvatar';
-import AutoplayIcon from '@/app/processing/components/common/icons/AutoplayIcon';
-import NoAutoplayIcon from '@/app/processing/components/common/icons/NoAutoplayIcon';
 import { DefaultProcessingVisualizationComponentProps } from '@/app/processing/components/def';
 import GodViewButton from '@/app/processing/components/specialized/who-is-the-spy/GodViewButton';
 import PlayerCard from '@/app/processing/components/specialized/who-is-the-spy/PlayerCard';
@@ -669,24 +668,13 @@ const WhoIsTheSpyVisualization = (props: WhoIsTheSpyVisualizationProps) => {
       <MainArea>
         <RoundArea>
           <div className="title">Round</div>
-          <Tooltip title={autoPlay ? 'Disable Auto Play' : 'Enable Auto Play'} placement={'right'}>
-            <Button
-              type={'text'}
-              style={{
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-                margin: '6px 0',
-                fontSize: '24px',
-              }}
-              size={'small'}
-              icon={autoPlay ? <NoAutoplayIcon /> : <AutoplayIcon />}
-              onClick={() => {
-                setAutoPlay(!autoPlay);
-              }}
-            />
-          </Tooltip>
+          <SampleAutoPlayButton
+            autoPlay={autoPlay}
+            toolTipPlacement={'right'}
+            onClick={() => {
+              setAutoPlay(!autoPlay);
+            }}
+          />
           {splitRoundLogs.length > 1 && (
             <Slider
               style={{

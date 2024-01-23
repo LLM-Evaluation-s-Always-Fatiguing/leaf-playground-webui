@@ -3,17 +3,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { SceneActionLog } from '@/types/server/common/Log';
 import SceneAgentConfig from '@/types/server/config/Agent';
-import { Button, Slider, Space, Tooltip } from 'antd';
+import { Button, Slider, Space } from 'antd';
 import { useTheme } from 'antd-style';
 import styled from '@emotion/styled';
 import keyBy from 'lodash/keyBy';
 import { GiTeacher } from 'react-icons/gi';
 import { IoMdLocate } from 'react-icons/io';
 import { RiRobot2Fill } from 'react-icons/ri';
+import SampleAutoPlayButton from '@/app/processing/components/common/SampleAutoPlayButton';
 import SampleAvatar from '@/app/processing/components/common/SampleAvatar';
 import SampleStatusAvatar from '@/app/processing/components/common/SampleStatusAvatar';
-import AutoplayIcon from '@/app/processing/components/common/icons/AutoplayIcon';
-import NoAutoplayIcon from '@/app/processing/components/common/icons/NoAutoplayIcon';
 import { DefaultProcessingVisualizationComponentProps } from '@/app/processing/components/def';
 import useGlobalStore from '@/stores/global';
 import { getSceneLogMessageDisplayContent } from '@/utils/scene-log';
@@ -241,25 +240,15 @@ const SampleQAVisualization = (props: SampleQAVisualizationProps) => {
             }}
             step={1}
           />
-          <Tooltip title={autoPlay ? 'Disable Auto Play' : 'Enable Auto Play'}>
-            <Button
-              type={'text'}
-              style={{
-                marginLeft: '6px',
-                marginTop: '4px',
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-                fontSize: '24px',
-              }}
-              size={'small'}
-              icon={autoPlay ? <NoAutoplayIcon /> : <AutoplayIcon />}
-              onClick={() => {
-                setAutoPlay(!autoPlay);
-              }}
-            />
-          </Tooltip>
+          <SampleAutoPlayButton
+            style={{
+              marginLeft: 8
+            }}
+            autoPlay={autoPlay}
+            onClick={() => {
+              setAutoPlay(!autoPlay);
+            }}
+          />
         </div>
       )}
       <div className="detailArea">
