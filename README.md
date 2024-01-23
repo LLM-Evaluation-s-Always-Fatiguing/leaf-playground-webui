@@ -2,6 +2,12 @@
 
 A browser interface based on Next.js for [leaf-playground](https://github.com/LLM-Evaluation-s-Always-Fatiguing/leaf-playground).
 
+
+[![github-releases](https://img.shields.io/github/v/release/LLM-Evaluation-s-Always-Fatiguing/leaf-playground-webui?color=7B916E&labelColor=black&logo=github&style=for-the-badge)](https://github.com/LLM-Evaluation-s-Always-Fatiguing/leaf-playground-webui/releases)
+[![github-releases](https://img.shields.io/github/release-date/LLM-Evaluation-s-Always-Fatiguing/leaf-playground-webui?color=7B916E&labelColor=black&logo=github&style=for-the-badge)](https://github.com/LLM-Evaluation-s-Always-Fatiguing/leaf-playground-webui/releases)
+[![github-releases](https://img.shields.io/github/license/LLM-Evaluation-s-Always-Fatiguing/leaf-playground-webui?color=7B916E&labelColor=black&logo=github&style=for-the-badge)](https://github.com/LLM-Evaluation-s-Always-Fatiguing/leaf-playground-webui/blob/main/LICENSE)
+
+
 ## Development
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
