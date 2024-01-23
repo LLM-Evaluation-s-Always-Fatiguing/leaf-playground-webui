@@ -11,7 +11,10 @@ interface GlobalState {
   currentProject?: Project;
   createSceneTaskParams?: CreateSceneTaskParams;
   taskId?: string;
-  updatePageTitle: (pageTitle: string) => void;
+}
+
+interface GlobalActions {
+  updatePageTitle: (pageTitleFn: (state: GlobalState) => string) => void;
   clearPageTitle: () => void;
   updateCurrentProject: (project: Project) => void;
   updateCreateSceneTaskParams: (createSceneTaskParams: CreateSceneTaskParams) => void;
@@ -25,16 +28,16 @@ interface GlobalState {
   clearTaskState: () => void;
 }
 
-const useGlobalStore = create<GlobalState>()(
+const useGlobalStore = create<GlobalState & GlobalActions>()(
   immer(
-    devtools((set) => ({
+    devtools((set, get) => ({
       pageTitle: undefined,
       currentProject: undefined,
       createSceneTaskParams: undefined,
       taskId: undefined,
-      updatePageTitle: (pageTitle: string) =>
+      updatePageTitle: (pageTitleFn) =>
         set((state) => {
-          state.pageTitle = pageTitle;
+          state.pageTitle = pageTitleFn(get());
         }),
       clearPageTitle: () =>
         set((state) => {

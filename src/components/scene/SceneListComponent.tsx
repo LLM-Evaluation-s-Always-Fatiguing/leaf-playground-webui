@@ -87,7 +87,7 @@ const SceneListComponent = (props: SceneListComponentProps) => {
           />
         </CoverImage>
         <div className="info">
-          <div className="title">{props.project.name}</div>
+          <div className="title">{props.project.display_name || props.project.name}</div>
           <div className="desc">{props.project.description}</div>
         </div>
       </Container>

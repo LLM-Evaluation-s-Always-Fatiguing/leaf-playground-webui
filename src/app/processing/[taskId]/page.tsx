@@ -321,7 +321,9 @@ const ProcessingPage = ({
       }
       setStartStatusCheckFinished(true);
 
-      globalStore.updatePageTitle(globalStore.currentProject?.metadata.scene_metadata.scene_definition.name || '');
+      globalStore.updatePageTitle((state) => {
+        return `${state.currentProject?.metadata.scene_metadata.scene_definition.name || ''} Task`;
+      });
 
       if (taskStatusRef.current === SceneTaskStatus.RUNNING) {
         setLoadingTip('Connecting to server...');

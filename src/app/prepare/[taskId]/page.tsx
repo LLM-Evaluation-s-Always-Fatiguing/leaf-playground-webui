@@ -168,7 +168,9 @@ const ProcessingPage = ({
         setLoadingTip('Connecting to server...');
 
         await globalStore.syncTaskStateFromServer(taskId);
-        globalStore.updatePageTitle(globalStore.currentProject?.metadata.scene_metadata.scene_definition.name || '');
+        globalStore.updatePageTitle((state) => {
+          return `${state.currentProject?.metadata.scene_metadata.scene_definition.name || ''} Waiting Room`;
+        });
 
         const wsUrl = await getFullServerWebSocketURL(
           agentId ? `/task/${taskId}/human/${agentId}/ws` : `/task/${taskId}/logs/ws`

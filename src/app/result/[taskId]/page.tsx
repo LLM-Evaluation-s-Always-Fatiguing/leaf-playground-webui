@@ -247,18 +247,20 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
     humanOnlyEvaluationMode: boolean;
   }>();
 
-  const loadDataFromLocal = async () => {
+  const loadDataFromLocal = async (regenResultBundle = true) => {
     try {
       setLoading(true);
       const checkTaskServerResp = await ServerAPI.sceneTask.checkTaskServer(taskId);
       setTaskServerAlive(checkTaskServerResp);
-      if (checkTaskServerResp) {
+      if (regenResultBundle && checkTaskServerResp) {
         await ServerAPI.sceneTask.regenTaskResultBundle(taskId);
       }
       const bundlePath = await ServerAPI.sceneTask.resultBundlePath(taskId);
       const serverBundle = await LocalAPI.sceneTask.getResultBundle(bundlePath);
       await globalStore.syncTaskStateFromServer(taskId);
-      globalStore.updatePageTitle(globalStore.currentProject?.metadata.scene_metadata.scene_definition.name || '');
+      globalStore.updatePageTitle((state) => {
+        return `${state.currentProject?.metadata.scene_metadata.scene_definition.name || ''} Task Result`;
+      });
       setServerBundle(serverBundle);
       setLoading(false);
     } catch (e) {
@@ -702,7 +704,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                         setLoading(false);
                       }
                       setLoadingTip('Reloading result data...');
-                      await loadDataFromLocal();
+                      await loadDataFromLocal(false);
                     }}
                   >
                     Regenerate Result Bundle
@@ -737,7 +739,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
               setJSONViewerModalOpen(true);
               setViewingLog(undefined);
             }}
-            onLogChanged={async ()=>{
+            onLogChanged={async () => {
               setLoadingTip('Reloading result data...');
               await loadDataFromLocal();
             }}

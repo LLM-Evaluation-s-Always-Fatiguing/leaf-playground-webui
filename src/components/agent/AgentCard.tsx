@@ -271,7 +271,7 @@ const AgentCard = (props: AgentCardProps) => {
           {props.joinLink && !props.connected && (
             <div className="gameLinkArea">
               <Link rel="stylesheet" href={props.joinLink} target={'_blank'}>
-                Join Game
+                Join Scene
               </Link>
               <div
                 className="copyLink"

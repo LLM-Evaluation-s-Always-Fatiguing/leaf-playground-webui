@@ -21,7 +21,7 @@ async function asyncReduce<T, U>(
 }
 
 const projectAPI = {
-  async list(): Promise<ListProject[]> {
+  async refresh(): Promise<string[]> {
     return (await request.get(`${prefix}/refresh`)).data;
   },
   async detail(projectId: string): Promise<Project> {

@@ -19,5 +19,6 @@ export default interface Project extends ServerProject {
 }
 
 export interface ListProject extends Pick<Project, 'id' | 'name'> {
+  display_name?: string;
   description: string;
 }
