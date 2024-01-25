@@ -40,8 +40,6 @@ const Content = styled.div`
     }
 
     .infoArea {
-      flex-grow: 1;
-      flex-basis: 1px;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
