@@ -19,6 +19,7 @@ import {
 } from '@formily/antd-v5';
 import { createSchemaField } from '@formily/react';
 import ColorPicker from '@/components/formily/components/ColorPicker';
+import MultiTypeItem from '@/components/formily/components/MultiTypeItem';
 import NoConfigRequired from '@/components/formily/components/NoConfigRequired';
 import NullableObject from '@/components/formily/components/NullableObject';
 import FormilyUploadStringFileContent from '@/components/formily/components/UploadStringFileContent';
@@ -44,6 +45,7 @@ const FormilyDefaultSchemaField = createSchemaField({
     Flex,
 
     NullableObject,
+    MultiTypeItem,
 
     NoConfigRequired,
     ColorPicker,

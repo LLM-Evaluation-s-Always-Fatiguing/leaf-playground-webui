@@ -63,7 +63,7 @@ const EvaluatorConfigModal: React.FC<EvaluatorConfigModalProps> = ({
     <CustomScrollableAntdModal
       title={`${metadata?.cls_name} Config`}
       open={open}
-      width={640}
+      width={960}
       destroyOnClose
       centered
       styles={{

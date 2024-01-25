@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import FormilyJSONSchema from '@/types/common/FormilyJSONSchema';
 import { Checkbox } from 'antd';
 import { FormItem } from '@formily/antd-v5';
@@ -6,7 +6,7 @@ import { ObjectField } from '@formily/core';
 import { observer, useField, useForm } from '@formily/react';
 import FormilyDefaultSchemaField from '@/components/formily/FormilyDefaultSchemaField';
 
-interface NullableObjectProps extends PropsWithChildren {
+interface NullableObjectProps {
   label?: string;
   childSchema?: FormilyJSONSchema;
 }

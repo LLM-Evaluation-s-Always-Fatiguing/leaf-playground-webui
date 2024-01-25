@@ -1,5 +1,6 @@
 import UploadStringFileContentTransformationUnit from '@/utils/formily-json-schema/transformation-units/custom-type/string-file-content';
 import LongStringTextViewTransformationUnit from '@/utils/formily-json-schema/transformation-units/custom-type/string-long-text';
+import MultiTypeAnyOfTransformationUnit from '@/utils/formily-json-schema/transformation-units/specialized/multi-type-any-of';
 import ObjectNullableAnyOfTransformationUnit from '@/utils/formily-json-schema/transformation-units/specialized/object-nullable-any-of';
 import BasicAllOfTransformationUnit from './basic/all-of';
 import BasicArrayTransformationUnit from './basic/array';
@@ -18,6 +19,7 @@ export const SystemTransformationUnits = [
   new UploadStringFileContentTransformationUnit(),
   new LongStringTextViewTransformationUnit(),
   new TopObjectTransformationUnit(),
+  new MultiTypeAnyOfTransformationUnit(),
   new EmptyObjectNoConfigRequiredTransformationUnit(),
   new NoObjectNullableAnyOfTransformationUnit(),
   new ObjectNullableAnyOfTransformationUnit(),
