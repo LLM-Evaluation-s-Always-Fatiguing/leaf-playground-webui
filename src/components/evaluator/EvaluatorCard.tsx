@@ -13,7 +13,7 @@ const Content = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  align-items: center;
+  align-items: stretch;
   overflow: hidden;
   position: relative;
 
@@ -23,6 +23,7 @@ const Content = styled.div`
     justify-content: flex-start;
     align-items: flex-start;
     padding: 16px 12px 0 12px;
+    overflow: hidden;
 
     .avatar {
       width: 60px;
@@ -39,6 +40,8 @@ const Content = styled.div`
     }
 
     .infoArea {
+      flex-grow: 1;
+      flex-basis: 1px;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
@@ -47,14 +50,19 @@ const Content = styled.div`
       color: ${(props) => props.theme.colorTextDisabled};
 
       .name {
+        width: 100%;
         font-size: 17px;
         font-weight: 500;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        word-break: break-all;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 1;
         overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .description {
+        width: 100%;
         margin-top: 0;
         font-size: 14px;
         line-height: 1.2;
@@ -207,18 +215,20 @@ const EvaluatorCard = (props: EvaluatorCardProps) => {
             <EvaluatorAvatar />
           </div>
           <div className="infoArea">
-            <div
-              className="name"
-              style={
-                props.enable
-                  ? {
-                      color: theme.colorText,
-                    }
-                  : {}
-              }
-            >
-              {props.metadata.cls_name}
-            </div>
+            <Tooltip title={props.metadata.cls_name}>
+              <div
+                className="name"
+                style={
+                  props.enable
+                    ? {
+                        color: theme.colorText,
+                      }
+                    : {}
+                }
+              >
+                {props.metadata.cls_name}
+              </div>
+            </Tooltip>
             <Tooltip title={props.metadata.description}>
               <div
                 className="description"
