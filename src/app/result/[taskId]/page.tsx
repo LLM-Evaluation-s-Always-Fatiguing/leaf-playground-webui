@@ -282,12 +282,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
       component: React.ComponentType<DefaultResultReportComponentProps>;
     }[] = [];
     const checkMetrics = (requiredMetrics: string[]) => {
-      const existMetrics = Array.from(
-        new Set([
-          ...Object.keys(serverBundle?.metrics.metrics || {}),
-          ...Object.keys(serverBundle?.metrics.human_metrics || {}),
-        ])
-      );
+      const existMetrics = Array.from(new Set(Object.keys(serverBundle?.metrics.merged_metrics || {})));
       return requiredMetrics.every((m) => existMetrics.includes(m));
     };
     switch (scene?.scene_metadata.scene_definition.name) {

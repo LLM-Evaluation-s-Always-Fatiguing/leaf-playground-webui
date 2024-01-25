@@ -6,4 +6,5 @@ export interface SceneTaskResultBundleMetricResult {
 export default interface SceneTaskResultBundleMetrics {
   metrics: Record<string, SceneTaskResultBundleMetricResult[]>;
   human_metrics: Record<string, SceneTaskResultBundleMetricResult[]>;
+  merged_metrics: Record<string, SceneTaskResultBundleMetricResult[]>;
 }

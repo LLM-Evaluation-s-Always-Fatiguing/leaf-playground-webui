@@ -28,7 +28,7 @@ const WhoIsTheSpyCNDefaultReport: ResultReportFunctionComponent<WhoIsTheSpyCNDef
     if (!props.metrics) return [];
     const agentsKeyByAgentId = keyBy(agents, (a) => a.config.config_data.profile.id);
     const result: ({ metric: string } & Record<string, any>)[] = [];
-    const camouflageAbility = props.metrics.metrics['player.describe_key.伪装能力'];
+    const camouflageAbility = props.metrics.merged_metrics['player.describe_key.伪装能力'];
     if (camouflageAbility) {
       const camouflageAbilityKeyByAgentId = keyBy(camouflageAbility, (mr) => mr.target_agent);
       const camouflageAbilitySource: { metric: string } & Record<string, any> = {
@@ -40,7 +40,7 @@ const WhoIsTheSpyCNDefaultReport: ResultReportFunctionComponent<WhoIsTheSpyCNDef
       });
       result.push(camouflageAbilitySource);
     }
-    const inferenceAbility = props.metrics.metrics['player.predict_role.推理能力'];
+    const inferenceAbility = props.metrics.merged_metrics['player.predict_role.推理能力'];
     if (inferenceAbility) {
       const inferenceAbilityKeyByAgentId = keyBy(inferenceAbility, (mr) => mr.target_agent);
       const inferenceAbilitySource: { metric: string } & Record<string, any> = {
