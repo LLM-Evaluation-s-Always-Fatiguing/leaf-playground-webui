@@ -13,6 +13,7 @@ const Header = styled.div`
   justify-content: center;
   align-items: center;
   border-bottom: 1px solid ${(props) => props.theme.dividerColor};
+  flex-shrink: 0;
 
   .title {
     font-size: 36px;
@@ -24,13 +25,18 @@ const Header = styled.div`
 
 const Footer = styled.div`
   width: 100%;
-  height: 85px;
+  height: 55px;
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
   align-items: center;
+  flex-shrink: 0;
 
   padding: 0 20px;
+
+  border-top: 1px solid ${(props) => props.theme.dividerColor};
+
+  z-index: calc(var(--loading-overlay-default-z-index) + 1);
 `;
 
 const Container = styled.div`

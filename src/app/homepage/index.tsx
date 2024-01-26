@@ -32,7 +32,7 @@ const OperationArea = styled.div`
   flex-grow: 1;
   width: 76%;
   min-width: 680px;
-  overflow: hidden auto;
+  overflow: hidden;
   position: relative;
 `;
 
