@@ -17,7 +17,6 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import remarkRemoveComments from 'remark-remove-comments';
 import remarkUnwrapImages from 'remark-unwrap-images';
-import LocalAPI from '@/services/local';
 import { copyToClipboard } from '@/utils/clipboard';
 
 export function Mermaid(props: { code: string; onError: () => void }) {
@@ -170,11 +169,15 @@ export const HubAssetsImage = (
   useEffect(() => {
     const process = async () => {
       try {
-        setRealSrc(
-          `/api/server/project/image_asset?filePath=${encodeURIComponent(props.src || '')}${
-            props.hubAssetsProjectId ? `&projectId=${props.hubAssetsProjectId}` : ''
-          }`
-        );
+        let finalFilePath = props.src || '';
+        finalFilePath = finalFilePath.replace(/\\/g, '/');
+        const regex = /(static|dataset)\/.*/;
+        const matches = finalFilePath.match(regex);
+        finalFilePath = matches ? matches[0] : '';
+        if (!finalFilePath.startsWith('/')) {
+          finalFilePath = `/${finalFilePath}`;
+        }
+        setRealSrc(`/server-api/hub/${props.hubAssetsProjectId}${finalFilePath}`);
       } catch (e) {
         console.error(e);
       }
@@ -184,18 +187,7 @@ export const HubAssetsImage = (
   const imageProps = { ...props };
   delete imageProps.node;
   // eslint-disable-next-line @next/next/no-img-element
-  return (
-    <Image
-      width={'100%'}
-      height={'100%'}
-      style={{
-        objectFit: 'contain',
-      }}
-      alt={''}
-      {...(imageProps as any)}
-      src={realSrc}
-    />
-  );
+  return <Image width={'100%'} alt={''} {...(imageProps as any)} src={realSrc} />;
 };
 
 export const _Image = (
@@ -228,7 +220,12 @@ function _MarkDownContent(props: MarkdownContentProps) {
     <ReactMarkdown
       remarkPlugins={[
         remarkGfm,
-        remarkMath,
+        [
+          remarkMath,
+          {
+            singleDollarTextMath: false,
+          },
+        ],
         remarkBreaks,
         remarkUnwrapImages,
         ...(props.removeComments ? [remarkRemoveComments] : []),
@@ -294,10 +291,6 @@ const ExtraStyleProvider = styled.div`
     width: 0.625rem;
     border-radius: 9999px;
     border: 1px solid gray;
-  }
-
-  img {
-    max-height: 280px;
   }
 `;
 
