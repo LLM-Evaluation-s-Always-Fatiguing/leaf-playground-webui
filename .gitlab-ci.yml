@@ -18,6 +18,10 @@ build_webui:
     - yarn install
     - yarn bundle
   artifacts:
+    paths:
+      - version.txt
+      - bundle/*.zip
+      - bundle/*.zip.sha256
     expire_in: 1 hour
 
 release_job:
@@ -31,5 +35,5 @@ release_job:
     description: "Release v$PACKAGE_VERSION"
   artifacts:
     paths:
-      - *.zip
-      - *.zip.sha256
+      - bundle/*.zip
+      - bundle/*.zip.sha256
