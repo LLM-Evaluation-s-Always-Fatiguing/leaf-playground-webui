@@ -9,6 +9,9 @@ build_webui:
   stage: build
   image: node:$NODE_VERSION
   script:
+    - export PACKAGE_VERSION=$(node -p "require('./package.json').version")
+    - export TAG_NAME=v$PACKAGE_VERSION
+    - export RELEASE_NAME="Release $TAG_NAME"
     - curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
     - . ~/.nvm/nvm.sh
     - nvm install $NODE_VERSION
@@ -17,16 +20,9 @@ build_webui:
     - yarn bundle
   artifacts:
     paths:
-      - bundle/
+      - bundle/webui-v${TAG_NAME}.zip
+      - bundle/webui-v${TAG_NAME}.zip.sha256
     expire_in: 1 hour
-
-release_job:
-  stage: release
-  image: registry.gitlab.com/gitlab-org/release-cli:latest
-  script:
-    - export PACKAGE_VERSION=$(node -p "require('./package.json').version")
-    - export TAG_NAME=v$PACKAGE_VERSION
-    - export RELEASE_NAME="Release $TAG_NAME"
   release: # See https://docs.gitlab.com/ee/ci/yaml/#release for available properties
     tag_name: "$TAG_NAME"
     description: "$RELEASE_NAME"
