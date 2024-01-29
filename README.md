@@ -56,6 +56,16 @@ To display custom scene result components in the Report section of the result pa
   - Ensure the registration occurs after the validation process by `checkMetrics`.
 
 
+### Environment Variables
+
+This project includes the following environment variables:
+
+1. `PLAYGROUND_SERVER_BASE_URL`: Defines the Playground Server's URL, with a default setting of http://127.0.0.1:8000
+
+
+2. `WEB_UI_EXTERNAL_URL`: This represents the external URL where the WebUI is accessible post-deployment, initially set as undefined. This URL is particularly used in creating links for human agents.
+
+
 ### Make WebUI Bundle
 
 To make a production-ready bundle, run the following command:

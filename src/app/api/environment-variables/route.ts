@@ -1,8 +1,11 @@
 import WebUIAppEnvironmentVariables from '@/types/webui/AppEnvironmentVariables';
 
 const PLAYGROUND_SERVER_BASE_URL = process.env.PLAYGROUND_SERVER_BASE_URL || 'http://127.0.0.1:8000';
+const WEB_UI_EXTERNAL_URL = process.env.WEB_UI_EXTERNAL_URL;
+
 const AppEnvironmentVariables: WebUIAppEnvironmentVariables = {
   serverUrl: PLAYGROUND_SERVER_BASE_URL,
+  externalUrl: WEB_UI_EXTERNAL_URL,
 };
 
 export async function GET() {

@@ -751,8 +751,19 @@ const SceneConfigBoard = ({ project, taskHistory, reloadHistory }: SceneConfigBo
                   const { id: task_id } = await ServerAPI.sceneTask.create(createSceneTaskParams);
                   globalStore.updateInfoAfterSceneTaskCreated(project, createSceneTaskParams, task_id);
                   if (hasHumanAgent) {
-                    const localIP = await LocalAPI.network.getLocalIP();
-                    const hostBaseUrl = `${window.location.protocol}//${localIP}:${window.location.port}`;
+                    const environmentVariables = await LocalAPI.environment.get();
+                    let hostBaseUrl = environmentVariables.externalUrl;
+                    if (!hostBaseUrl) {
+                      const ipv4Regex =
+                        /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+                      if (ipv4Regex.test(window.location.hostname)) {
+                        hostBaseUrl = `${window.location.protocol}//${await LocalAPI.network.getLocalIP()}:${
+                          window.location.port
+                        }`;
+                      } else {
+                        hostBaseUrl = window.location.origin;
+                      }
+                    }
                     router.push(`/prepare/${task_id}?hostBaseUrl=${encodeURIComponent(hostBaseUrl)}`);
                   } else {
                     router.push(`/processing/${task_id}`);

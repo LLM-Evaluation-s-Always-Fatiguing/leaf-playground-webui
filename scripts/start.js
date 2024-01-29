@@ -6,6 +6,7 @@ const args = process.argv.slice(2);
 let hostname = '0.0.0.0'; // Default hostname
 let currentPort = 3000; // Default port
 let serverUrl = 'http://127.0.0.1:8000'; // Default server URL
+let externalUrl;
 
 // Parsing command line arguments
 args.forEach((arg) => {
@@ -19,6 +20,9 @@ args.forEach((arg) => {
       break;
     case '--server':
       serverUrl = value;
+      break;
+    case '--external_url':
+      externalUrl = value;
       break;
   }
 });
@@ -47,12 +51,13 @@ const checkPort = (port) => {
 
 // Function to start the server
 const startServer = async () => {
-  console.log(`Starting playground WebUI:`)
+  console.log(`Starting playground WebUI:`);
   try {
     const port = await checkPort(currentPort); // Wait for a free port
     process.env.HOSTNAME = hostname;
     process.env.PORT = port;
     process.env.PLAYGROUND_SERVER_BASE_URL = serverUrl;
+    process.env.WEB_UI_EXTERNAL_URL = externalUrl;
 
     console.log(`Starting WebUI server at ${hostname}:${port}, serverUrl: ${serverUrl}`);
     const serverProcess = spawn('node', [path.resolve(__dirname, 'server.js')], { stdio: 'inherit' });
