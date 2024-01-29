@@ -1,0 +1,47 @@
+stages:
+  - build
+  - release
+
+variables:
+  NODE_VERSION: '18'
+
+before_script:
+  - 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash'
+  - '. ~/.nvm/nvm.sh'
+  - 'nvm install $NODE_VERSION'
+  - 'nvm use $NODE_VERSION'
+  - 'yarn install'
+
+build_webui:
+  stage: build
+  image: node:$NODE_VERSION
+  script:
+    - yarn bundle
+  artifacts:
+    paths:
+      - bundle/
+    expire_in: 1 hour
+
+create_release:
+  stage: release
+  image: alpine/latest
+  script:
+    - apk add --no-cache curl jq
+    - export PACKAGE_VERSION=$(node -p "require('./package.json').version")
+    - export TAG_NAME=v$PACKAGE_VERSION
+    - export RELEASE_NAME="Release $TAG_NAME"
+    # The following command assumes you have a GitLab project access token set as CI_JOB_TOKEN
+    - >
+      curl --header 'Content-Type: application/json' --header "PRIVATE-TOKEN: $CI_JOB_TOKEN" --data "{
+        \"name\": \"$RELEASE_NAME\",
+        \"tag_name\": \"$TAG_NAME\",
+        \"ref\": \"$CI_COMMIT_REF_NAME\",
+        \"description\": \"Release of version $PACKAGE_VERSION\",
+        \"assets\": {
+          \"links\": []
+        }
+      }" --request POST "https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/releases"
+  needs:
+    - build_webui
+  dependencies:
+    - build_webui
