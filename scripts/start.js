@@ -47,13 +47,14 @@ const checkPort = (port) => {
 
 // Function to start the server
 const startServer = async () => {
+  console.log(`Starting playground WebUI:`)
   try {
     const port = await checkPort(currentPort); // Wait for a free port
     process.env.HOSTNAME = hostname;
     process.env.PORT = port;
-    process.env.SERVER_URL = serverUrl;
+    process.env.PLAYGROUND_SERVER_BASE_URL = serverUrl;
 
-    console.log(`Starting server at ${hostname}:${port}`);
+    console.log(`Starting WebUI server at ${hostname}:${port}, serverUrl: ${serverUrl}`);
     const serverProcess = spawn('node', [path.resolve(__dirname, 'server.js')], { stdio: 'inherit' });
 
     serverProcess.on('close', (code) => {
