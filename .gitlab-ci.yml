@@ -20,8 +20,8 @@ build_webui:
   artifacts:
     paths:
       - version.txt
-      - bundle/webui-v${PACKAGE_VERSION}.zip
-      - bundle/webui-v${PACKAGE_VERSION}.zip.sha256
+      - bundle/webui-v$PACKAGE_VERSION.zip
+      - bundle/webui-v$PACKAGE_VERSION.zip.sha256
     expire_in: 1 hour
 
 release_job:
