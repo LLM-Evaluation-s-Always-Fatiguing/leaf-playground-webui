@@ -1,6 +1,7 @@
 import { CreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
 import { SceneTaskStatus } from '@/types/server/task/SceneTask';
 import SceneTaskHistory from '@/types/server/task/SceneTaskHistory';
+import SceneTaskResultDataWithoutLogs from '@/types/server/task/result-data';
 import dayjs from 'dayjs';
 import { groupBy } from 'lodash';
 import request from '@/services/server/request';
@@ -53,6 +54,9 @@ const sceneTaskAPI = {
   },
   async resultBundlePath(taskId: string): Promise<string> {
     return (await request.get(`${prefix}/${taskId}/results_dir`)).data.results_dir;
+  },
+  async resultDataWithoutLogs(taskId: string): Promise<SceneTaskResultDataWithoutLogs> {
+    return (await request.get(`${prefix}/${taskId}/metrics_and_charts`)).data;
   },
 
   async allHistoryMap(): Promise<Record<string, SceneTaskHistory[]>> {

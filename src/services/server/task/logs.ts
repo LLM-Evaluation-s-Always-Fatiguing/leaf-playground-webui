@@ -1,4 +1,5 @@
-import { SceneMetricRecordDisplayType } from '@/types/server/meta/Scene';
+import { SceneActionLog, SceneLogType } from '@/types/server/common/Log';
+import { PaginationData, PaginationParams } from '@/services/server/def';
 import request from '@/services/server/request';
 import { prefix as taskPrefix } from './index';
 
@@ -7,6 +8,30 @@ const prefix = (taskId: string) => {
 };
 
 const sceneTaskLogsAPI = {
+  async searchActionLogs(taskId: string, paginationParams: PaginationParams): Promise<PaginationData<SceneActionLog>> {
+    const logs = (
+      await request.get(`${prefix(taskId)}`, {
+        params: {
+          skip: paginationParams.pageSize * (paginationParams.pageNo - 1),
+          limit: paginationParams.pageSize,
+          log_type: SceneLogType.ACTION,
+        },
+      })
+    ).data;
+    const totalItems = (
+      await request.get(`${prefix(taskId)}/count`, {
+        params: {
+          log_type: SceneLogType.ACTION,
+        },
+      })
+    ).data.count;
+    return {
+      items: logs,
+      current: paginationParams.pageNo,
+      totalElements: totalItems,
+      totalPages: Math.ceil(totalItems / paginationParams.pageSize),
+    };
+  },
   async updateLogHumanMetricRecord(
     taskId: string,
     logId: string,

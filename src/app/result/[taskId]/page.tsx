@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { SceneActionLog, SceneLogType } from '@/types/server/common/Log';
+import { SceneActionLog } from '@/types/server/common/Log';
 import { getRoleAgentConfigsMapFromCreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
 import { SceneMetricConfig } from '@/types/server/config/Metric';
 import { SceneMetricDefinition } from '@/types/server/meta/Scene';
-import SceneTaskResultBundle from '@/types/server/task/result-bundle';
+import SceneTaskResultDataWithoutLogs from '@/types/server/task/result-data';
 import { Badge, Button, ButtonProps, Card, Collapse, Descriptions, Modal, Space, Table, Tooltip, message } from 'antd';
 import { useTheme } from 'antd-style';
 import { Switch } from '@formily/antd-v5';
@@ -33,6 +33,7 @@ import {
   getSceneActionLogMetricInfo,
   getSceneLogMessageDisplayContent,
 } from '@/utils/scene-log';
+import { downloadSceneTaskResultZip } from '../../../utils/task-result';
 
 const Container = styled.div`
   width: 100%;
@@ -199,6 +200,15 @@ const Footer = styled.div`
   align-items: center;
 `;
 
+function triggerDownload(url: string, fileName: string) {
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
 const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
   const taskId = params.taskId;
 
@@ -214,10 +224,13 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
   const createSceneTaskParams = useMemo(() => {
     return globalStore.createSceneTaskParams;
   }, [globalStore.createSceneTaskParams]);
-  const [serverBundle, setServerBundle] = useState<SceneTaskResultBundle>();
-  const actionLogs = useMemo(() => {
-    return (serverBundle?.logs || []).filter((l) => l.log_type === SceneLogType.ACTION) as SceneActionLog[];
-  }, [serverBundle?.logs]);
+  const [serverData, setServerData] = useState<SceneTaskResultDataWithoutLogs>();
+  const [loadingLogs, setLoadingLogs] = useState<boolean>(false);
+  const [actionLogs, setActionLogs] = useState<SceneActionLog[]>([]);
+  const [logCurrentPage, setLogCurrentPage] = useState(1);
+  const [logPageSize, setLogPageSize] = useState(10);
+  const [logTotalPages, setLogTotalPages] = useState(1);
+  const [logTotalElements, setLogTotalElements] = useState(0);
   const [showLogsMetrics, setShowLogsMetrics] = useState<boolean>(false);
   const roleAgentConfigMap = useMemo(() => {
     if (globalStore.createSceneTaskParams) {
@@ -247,7 +260,35 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
     humanOnlyEvaluationMode: boolean;
   }>();
 
-  const loadDataFromLocal = async (regenResultBundle = true) => {
+  const loadLogs = async () => {
+    if (loadingLogs) {
+      return;
+    }
+    try {
+      setLoadingLogs(true);
+      const logsResp = await ServerAPI.sceneTask.logs.searchActionLogs(taskId, {
+        pageNo: logCurrentPage,
+        pageSize: logPageSize,
+      });
+      if (logMetricDetailModalData && logsResp.items.some((log) => log.id === logMetricDetailModalData.log.id)) {
+        const newLog = logsResp.items.find((log) => log.id === logMetricDetailModalData.log.id)!;
+        setLogMetricDetailModalData({
+          ...logMetricDetailModalData,
+          log: newLog,
+        });
+      }
+      setActionLogs(logsResp.items);
+      setLogTotalElements(logsResp.totalElements);
+      setLogTotalPages(logsResp.totalPages);
+    } catch (e) {
+      console.error(e);
+      message.error('Load logs failed!');
+    } finally {
+      setLoadingLogs(false);
+    }
+  };
+
+  const loadResultData = async (regenResultBundle = true) => {
     try {
       setLoading(true);
       const checkTaskServerResp = await ServerAPI.sceneTask.checkTaskServer(taskId);
@@ -255,23 +296,31 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
       if (regenResultBundle && checkTaskServerResp) {
         await ServerAPI.sceneTask.regenTaskResultBundle(taskId);
       }
-      const bundlePath = await ServerAPI.sceneTask.resultBundlePath(taskId);
-      const serverBundle = await LocalAPI.sceneTask.getResultBundle(bundlePath);
+      const serverData = await ServerAPI.sceneTask.resultDataWithoutLogs(taskId);
       await globalStore.syncTaskStateFromServer(taskId);
       globalStore.updatePageTitle((state) => {
         return `${state.currentProject?.metadata.scene_metadata.scene_definition.name || ''} Task Result`;
       });
-      setServerBundle(serverBundle);
+      setServerData(serverData);
       setLoading(false);
     } catch (e) {
       console.error(e);
-      message.error('Load task result failed!');
+      message.error('Load task result data failed!');
     }
   };
 
+  const loadData = (regenResultBundle = true) => {
+    loadResultData(regenResultBundle);
+    loadLogs();
+  };
+
   useEffect(() => {
-    loadDataFromLocal();
+    loadData();
   }, []);
+
+  useEffect(() => {
+    loadLogs();
+  }, [logCurrentPage, logPageSize]);
 
   function getSpecializedReportComponents(): {
     displayName: string;
@@ -282,7 +331,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
       component: React.ComponentType<DefaultResultReportComponentProps>;
     }[] = [];
     const checkMetrics = (requiredMetrics: string[]) => {
-      const existMetrics = Array.from(new Set(Object.keys(serverBundle?.metrics.merged_metrics || {})));
+      const existMetrics = Array.from(new Set(Object.keys(serverData?.metrics.merged_metrics || {})));
       return requiredMetrics.every((m) => existMetrics.includes(m));
     };
     switch (scene?.scene_metadata.scene_definition.name) {
@@ -304,16 +353,16 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
 
   const reportComponents = useMemo(() => {
     return getSpecializedReportComponents();
-  }, [scene, serverBundle?.metrics]);
+  }, [scene, serverData?.metrics]);
 
   const hasSpecializedReport = reportComponents.length > 0;
-  const hasServerCharts = Object.keys(serverBundle?.charts || {}).length > 0;
+  const hasServerCharts = Object.keys(serverData?.charts || {}).length > 0;
   const showReportPart = hasSpecializedReport || hasServerCharts;
 
   return (
     <>
       <LoadingOverlay fullScreen={true} spinning={loading} tip={loadingTip} />
-      {globalStore.currentProject && serverBundle && scene && createSceneTaskParams && (
+      {globalStore.currentProject && serverData && scene && createSceneTaskParams && (
         <>
           <Container>
             <Content>
@@ -326,10 +375,40 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                 >
                   <CustomCollapseWrapper>
                     <Collapse
-                      defaultActiveKey={['basic']}
+                      defaultActiveKey={['basic', 'scene']}
                       items={[
                         {
                           key: 'basic',
+                          label: 'Scene Info',
+                          children: (
+                            <Descriptions
+                              items={[
+                                {
+                                  key: '1',
+                                  label: 'Task ID',
+                                  span: 24,
+                                  children: taskId,
+                                },
+                                {
+                                  key: '2',
+                                  label: 'Create Scene Params',
+                                  children: (
+                                    <Button
+                                      {...jsonCodeButtonCommonProps}
+                                      onClick={() => {
+                                        setViewingJSON(createSceneTaskParams);
+                                        setJSONViewerModalTitle('Create Scene Params');
+                                        setJSONViewerModalOpen(true);
+                                      }}
+                                    />
+                                  ),
+                                },
+                              ]}
+                            />
+                          ),
+                        },
+                        {
+                          key: 'scene',
                           label: 'Scene Info',
                           children: (
                             <Descriptions
@@ -345,20 +424,6 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                                   label: 'Description',
                                   span: 24,
                                   children: scene.scene_metadata.scene_definition.description,
-                                },
-                                {
-                                  key: '3',
-                                  label: 'Scene Config',
-                                  children: (
-                                    <Button
-                                      {...jsonCodeButtonCommonProps}
-                                      onClick={() => {
-                                        setViewingJSON(serverBundle?.sceneObjConfig);
-                                        setJSONViewerModalTitle('Scene Config Detail');
-                                        setJSONViewerModalOpen(true);
-                                      }}
-                                    />
-                                  ),
                                 },
                               ]}
                             />
@@ -423,8 +488,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                                 <ReportComponent
                                   scene={scene}
                                   createSceneTaskParams={createSceneTaskParams}
-                                  logs={serverBundle.logs}
-                                  metrics={serverBundle.metrics}
+                                  metrics={serverData.metrics}
                                 />
                               ),
                             };
@@ -446,7 +510,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                                         gap: 10,
                                       }}
                                     >
-                                      {Object.entries(serverBundle.charts).map(
+                                      {Object.entries(serverData.charts).map(
                                         ([chartName, chartSpec], index: number) => {
                                           return <VegaChart key={chartName + index} vSpec={chartSpec} />;
                                         }
@@ -488,6 +552,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                   }
                 >
                   <Table<SceneActionLog>
+                    loading={loadingLogs}
                     rowKey={'id'}
                     tableLayout={'fixed'}
                     bordered
@@ -643,6 +708,16 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                     }
                     dataSource={actionLogs}
                     pagination={{
+                      current: logCurrentPage,
+                      pageSize: logPageSize,
+                      total: logTotalElements,
+                      onChange: (page) => {
+                        setLogCurrentPage(page);
+                      },
+                      onShowSizeChange: (page, pageSize) => {
+                        setLogCurrentPage(page);
+                        setLogPageSize(pageSize);
+                      },
                       responsive: true,
                       showSizeChanger: true,
                       showQuickJumper: true,
@@ -699,7 +774,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                         setLoading(false);
                       }
                       setLoadingTip('Reloading result data...');
-                      await loadDataFromLocal(false);
+                      await loadData(false);
                     }}
                   >
                     Regenerate Result Bundle
@@ -708,11 +783,10 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
               )}
               <Button
                 onClick={async () => {
-                  const bundlePath = await ServerAPI.sceneTask.resultBundlePath(taskId);
-                  await LocalAPI.dict.open(bundlePath);
+                  downloadSceneTaskResultZip(taskId);
                 }}
               >
-                Open Result Bundle Dict
+                Download Result Zip
               </Button>
             </Space>
           </Footer>
@@ -736,7 +810,7 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
             }}
             onLogChanged={async () => {
               setLoadingTip('Reloading result data...');
-              await loadDataFromLocal();
+              await loadData();
             }}
           />
         </>

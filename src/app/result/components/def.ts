@@ -1,5 +1,5 @@
 import { Component, FunctionComponent } from 'react';
-import SceneTaskResultBundleMetrics from '@/types/server/task/result-bundle/Metric';
+import SceneTaskResultDataMetrics from '@/types/server/task/result-data/Metric';
 import { CreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
 import SceneLog from '@/types/server/common/Log';
 import Scene from '@/types/server/meta/Scene';
@@ -7,8 +7,7 @@ import Scene from '@/types/server/meta/Scene';
 export interface DefaultResultReportComponentProps {
   scene: Scene;
   createSceneTaskParams: CreateSceneTaskParams;
-  logs: SceneLog[];
-  metrics?: SceneTaskResultBundleMetrics;
+  metrics?: SceneTaskResultDataMetrics;
 }
 
 export interface DefaultResultReportComponentStatics {

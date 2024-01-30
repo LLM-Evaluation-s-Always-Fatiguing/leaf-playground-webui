@@ -5,13 +5,13 @@ import { CreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskPara
 import Scene from '@/types/server/meta/Scene';
 import { SceneTaskStatus, SceneTaskStatusDisplayStrMap } from '@/types/server/task/SceneTask';
 import SceneTaskHistory from '@/types/server/task/SceneTaskHistory';
-import { Button, ButtonProps, Flex, Modal, Popover, Space, Table, Tree, TreeDataNode } from 'antd';
+import { Button, ButtonProps, Modal, Space, Table } from 'antd';
 import { useTheme } from 'antd-style';
 import dayjs from 'dayjs';
-import { AiOutlineInfoCircle } from 'react-icons/ai';
 import LoadingOverlay from '@/components/loading/LoadingOverlay';
 import LocalAPI from '@/services/local';
 import ServerAPI from '@/services/server';
+import { downloadSceneTaskResultZip } from '../../utils/task-result';
 
 interface TaskHistoryModalProps {
   open: boolean;
@@ -74,81 +74,6 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
             dataIndex: 'id',
             ellipsis: true,
           },
-          // {
-          //   title: 'Agents',
-          //   dataIndex: 'roleAgentsMap',
-          //   render: (_, record) => {
-          //     if (!record.roleAgentsMap) return '-';
-          //     const treeData: TreeDataNode[] = [];
-          //     Object.entries(record.roleAgentsMap).forEach(([roleName, agentNames]) => {
-          //       treeData.push({
-          //         key: roleName,
-          //         title: `${roleName} agents`,
-          //         children: agentNames.map((agentName) => ({
-          //           key: agentName,
-          //           title: agentName,
-          //         })),
-          //       });
-          //     });
-          //     return <Tree defaultExpandAll showLine treeData={treeData} />;
-          //   },
-          // },
-          // {
-          //   title: 'Enable Metrics',
-          //   dataIndex: 'enableMetricsName',
-          //   render: (_, record) => {
-          //     if (!record.enableMetricsName) return '-';
-          //     return (
-          //       <Popover
-          //         title={'Enabled Metrics'}
-          //         content={
-          //           <div
-          //             style={{
-          //               whiteSpace: 'pre',
-          //             }}
-          //           >
-          //             {record.enableMetricsName.join('\n')}
-          //           </div>
-          //         }
-          //       >
-          //         <Flex align={'center'} gap={3}>
-          //           {`${record.enableMetricsName?.length || 0} metric${
-          //             (record.enableMetricsName?.length || 0) > 1 ? 's' : ''
-          //           }`}
-          //           <AiOutlineInfoCircle />
-          //         </Flex>
-          //       </Popover>
-          //     );
-          //   },
-          // },
-          // {
-          //   title: 'Enable Evaluators',
-          //   dataIndex: 'enableEvaluatorsName',
-          //   render: (_, record) => {
-          //     if (!record.enableEvaluatorsName) return '-';
-          //     return (
-          //       <Popover
-          //         title={'Enabled Evaluators'}
-          //         content={
-          //           <div
-          //             style={{
-          //               whiteSpace: 'pre',
-          //             }}
-          //           >
-          //             {record.enableEvaluatorsName.join('\n')}
-          //           </div>
-          //         }
-          //       >
-          //         <Flex align={'center'} gap={3}>
-          //           {`${record.enableEvaluatorsName.length || 0} evaluator${
-          //             (record.enableEvaluatorsName?.length || 0) > 1 ? 's' : ''
-          //           }`}
-          //           <AiOutlineInfoCircle />
-          //         </Flex>
-          //       </Popover>
-          //     );
-          //   },
-          // },
           {
             title: 'Created At',
             dataIndex: 'created_at',
@@ -173,10 +98,6 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
                   color: theme.colorPrimary,
                 },
               };
-              // const stillRunning =
-              //   record.status === SceneTaskStatus.PENDING ||
-              //   record.status === SceneTaskStatus.RUNNING ||
-              //   record.status === SceneTaskStatus.PAUSED;
               const finished = record.status === SceneTaskStatus.FINISHED;
               const failed = record.status === SceneTaskStatus.INTERRUPTED || record.status === SceneTaskStatus.FAILED;
               return (
@@ -209,11 +130,10 @@ const TaskHistoryModal: React.FC<TaskHistoryModalProps> = ({
                     <Button
                       {...buttonProps}
                       onClick={async () => {
-                        const bundlePath = await ServerAPI.sceneTask.resultBundlePath(record.id);
-                        await LocalAPI.dict.open(bundlePath);
+                        downloadSceneTaskResultZip(record.id);
                       }}
                     >
-                      Result Bundle Dict
+                      Download Result Zip
                     </Button>
                   )}
                   <Button
