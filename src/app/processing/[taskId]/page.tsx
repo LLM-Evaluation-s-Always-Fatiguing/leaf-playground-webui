@@ -154,7 +154,7 @@ const ProcessingPage = ({
   const taskId = params.taskId;
   const router = useRouter();
   const searchParams = useSearchParams();
-  const agentId = searchParams.get('agentId');
+  const agentId = searchParams?.get('agentId');
 
   const playerMode = !!agentId;
 

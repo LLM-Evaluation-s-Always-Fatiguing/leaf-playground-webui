@@ -90,8 +90,8 @@ const ProcessingPage = ({
   const taskId = params.taskId;
   const router = useRouter();
   const searchParams = useSearchParams();
-  const hostBaseUrl = searchParams.get('hostBaseUrl');
-  const agentId = searchParams.get('agentId');
+  const hostBaseUrl = searchParams?.get('hostBaseUrl');
+  const agentId = searchParams?.get('agentId');
 
   const globalStore = useGlobalStore();
 
