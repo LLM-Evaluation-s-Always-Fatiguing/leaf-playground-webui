@@ -177,7 +177,7 @@ export const HubAssetsImage = (
         if (!finalFilePath.startsWith('/')) {
           finalFilePath = `/${finalFilePath}`;
         }
-        setRealSrc(`/server-api/hub/${props.hubAssetsProjectId}${finalFilePath}`);
+        setRealSrc(`/api/server/hub/${props.hubAssetsProjectId}${finalFilePath}`);
       } catch (e) {
         console.error(e);
       }
