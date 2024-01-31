@@ -242,6 +242,7 @@ const ProcessingPage = ({
       switch (taskStatusResp) {
         case SceneTaskStatus.PENDING:
           whileLoopMarkRef.current = true;
+          setLoadingTip('Preparing scene resources...');
           let finalStatus: SceneTaskStatus = taskStatusResp;
           while (whileLoopMarkRef.current) {
             await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -302,6 +303,7 @@ const ProcessingPage = ({
 
       let checkTaskServerResp = await ServerAPI.sceneTask.checkTaskServer(taskId);
       if (!checkTaskServerResp && taskStatusRef.current === SceneTaskStatus.RUNNING) {
+        setLoadingTip('Waiting scene server online...');
         whileLoopMarkRef.current = true;
         while (whileLoopMarkRef.current) {
           await new Promise((resolve) => setTimeout(resolve, 1000));
