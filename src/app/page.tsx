@@ -1,8 +1,8 @@
 import Index from '@/app/homepage';
 import ServerAPI from '@/services/server';
 
-export default async function Page({ searchParams }: { searchParams: { selectedProjectId?: string } }) {
-  let selectedProjectId = searchParams.selectedProjectId;
+export default async function Page({ searchParams }: { searchParams: { pid?: string } }) {
+  let selectedProjectId = searchParams.pid;
   try {
     const homepageInfo = await ServerAPI.site.homepage();
     const allHistoryMap = await ServerAPI.sceneTask.allHistoryMap();

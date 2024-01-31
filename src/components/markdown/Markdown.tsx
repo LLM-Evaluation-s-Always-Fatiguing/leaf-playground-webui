@@ -328,7 +328,7 @@ export default function Markdown(
           useHubAssets={props.useHubAssets}
           hubAssetsProjectId={props.hubAssetsProjectId}
           removeComments={props.removeComments}
-          content={processLaTeX(props.content)}
+          content={props.content ? processLaTeX(props.content) : props.content}
         />
       </ExtraStyleProvider>
     </Typography>
@@ -336,8 +336,7 @@ export default function Markdown(
 }
 
 // Regex to check if the processed content contains any potential LaTeX patterns
-const containsLatexRegex =
-  /\\\(.*?\\\)|\\\[.*?\\\]|\$.*?\$|\\begin\{equation\}.*?\\end\{equation\}/;
+const containsLatexRegex = /\\\(.*?\\\)|\\\[.*?\\\]|\$.*?\$|\\begin\{equation\}.*?\\end\{equation\}/;
 // Regex for inline and block LaTeX expressions
 const inlineLatex = new RegExp(/\\\((.+?)\\\)/, 'g');
 // const blockLatex = new RegExp(/\\\[(.*?)\\\]/, 'gs');

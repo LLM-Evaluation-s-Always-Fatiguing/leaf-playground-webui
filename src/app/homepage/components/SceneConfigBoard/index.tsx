@@ -756,7 +756,7 @@ const SceneConfigBoard = ({ project, taskHistory, reloadHistory }: SceneConfigBo
                     if (!hostBaseUrl) {
                       const ipv4Regex =
                         /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
-                      if (ipv4Regex.test(window.location.hostname)) {
+                      if (window.location.hostname === 'localhost' || ipv4Regex.test(window.location.hostname)) {
                         hostBaseUrl = `${window.location.protocol}//${await LocalAPI.network.getLocalIP()}:${
                           window.location.port
                         }`;
@@ -764,7 +764,7 @@ const SceneConfigBoard = ({ project, taskHistory, reloadHistory }: SceneConfigBo
                         hostBaseUrl = window.location.origin;
                       }
                     }
-                    router.push(`/prepare/${task_id}?hostBaseUrl=${encodeURIComponent(hostBaseUrl)}`);
+                    router.push(`/prepare/${task_id}?host=${encodeURIComponent(hostBaseUrl)}`);
                   } else {
                     router.push(`/processing/${task_id}`);
                   }

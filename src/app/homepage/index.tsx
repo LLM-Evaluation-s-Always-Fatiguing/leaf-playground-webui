@@ -7,9 +7,9 @@ import SceneTaskHistory from '@/types/server/task/SceneTaskHistory';
 import { message } from 'antd';
 import styled from '@emotion/styled';
 import LoadingOverlay from '@/components/loading/LoadingOverlay';
+import SceneListComponent from '@/components/scene/SceneListComponent';
 import ProjectInfoBoard from '@/app/homepage/components/ProjectInfoBoard';
 import SceneConfigBoard from '@/app/homepage/components/SceneConfigBoard';
-import SceneListComponent from '@/components/scene/SceneListComponent';
 import ServerAPI from '@/services/server';
 import useGlobalStore from '@/stores/global';
 
@@ -118,7 +118,7 @@ export default function Index(props: HomePageProps) {
   useEffect(() => {
     loadProjectDetail();
     if (typeof window !== undefined) {
-      window.history.replaceState({}, '', selectedProjectId ? `/?selectedProjectId=${selectedProjectId}` : '/');
+      window.history.replaceState({}, '', selectedProjectId ? `/?pid=${selectedProjectId}` : '/');
     }
   }, [selectedProjectId]);
 
@@ -149,7 +149,7 @@ export default function Index(props: HomePageProps) {
             project={projectDetail}
             serverInfo={props.appInfo}
             taskHistory={allTaskHistoryMap[projectDetail.id] || []}
-            reloadHistory={async ()=>{
+            reloadHistory={async () => {
               await reloadTaskHistory();
             }}
           />

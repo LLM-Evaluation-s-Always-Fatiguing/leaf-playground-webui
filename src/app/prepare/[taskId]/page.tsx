@@ -90,8 +90,8 @@ const ProcessingPage = ({
   const taskId = params.taskId;
   const router = useRouter();
   const searchParams = useSearchParams();
-  const hostBaseUrl = searchParams?.get('hostBaseUrl');
-  const agentId = searchParams?.get('agentId');
+  const hostBaseUrl = searchParams?.get('host');
+  const agentId = searchParams?.get('agent');
 
   const globalStore = useGlobalStore();
 
@@ -133,7 +133,7 @@ const ProcessingPage = ({
           setLoading(true);
           wsRef.current?.close();
           await new Promise((resolve) => setTimeout(resolve, 1500));
-          router.push(`/processing/${taskId}${agentId ? `?agentId=${encodeURIComponent(agentId)}` : ''}`);
+          router.push(`/processing/${taskId}${agentId ? `?agent=${encodeURIComponent(agentId)}` : ''}`);
         }
       }
     } catch (e) {
@@ -286,7 +286,7 @@ const ProcessingPage = ({
                               const sceneAgentMeta = agentsMetadata.find(
                                 (m) => m.obj_for_import.obj === agentConfig.obj_for_import.obj
                               );
-                              const joinLink = `${hostBaseUrl}/prepare/${taskId}?agentId=${encodeURIComponent(
+                              const joinLink = `${hostBaseUrl}/prepare/${taskId}?agent=${encodeURIComponent(
                                 agentConfig.config_data.profile.id
                               )}`;
                               const you = agentConfig.config_data.profile.id === agentId;
