@@ -4,6 +4,7 @@ import ServerAPI from '@/services/server';
 export default async function Page({ searchParams }: { searchParams: { pid?: string } }) {
   let selectedProjectId = searchParams.pid;
   try {
+    await ServerAPI.project.refresh();
     const homepageInfo = await ServerAPI.site.homepage();
     const allHistoryMap = await ServerAPI.sceneTask.allHistoryMap();
     if (!selectedProjectId) {

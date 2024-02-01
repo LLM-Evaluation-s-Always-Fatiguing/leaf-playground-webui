@@ -4,8 +4,9 @@ import React, { useEffect, useState } from 'react';
 import Project, { ListProject } from '@/types/server/meta/Project';
 import ServerAppInfo from '@/types/server/meta/ServerAppInfo';
 import SceneTaskHistory from '@/types/server/task/SceneTaskHistory';
-import { message } from 'antd';
+import { Button, Tooltip, message } from 'antd';
 import styled from '@emotion/styled';
+import { AiOutlineReload } from 'react-icons/ai';
 import LoadingOverlay from '@/components/loading/LoadingOverlay';
 import SceneListComponent from '@/components/scene/SceneListComponent';
 import ProjectInfoBoard from '@/app/homepage/components/ProjectInfoBoard';
@@ -22,9 +23,20 @@ const ScenesArea = styled.div`
 
   .content {
     width: 100%;
-    height: 100%;
+    height: calc(100% - 32px);
     overflow: hidden auto;
     padding: 16px 12px;
+  }
+
+  .bottomBar {
+    width: 100%;
+    height: 32px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0 12px;
+    border-top: 1px solid ${(props) => props.theme.dividerColor};
   }
 `;
 
@@ -72,6 +84,7 @@ export default function Index(props: HomePageProps) {
   const reloadProjectList = async () => {
     try {
       setProjectsLoading(true);
+      await ServerAPI.project.refresh();
       const homepageResp = await ServerAPI.site.homepage();
       if (!homepageResp.projects.some((p) => p.id === selectedProjectId) && homepageResp.projects.length > 0) {
         setSelectedProjectId(homepageResp.projects[0].id);
@@ -139,6 +152,26 @@ export default function Index(props: HomePageProps) {
               />
             );
           })}
+        </div>
+        <div className="bottomBar">
+          <Tooltip title="Reload Scenes">
+            <Button
+              size="small"
+              type="text"
+              style={{
+                fontSize: '16px',
+                lineHeight: 1,
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+              icon={<AiOutlineReload size={'1em'} />}
+              onClick={() => {
+                reloadProjectList();
+              }}
+            />
+          </Tooltip>
         </div>
         <LoadingOverlay spinning={projectsLoading} />
       </ScenesArea>
