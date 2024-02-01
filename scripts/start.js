@@ -57,7 +57,9 @@ const startServer = async () => {
     process.env.HOSTNAME = hostname;
     process.env.PORT = port;
     process.env.PLAYGROUND_SERVER_BASE_URL = serverUrl;
-    process.env.WEB_UI_EXTERNAL_URL = externalUrl;
+    if (externalUrl) {
+      process.env.WEB_UI_EXTERNAL_URL = externalUrl;
+    }
 
     console.log(`Starting WebUI server at ${hostname}:${port}, serverUrl: ${serverUrl}`);
     const serverProcess = spawn('node', [path.resolve(__dirname, 'server.js')], { stdio: 'inherit' });
