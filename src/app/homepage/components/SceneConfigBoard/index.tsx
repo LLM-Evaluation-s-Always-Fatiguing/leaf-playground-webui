@@ -766,10 +766,12 @@ const SceneConfigBoard = ({ project, taskHistory, reloadHistory }: SceneConfigBo
                     }
                     let sceneServerOnline = false;
                     while (!sceneServerOnline) {
-                      try {
-                        await ServerAPI.sceneTask.agentsConnectedStatus(task_id);
+                      const online = await ServerAPI.sceneTask.checkTaskServer(task_id);
+                      if (online) {
                         sceneServerOnline = true;
-                      } catch {}
+                      } else {
+                        await new Promise((resolve) => setTimeout(resolve, 1500));
+                      }
                     }
                     router.push(`/prepare/${task_id}?host=${encodeURIComponent(hostBaseUrl)}`);
                   } else {
