@@ -764,6 +764,13 @@ const SceneConfigBoard = ({ project, taskHistory, reloadHistory }: SceneConfigBo
                         hostBaseUrl = window.location.origin;
                       }
                     }
+                    let sceneServerOnline = false;
+                    while (!sceneServerOnline) {
+                      try {
+                        await ServerAPI.sceneTask.agentsConnectedStatus(task_id);
+                        sceneServerOnline = true;
+                      } catch {}
+                    }
                     router.push(`/prepare/${task_id}?host=${encodeURIComponent(hostBaseUrl)}`);
                   } else {
                     router.push(`/processing/${task_id}`);
