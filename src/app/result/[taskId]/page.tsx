@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { SceneActionLog } from '@/types/server/common/Log';
 import { getRoleAgentConfigsMapFromCreateSceneTaskParams } from '@/types/server/config/CreateSceneTaskParams';
 import { SceneMetricConfig } from '@/types/server/config/Metric';
@@ -212,6 +213,7 @@ function triggerDownload(url: string, fileName: string) {
 const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
   const taskId = params.taskId;
 
+  const router = useRouter();
   const theme = useTheme();
   const globalStore = useGlobalStore();
 
@@ -734,6 +736,15 @@ const TaskResultPage = ({ params }: { params: { taskId: string } }) => {
                 status={taskServerAlive ? 'success' : 'error'}
                 text={taskServerAlive ? 'Scene Task Server Online' : 'Scene Task Server Closed'}
               />
+              {taskServerAlive && (
+                <Button
+                  onClick={async () => {
+                    router.push(`/processing/${taskId}`);
+                  }}
+                >
+                  Back To Processing
+                </Button>
+              )}
             </Space>
             <Space>
               {taskServerAlive && (
