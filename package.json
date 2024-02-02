@@ -1,6 +1,6 @@
 {
   "name": "leaf-playground-webui",
-  "version": "0.5.0.dev8",
+  "version": "0.5.0.dev9",
   "private": true,
   "scripts": {
     "dev": "next dev",
