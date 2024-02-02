@@ -169,7 +169,7 @@ export const HubAssetsImage = (
   useEffect(() => {
     const process = async () => {
       try {
-        let finalFilePath = props.src || '';
+        let finalFilePath = decodeURIComponent(props.src || '');
         finalFilePath = finalFilePath.replace(/\\/g, '/');
         const regex = /(static|dataset)\/.*/;
         const matches = finalFilePath.match(regex);
