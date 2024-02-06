@@ -1,4 +1,5 @@
 import SceneLog from '@/types/server/common/Log';
+import SampleJSONSchema from '@/types/common/SampleJSONSchema';
 
 export enum WebsocketMessageType {
   DATA = 'data',
@@ -28,4 +29,6 @@ export enum WebsocketEvent {
 export interface WebsocketEventMessage extends WebsocketMessage {
   type: WebsocketMessageType.EVENT;
   event: WebsocketEvent;
+
+  data_schema?: SampleJSONSchema;
 }

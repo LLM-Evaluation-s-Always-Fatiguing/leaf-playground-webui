@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import FormilyJSONSchema from '@/types/common/FormilyJSONSchema';
 import SceneLog, { SceneActionLog, SceneLogType, SceneSystemLog, SceneSystemLogEvent } from '@/types/server/common/Log';
 import {
   WebsocketDataMessage,
@@ -23,6 +24,7 @@ import JSONViewModal from '@/components/modals/JSONViewModal';
 import LogMetricDetailModal from '@/components/modals/LogMetricDetailModal';
 import ProcessingConsole, { ProcessingConsoleMethods } from '@/app/processing/components/Console';
 import BaseVisualization from '@/app/processing/components/common/BaseVisualization';
+import UserInputDrawer from '@/app/processing/components/common/UserInputDrawer';
 import VisualizationComponentWithExtraProps from '@/app/processing/components/common/VisualizationComponentWithExtraProps';
 import { DefaultProcessingVisualizationComponentProps } from '@/app/processing/components/def';
 import BuddhaLogo from '@/app/processing/components/specialized/buddha/BuddhaLogo';
@@ -30,6 +32,7 @@ import SampleQAVisualization from '@/app/processing/components/specialized/sampl
 import WhoIsTheSpyVisualization from '@/app/processing/components/specialized/who-is-the-spy/WhoIsTheSpyVisualization';
 import ServerAPI from '@/services/server';
 import useGlobalStore from '@/stores/global';
+import { transferStandardJSONSchemaToFormilyJSONSchema } from '@/utils/json-schema';
 import { getFullServerWebSocketURL } from '@/utils/websocket';
 
 const PageContainer = styled.div`
@@ -55,6 +58,21 @@ const PageContainer = styled.div`
 
     backdrop-filter: blur(10px);
     z-index: 50;
+  }
+
+  .inputTipArea {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 45px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    background: ${(props) => props.theme.colorPrimary};
+    color: white;
+    cursor: pointer;
   }
 `;
 
@@ -201,7 +219,8 @@ const ProcessingPage = ({
 
   const needInputRef = useRef(false);
   const [needInput, setNeedInput] = useState(false);
-  const [inputText, setInputText] = useState<string>();
+  const [inputDataSchema, setInputDataSchema] = useState<FormilyJSONSchema>();
+  const [inputDrawerOpen, setInputDrawerOpen] = useState(false);
 
   const showTaskFinishedForPlayer = () => {
     if (!playerMode) return;
@@ -439,6 +458,13 @@ const ProcessingPage = ({
                   console.info('WebSocket Received Event Message:', wsEventMessage);
                   consoleRef.current?.setAutoPlay(true);
                   setNeedInput(true);
+                  if (wsEventMessage.data_schema) {
+                    const result = await transferStandardJSONSchemaToFormilyJSONSchema(wsEventMessage.data_schema);
+                    setInputDataSchema(result.formilySchema);
+                  } else {
+                    setInputDataSchema(undefined);
+                  }
+                  setInputDrawerOpen(true);
                   needInputRef.current = true;
                   break;
                 case WebsocketEvent.DISABLE_HUMAN_INPUT:
@@ -446,7 +472,8 @@ const ProcessingPage = ({
                   if (needInputRef.current) {
                     needInputRef.current = false;
                     setNeedInput(false);
-                    setInputText(undefined);
+                    setInputDataSchema(undefined);
+                    setInputDrawerOpen(false);
                     message.warning('Input has exceeded the time limit!', 3);
                   }
                   break;
@@ -552,7 +579,15 @@ const ProcessingPage = ({
   }, [globalStore.currentProject, globalStore.createSceneTaskParams, tryVisualizationName]);
 
   return (
-    <PageContainer>
+    <PageContainer
+      style={
+        needInput && inputDataSchema && !inputDrawerOpen
+          ? {
+              paddingBottom: '45px',
+            }
+          : {}
+      }
+    >
       <VisualizationArea>
         {tryVisualizationName && (
           <div className="tryComponentTopBar">
@@ -682,38 +717,45 @@ const ProcessingPage = ({
             )}
           </div>
         )}
-        {needInput && (
-          <div className="inputBar">
-            <Input.TextArea
-              autoSize={{
-                minRows: 1,
-                maxRows: 3,
-              }}
-              value={inputText}
-              onChange={(e) => {
-                setInputText(e.target.value);
-              }}
-            />
-            <Button
-              style={{
-                alignSelf: 'flex-end',
-                marginLeft: '12px',
-              }}
-              type={'primary'}
-              onClick={() => {
-                if (wsRef.current && inputText) {
-                  wsRef.current?.send(inputText);
-                  needInputRef.current = false;
-                  setNeedInput(false);
-                  setInputText(undefined);
-                }
-              }}
-            >
-              Send
-            </Button>
-          </div>
-        )}
       </ConsoleArea>
+      {needInput && !inputDrawerOpen && (
+        <div
+          className="inputTipArea"
+          onClick={() => {
+            setInputDrawerOpen(true);
+          }}
+        >
+          <div>Continue to {inputDataSchema?.title || 'User Input'}</div>
+        </div>
+      )}
+      <UserInputDrawer
+        open={inputDrawerOpen}
+        schema={
+          inputDataSchema || {
+            title: 'User Input',
+            type: 'object',
+            properties: {
+              input: {
+                title: 'Input',
+                'x-decorator': 'FormItem',
+                'x-component': 'Input',
+              },
+            },
+          }
+        }
+        onSubmit={(data: any) => {
+          if (wsRef.current) {
+            wsRef.current?.send(inputDataSchema ? JSON.stringify(data) : data.input);
+            needInputRef.current = false;
+            setNeedInput(false);
+            setInputDrawerOpen(false);
+            consoleRef.current?.setAutoPlay(true);
+          }
+        }}
+        onNeedClose={() => {
+          setInputDrawerOpen(false);
+        }}
+      />
       <LoadingOverlay spinning={loading} tip={loadingTip} />
       <JSONViewModal
         title={operatingLog ? 'Log Detail' : 'Detail Data'}
