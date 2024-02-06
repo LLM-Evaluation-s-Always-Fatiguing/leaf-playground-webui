@@ -581,7 +581,7 @@ const ProcessingPage = ({
   return (
     <PageContainer
       style={
-        needInput && inputDataSchema && !inputDrawerOpen
+        needInput && !inputDrawerOpen
           ? {
               paddingBottom: '45px',
             }
