@@ -79,6 +79,7 @@ const CreateOrUpdateAgentModal: React.FC<CreateOrUpdateAgentModalProps> = ({
       await form.validate();
       const newName = form.values.profile.name.trim();
       const formData = cloneDeep(form.values);
+      console.log(formData);
       formData.profile.name = newName;
       if (sceneAgentConfig?.config_data.profile.name !== newName && allAgentNames.includes(newName)) {
         message.error('Agent name already exists');

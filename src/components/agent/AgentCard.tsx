@@ -39,6 +39,7 @@ const AgentContent = styled.div`
     width: 60px;
     height: 60px;
     border-radius: 50%;
+    flex-shrink: 0;
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -57,17 +58,33 @@ const AgentContent = styled.div`
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .type {
+    align-self: stretch;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    flex-shrink: 0;
   }
 
   .infoArea {
     align-self: stretch;
     margin-top: 0;
+    flex-shrink: 1;
     flex-grow: 1;
     overflow: hidden auto;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
+    word-break: break-all;
+    font-size: 14px;
+    text-align: center;
   }
 
   .gameLinkArea {
@@ -169,9 +186,12 @@ const AgentCard = (props: AgentCardProps) => {
     return (props.sceneAgentMeta?.configSchema?.properties?.ai_backend_config?.required || []) as string[];
   }, [props.sceneAgentConfig, props.sceneAgentMeta]);
 
-  const displayKV = Object.entries(props.sceneAgentConfig?.config_data.ai_backend_config || {}).filter(([key]) =>
-    requiredBackendConfigs.includes(key)
-  );
+  const displayKV = Object.entries(props.sceneAgentConfig?.config_data.ai_backend_config || {})
+    .filter(([k, v]) => requiredBackendConfigs.includes(k) && v)
+    .map(([k, v]) => {
+      return typeof v === 'object' ? Object.entries(v).filter(([k2, v2]) => v2) : [[k, v]];
+    })
+    .flat();
 
   return (
     <Card
@@ -233,18 +253,8 @@ const AgentCard = (props: AgentCardProps) => {
           >
             {props.sceneAgentConfig?.config_data.profile.name}
           </div>
+          <div className="type">{props.sceneAgentMeta?.cls_name}</div>
           <div className="infoArea">
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                textAlign: 'center',
-                wordBreak: 'break-all',
-              }}
-            >
-              {props.sceneAgentMeta?.cls_name}
-            </div>
             {displayKV.map((kv, index) => {
               return (
                 <div
@@ -253,6 +263,7 @@ const AgentCard = (props: AgentCardProps) => {
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
+                    paddingBottom: '4px',
                   }}
                 >
                   <div
@@ -263,7 +274,7 @@ const AgentCard = (props: AgentCardProps) => {
                   >
                     {kv[0]}
                   </div>
-                  <div>{kv[1]}</div>
+                  <div>{typeof kv[1] === 'object' ? JSON.stringify(kv[1]) : kv[1]}</div>
                 </div>
               );
             })}

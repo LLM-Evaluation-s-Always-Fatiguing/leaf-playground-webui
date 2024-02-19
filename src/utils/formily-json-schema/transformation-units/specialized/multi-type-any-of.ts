@@ -35,6 +35,5 @@ export default class MultiTypeAnyOfTransformationUnit extends AbstractSpecialize
       nullable: canBeNull,
       options: noNullAnyOf,
     };
-    console.log(schema);
   }
 }
