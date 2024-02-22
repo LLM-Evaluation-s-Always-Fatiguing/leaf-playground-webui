@@ -16,8 +16,8 @@ import { SceneMetricConfig } from '@/types/server/config/Metric';
 import { SceneMetricDefinition } from '@/types/server/meta/Scene';
 import { SceneTaskStatus } from '@/types/server/task/SceneTask';
 import { Button, Modal, message } from 'antd';
-import { Input } from '@formily/antd-v5';
 import styled from '@emotion/styled';
+import { Resizable } from 're-resizable';
 import { MdClose, MdPerson3 } from 'react-icons/md';
 import LoadingOverlay from '@/components/loading/LoadingOverlay';
 import JSONViewModal from '@/components/modals/JSONViewModal';
@@ -38,7 +38,7 @@ import { getFullServerWebSocketURL } from '@/utils/websocket';
 const PageContainer = styled.div`
   width: 100%;
   height: 100%;
-  overflow: hidden;
+  overflow: auto hidden;
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
@@ -79,8 +79,7 @@ const PageContainer = styled.div`
 const VisualizationArea = styled.div`
   --try-component-bar-height: 35px;
 
-  width: 45%;
-  min-width: 480px;
+  width: 100%;
   height: 100%;
   border-right: 1px solid ${(props) => props.theme.dividerColor};
   position: relative;
@@ -120,8 +119,8 @@ const VisualizationArea = styled.div`
 `;
 
 const ConsoleArea = styled.div`
-  width: calc(100% - 45% - 1px);
-  min-width: 680px;
+  flex-grow: 1;
+  min-width: 30%;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -588,36 +587,58 @@ const ProcessingPage = ({
           : {}
       }
     >
-      <VisualizationArea>
-        {tryVisualizationName && (
-          <div className="tryComponentTopBar">
-            <div>{tryVisualizationName}</div>
-            <div
-              className="closeButton"
-              onClick={() => {
-                setTryVisualizationName(undefined);
-              }}
-            >
-              <MdClose size={'1em'} />
+      <Resizable
+        defaultSize={{
+          width: '50%',
+          height: '100%',
+        }}
+        minWidth={'30%'}
+        maxWidth={'70%'}
+        enable={{
+          top: false,
+          right: true,
+          bottom: false,
+          left: false,
+          topRight: false,
+          bottomRight: false,
+          bottomLeft: false,
+          topLeft: false,
+        }}
+        onResize={() => {
+          consoleRef.current?.measureAllRows();
+        }}
+      >
+        <VisualizationArea>
+          {tryVisualizationName && (
+            <div className="tryComponentTopBar">
+              <div>{tryVisualizationName}</div>
+              <div
+                className="closeButton"
+                onClick={() => {
+                  setTryVisualizationName(undefined);
+                }}
+              >
+                <MdClose size={'1em'} />
+              </div>
             </div>
-          </div>
-        )}
-        <div className="visualizationComponentWrapper">
-          {globalStore.currentProject && globalStore.createSceneTaskParams && (
-            <VisualizationComponent
-              project={globalStore.currentProject}
-              scene={globalStore.currentProject.metadata}
-              createSceneTaskParams={globalStore.createSceneTaskParams}
-              logs={logs}
-              targetAgentId={targetAgentId}
-              playerMode={playerMode}
-              needScrollToLog={(logId) => {
-                consoleRef.current?.scrollToLog(logId);
-              }}
-            />
           )}
-        </div>
-      </VisualizationArea>
+          <div className="visualizationComponentWrapper">
+            {globalStore.currentProject && globalStore.createSceneTaskParams && (
+              <VisualizationComponent
+                project={globalStore.currentProject}
+                scene={globalStore.currentProject.metadata}
+                createSceneTaskParams={globalStore.createSceneTaskParams}
+                logs={logs}
+                targetAgentId={targetAgentId}
+                playerMode={playerMode}
+                needScrollToLog={(logId) => {
+                  consoleRef.current?.scrollToLog(logId);
+                }}
+              />
+            )}
+          </div>
+        </VisualizationArea>
+      </Resizable>
       <ConsoleArea>
         {globalStore.currentProject && globalStore.createSceneTaskParams && (
           <ProcessingConsole

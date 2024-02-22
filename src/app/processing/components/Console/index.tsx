@@ -62,6 +62,7 @@ const Header = styled.div`
       height: 10px;
       border-radius: 50%;
       margin-right: 8px;
+      flex-shrink: 0;
     }
 
     font-size: 14px;
@@ -204,6 +205,7 @@ interface ProcessingConsoleProps {
 export type ProcessingConsoleMethods = {
   scrollToLog: (logId: string) => void;
   setAutoPlay: (autoPlay: boolean) => void;
+  measureAllRows: () => void;
 };
 
 const ProcessingConsole = forwardRef<ProcessingConsoleMethods, ProcessingConsoleProps>((props, ref) => {
@@ -377,10 +379,16 @@ const ProcessingConsole = forwardRef<ProcessingConsoleMethods, ProcessingConsole
     }
   };
 
+  const measureAllRows = () => {
+    logListMeasurerCache.clearAll();
+    listRef.current?.measureAllRows();
+  };
+
   useImperativeHandle(ref, () => {
     return {
       scrollToLog,
       setAutoPlay,
+      measureAllRows,
     };
   });
 
